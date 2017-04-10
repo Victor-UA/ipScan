@@ -1,0 +1,37 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ipScan.Classes
+{
+    class IPInfoComparer : IComparer<IPInfo>
+    {
+        public int Compare(IPInfo x, IPInfo y)
+        {
+            try
+            {
+                string[] X = x.IPAddress.ToString().Split('.');
+                string[] Y = y.IPAddress.ToString().Split('.');
+                for (int i = 0; i < 4; i++)
+                {
+                    if (int.Parse(X[i]) > int.Parse(Y[i]))
+                    {
+                        return 1;
+                    }
+                    if (int.Parse(X[i]) < int.Parse(Y[i]))
+                    {
+                        return -1;
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+                throw new NotImplementedException();
+            }
+        }
+    }
+}
