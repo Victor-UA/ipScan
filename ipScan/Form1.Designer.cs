@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.textBox_IPFirst = new System.Windows.Forms.TextBox();
             this.textBox_IPLast = new System.Windows.Forms.TextBox();
             this.textBox_ThreadCount = new System.Windows.Forms.TextBox();
@@ -245,9 +246,10 @@
             this.Controls.Add(this.richTextBox_result);
             this.Controls.Add(this.textBox_IPLast);
             this.Controls.Add(this.textBox_IPFirst);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(600, 450);
             this.Name = "Form1";
-            this.Text = "IP-Scan";
+            this.Text = "ipScan";
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
