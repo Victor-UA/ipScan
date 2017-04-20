@@ -9,16 +9,18 @@ namespace ipScan.Classes
     class IPInfo 
     {
         public IPAddress IPAddress { get; set; }
+        public int Index { get; set; }
         public string HostName { get; set; }
         public long RoundtripTime { get; set; }
         public bool isLooking4HostNames { get; private set; }
-        public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime)
+        public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime, int Index = -1)
         {
             IPAddress = ipAddress;
             HostName = hostName;
             RoundtripTime = roundtripTime;
+            this.Index = Index;
         }
-        public IPInfo(IPAddress ipAddress) : this(ipAddress, string.Empty, 0)
+        public IPInfo(IPAddress ipAddress, int Index = -1) : this(ipAddress, string.Empty, 0, Index)
         {
             
         }

@@ -23,9 +23,10 @@ namespace ipScan.Classes
         {
             Buffer.AddRange(Lines);
         }
-        public ListIPInfo getBuffer(int count)
+        public ListIPInfo getBuffer(int count, bool changeIndex = true)
         {
-            Index += count;
+            if(changeIndex)
+                Index += count;
             return Buffer.GetRange(Index - count, count);
         }
         public ListIPInfo getBuffer()

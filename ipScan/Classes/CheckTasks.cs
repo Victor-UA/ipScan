@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,9 +15,9 @@ namespace ipScan.Classes
         private Action<bool> startButtonEnable { get; set; }
         private Action<bool> stopButtonEnable { get; set; }
         private Action<object> resultAppendBuffer { get; set; }
-        private BufferResult bufferResult { get; set; }
+        private BufferResult bufferResult { get; set; }        
         private Action<object> disposeTasks { get; set; }
-        private Action<int, int, int, TimeSpan, TimeSpan> setProgress { get; set; }
+        Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan> setProgress { get; set; }
         private int IPListCount { get; set; }
         private DateTime timeStart { get; set; }
         public bool isRunning { get; private set; }
@@ -38,7 +40,7 @@ namespace ipScan.Classes
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            Action<int, int, int, TimeSpan, TimeSpan> SetProgress,
+            Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan> SetProgress,
             int IPListCount,
             BufferResult BufferResult)
         {
@@ -83,6 +85,11 @@ namespace ipScan.Classes
                         int progress = 0;
                         int thread4IpCount = 0;
                         int thread4HostNameCount = 0;
+                        List<int> ListIp = new List<int>();
+                        List<int> ListHostNames = new List<int>();
+                        ListIPInfo IpArePassed = new ListIPInfo();
+                        ListIPInfo IpAreFound = new ListIPInfo();
+                        ListIPInfo IpAreLooking4HostName = new ListIPInfo();
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
@@ -90,18 +97,19 @@ namespace ipScan.Classes
                             {
                                 bool SubTasksAreRunning = false;
                                 try
-                                {
-                                    foreach (var key in mySearchTasks[i].isLooking4HostNames.Keys)
+                                {                                    
+                                    foreach (IPAddress key in mySearchTasks[i].isLooking4HostNames.Keys)
                                     {
                                         bool subIsRunning = mySearchTasks[i].isLooking4HostNames[key];
                                         SubTasksAreRunning |= subIsRunning;
                                         if (!subIsRunning)
                                         {
-                                            mySearchTasks[i].isLooking4HostNames.Remove(key);
+                                            mySearchTasks[i].isLooking4HostNames.Remove(key);                                            
                                         }
                                         else
                                         {
                                             thread4HostNameCount++;
+                                            //IpAreLooking4HostName.Add(new IPInfo(key));
                                         }
                                     }
                                 }
@@ -162,7 +170,15 @@ namespace ipScan.Classes
                                 if (buffer.Count() > 0)
                                 {
                                     bufferResult.AddLines(buffer);
+                                    IpAreFound.AddRange(buffer);
                                 }
+                                
+                                buffer = mySearchTasks[i].IpArePassed.getBuffer();
+                                if (buffer.Count() > 0)
+                                {
+                                    IpArePassed.AddRange(buffer);
+                                }
+                                
                                 progress += mySearchTasks[i].progress;
                             }
                             catch (Exception ex)
@@ -194,7 +210,7 @@ namespace ipScan.Classes
                             timePassed = TimeSpan.MinValue;
                             timeLeft = TimeSpan.MinValue;
                         }
-                        setProgress(progress, thread4IpCount, thread4HostNameCount, timePassed, timeLeft);
+                        setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft);
                     }
                 } while ((TasksAreRunning || isRunning) && !isStopped);
                 disposeTasks(null);

@@ -15,6 +15,7 @@ namespace ipScan.Classes
         public bool wasStopped { get; private set; }
         public int taskId { get; private set; }
         public BufferResult buffer { get; private set; }
+        public BufferResult IpArePassed { get; private set; }
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
         public List<IPAddress> ipList { get; set; }
         public int index { get; private set; }
@@ -39,6 +40,7 @@ namespace ipScan.Classes
         public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut)
         {
             buffer = new BufferResult();
+            IpArePassed = new BufferResult();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
             taskId = TaskId;
             ipList = IPList;
@@ -113,6 +115,7 @@ namespace ipScan.Classes
                     {
                         IPAddress address = ipList[currentPosition];
                         PingReply reply = PingHost(address);
+                        IpArePassed.AddLine(new IPInfo(ipList[currentPosition]));
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
                             IPInfo ipInfo = new IPInfo(ipList[currentPosition], reply.RoundtripTime);
