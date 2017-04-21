@@ -33,13 +33,13 @@ namespace ipScan.Classes
 
         public void setHostNameAsync()
         {
-            look4HostNames = new Thread(() => {
+            look4HostNames = new Thread(async () => {
                 isLooking4HostNames = true;
                 OnPropertyBeforeChanged("HostName");
                 try
                 {
                     Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 100, Timeout.Infinite);
-                    HostName = Dns.GetHostEntry(IPAddress).HostName;
+                    HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
                     timer.Dispose();
                 }
                 catch (Exception ex)
