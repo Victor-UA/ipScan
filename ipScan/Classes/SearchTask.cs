@@ -11,8 +11,9 @@ namespace ipScan.Classes
 {
     class SearchTask
     {        
-        public bool isRunning { get; private set; }
+        public bool isRunning { get; private set; }        
         public bool wasStopped { get; private set; }
+        public CancellationToken cancellationToken { get; private set; }
         public int taskId { get; private set; }
         public BufferResult buffer { get; private set; }
         public BufferResult IpArePassed { get; private set; }
@@ -37,7 +38,7 @@ namespace ipScan.Classes
         private PingOptions options = new PingOptions(50, true);
         private AutoResetEvent reset = new AutoResetEvent(false);
 
-        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut)
+        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken)
         {
             buffer = new BufferResult();
             IpArePassed = new BufferResult();
@@ -50,8 +51,9 @@ namespace ipScan.Classes
             timeOut = TimeOut;
             bufferResultAddLine = BufferResultAddLine;
             isPaused = false;
-            isRunning = false;
+            isRunning = false;            
             wasStopped = false;
+            cancellationToken = CancellationToken;
             progress = 0;
         }
 
@@ -106,8 +108,9 @@ namespace ipScan.Classes
             if (!wasStopped)
             {
                 while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
-                {
-                    if (isPaused)
+                {                    
+                    //if (isPaused)
+                    if (false)
                     {
                         Thread.Sleep(500);
                     }
@@ -115,17 +118,22 @@ namespace ipScan.Classes
                     {
                         IPAddress address = ipList[currentPosition];
                         PingReply reply = PingHost(address);
-                        IpArePassed.AddLine(new IPInfo(ipList[currentPosition]));
+                        IPInfo ipInfo = new IPInfo(address);
+                        IpArePassed.AddLine(ipInfo);
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
-                            IPInfo ipInfo = new IPInfo(ipList[currentPosition], reply.RoundtripTime);
+                            ipInfo.RoundtripTime = reply.RoundtripTime;
                             ipInfo.PropertyBeforeChanged += HostName_BeforeChanged;
                             ipInfo.PropertyAfterChanged += HostName_AfterChanged;
                             ipInfo.setHostNameAsync();
                             buffer.AddLine(ipInfo);
                         }
                         progress++;
-                        currentPosition++;
+                        currentPosition++;                        
+                    }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        Stop();
                     }
                 }
             }
@@ -139,13 +147,11 @@ namespace ipScan.Classes
             LookingForIp();
         }
         public void Stop()
-        {
-            /*
+        {            
             foreach (IPInfo item in buffer.Buffer)
             {
                 item.StopLooking4HostNames(null);
-            }
-            */
+            }            
             wasStopped = true;
             isRunning = false;
         }

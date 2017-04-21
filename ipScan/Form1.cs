@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ipScan.Classes;
@@ -13,8 +15,9 @@ namespace ipScan
 {
     public partial class Form1 : Form
     {
-        private Task[] myTasks { get; set; }
-        private SearchTask[] mySearchTasks { get; set; }
+        private List<Task> myTasks { get; set; }
+        private List<SearchTask> mySearchTasks { get; set; }
+        private CancellationTokenSource mySearchTasksCancel { get; set; }
         private CheckTasks checkTasks { get; set; }
         private bool isRunning
         {
@@ -84,13 +87,13 @@ namespace ipScan
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
-                    Console.WriteLine(bufferResult.getBufferTotalCount.ToString());
+                    Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
+                    Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.StackTrace);
+                Debug.WriteLine(ex.StackTrace);
             }
         }
         private void BufferResultAddLine(IPInfo Line)
@@ -133,7 +136,7 @@ namespace ipScan
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
+                Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
             }
         }
         private void SetProgressMaxValue(int MaxValue)
@@ -149,7 +152,7 @@ namespace ipScan
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
+                Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
             }
         }
 
@@ -252,7 +255,7 @@ namespace ipScan
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine(ex.StackTrace);
+                    Debug.WriteLine(ex.StackTrace);
                 }
 
                 int taskCount = 1;
@@ -262,12 +265,11 @@ namespace ipScan
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.StackTrace);
+                    Debug.WriteLine(ex.StackTrace);
                 }
-
-
-                myTasks = new Task[taskCount];
-                mySearchTasks = new SearchTask[taskCount];
+                
+                myTasks = new List<Task>();//[taskCount];
+                mySearchTasks = new List<SearchTask>();//[taskCount];
 
                 checkTasks = new CheckTasks(
                     myTasks,
@@ -279,17 +281,23 @@ namespace ipScan
                     SetProgress,
                     ipList.Count,
                     bufferResult);
-                Task.Factory.StartNew(checkTasks.Check);
+                //Task.Factory.StartNew(checkTasks.Check);
+                newTask(checkTasks.Check);
+                mySearchTasksCancel = new CancellationTokenSource();
 
                 int range = (int)Math.Truncate((double)ipList.Count / taskCount);
                 for (int i = 0; i < taskCount; i++)
                 {
-                    mySearchTasks[i] = new SearchTask(i, ipList, i * range, i == taskCount - 1 ? ipList.Count - range * i : range, BufferResultAddLine, TimeOut);
+                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, i == taskCount - 1 ? ipList.Count - range * i : range, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token));
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
-                    myTasks[i] = Task.Factory.StartNew(mySearchTasks[i].Start);
-                }
-                
+                    myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
+                }                
             }
+        }      
+
+        private async void newTask(Action action)
+        {
+            await Task.Run(() => { new Task(action).Start(); });
         }
 
         #region SetPropertyThreadSafeDelegate
@@ -352,19 +360,22 @@ namespace ipScan
             return ipAddressesInTheRange;
         }
 
-        
-        private void button_Stop_Click(object sender, EventArgs e)
-        {
-            if (isRunning)
-            {
-                for (int i = 0; i < mySearchTasks.Count(); i++)
-                {
-                    mySearchTasks[i].Stop();
-                    Console.WriteLine(i + ": is stopped");
-                }
 
-                checkTasks.Stop();
+        private void button_Stop_Click(object sender, EventArgs e)
+        {            
+            for (int i = 0; i < mySearchTasks.Count(); i++)
+            {
+                try
+                {                    
+                    mySearchTasksCancel.Cancel();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.StackTrace);
+                }
+                Console.WriteLine(i + ": is stopped");
             }
+            checkTasks.Stop();
         }
 
         private void richTextBox_result_KeyPress(object sender, KeyPressEventArgs e)
@@ -398,6 +409,21 @@ namespace ipScan
                 checkTasks.BlockResultOutput(false);
             }
             catch (Exception) { }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                button_Stop_Click(sender, null);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                e.Cancel = false;
+            }            
         }
     }
 

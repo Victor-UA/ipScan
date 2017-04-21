@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -10,8 +11,9 @@ namespace ipScan.Classes
     class CheckTasks
     {
         private static readonly object lockObject = new object();
-        public Task[] myTasks { get; private set; }
-        public SearchTask[] mySearchTasks { get; private set; }
+        private int OkRemaind { get; } = 4;
+        public List<Task> myTasks { get; private set; }
+        public List<SearchTask> mySearchTasks { get; private set; }
         private Action<bool> startButtonEnable { get; set; }
         private Action<bool> stopButtonEnable { get; set; }
         private Action<object> resultAppendBuffer { get; set; }
@@ -20,7 +22,7 @@ namespace ipScan.Classes
         Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan> setProgress { get; set; }
         private int IPListCount { get; set; }
         private DateTime timeStart { get; set; }
-        public bool isRunning { get; private set; }
+        public bool isStarting { get; private set; }
         public bool isPaused { get; private set; }
         public bool isStopped { get; private set; }
         private bool isResultOutputBlocked { get; set; }
@@ -34,8 +36,8 @@ namespace ipScan.Classes
         }
 
         public CheckTasks(
-            Task[] MyTasks,
-            SearchTask[] MySearchTasks,
+            List<Task> MyTasks,
+            List<SearchTask> MySearchTasks,
             Action<bool> StartButtonEnable,
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
@@ -63,13 +65,12 @@ namespace ipScan.Classes
         }
         public void Check()
         {
-            isRunning = true;
+            isStarting = true;
             try
             {
                 System.GC.Collect();
                 bool TasksAreRunning;
-                TasksAreRunning = false;
-                int OkRemaind = 50;
+                TasksAreRunning = false;                
                 int maxRemaind = OkRemaind;
                 do
                 {
@@ -97,33 +98,40 @@ namespace ipScan.Classes
                             {
                                 bool SubTasksAreRunning = false;
                                 try
-                                {                                    
-                                    foreach (IPAddress key in mySearchTasks[i].isLooking4HostNames.Keys)
+                                {
+                                    if (mySearchTasks[i] != null && mySearchTasks[i].isLooking4HostNames != null)
                                     {
-                                        bool subIsRunning = mySearchTasks[i].isLooking4HostNames[key];
-                                        SubTasksAreRunning |= subIsRunning;
-                                        if (!subIsRunning)
+                                        Dictionary<IPAddress, bool> isLooking4HostNames = new Dictionary<IPAddress, bool>(mySearchTasks[i].isLooking4HostNames);
+                                        foreach (IPAddress key in isLooking4HostNames.Keys)
                                         {
-                                            mySearchTasks[i].isLooking4HostNames.Remove(key);                                            
+                                            bool subIsRunning = isLooking4HostNames[key];
+                                            SubTasksAreRunning |= subIsRunning;
+                                            if (!subIsRunning)
+                                            {
+                                                mySearchTasks[i].isLooking4HostNames.Remove(key);
+                                            }
+                                            else
+                                            {
+                                                thread4HostNameCount++;
+                                                //IpAreLooking4HostName.Add(new IPInfo(key));
+                                            }
                                         }
-                                        else
-                                        {
-                                            thread4HostNameCount++;
-                                            //IpAreLooking4HostName.Add(new IPInfo(key));
-                                        }
+
                                     }
                                 }
-                                catch (Exception)
+
+                                catch (Exception ex)
                                 {
+                                    Debug.WriteLine(ex.StackTrace);
                                 }
 
-                                if (mySearchTasks[i].isRunning)
+                                if (mySearchTasks[i] != null && mySearchTasks[i].isRunning)
                                 {
                                     thread4IpCount++;
                                 }
                                 else
                                 {
-                                    if (myTasks[i].IsCompleted && maxRemaind >= OkRemaind)
+                                    if (myTasks[i].IsCompleted && maxRemaind >= OkRemaind)                                    
                                     {
                                         maxRemaind = 0;
                                         int taskIndex = -1;
@@ -157,6 +165,8 @@ namespace ipScan.Classes
 
                                             mySearchTasks[i].Init(index + newCount, newRemaind);
                                             myTasks[i] = Task.Factory.StartNew(mySearchTasks[i].Start);
+                                            Console.WriteLine(i.ToString() + " is joined to " + taskIndex.ToString());
+                                            //myTasks[i] = NewTask(mySearchTasks[i].Start);                                            
                                             //myTasks[i] = new Task(mySearchTasks[i].Start);
                                             //myTasks[i].Start();
                                         }
@@ -164,8 +174,8 @@ namespace ipScan.Classes
                                 }
 
 
-                                TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
-                                
+                                TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;                                
+
                                 ListIPInfo buffer = mySearchTasks[i].buffer.getBuffer();
                                 if (buffer.Count() > 0)
                                 {
@@ -183,13 +193,13 @@ namespace ipScan.Classes
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine(ex.StackTrace);
+                                Debug.WriteLine(ex.StackTrace);
                             }
                             i++;
                         }
                         if (TasksAreRunning)
                         {
-                            isRunning = false;
+                            isStarting = false;
                         }
 
                         if (!isResultOutputBlocked)
@@ -205,23 +215,24 @@ namespace ipScan.Classes
                             timePassed = Now - timeStart;
                             timeLeft = TimeSpan.FromMilliseconds((IPListCount - progress) * (timePassed.TotalMilliseconds / progress));
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             timePassed = TimeSpan.MinValue;
                             timeLeft = TimeSpan.MinValue;
+                            Debug.WriteLine(ex.StackTrace);
                         }
                         setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft);
                     }
-                } while ((TasksAreRunning || isRunning) && !isStopped);
+                } while ((TasksAreRunning || isStarting) && !isStopped);
                 disposeTasks(null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.StackTrace);
+                Debug.WriteLine(ex.StackTrace);
             }
             Console.WriteLine("Усі задачі зупинено");
             startButtonEnable(true);
             stopButtonEnable(false);
-        }
+        }        
     }
 }

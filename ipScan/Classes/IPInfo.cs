@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace ipScan.Classes
         public string HostName { get; set; }
         public long RoundtripTime { get; set; }
         public bool isLooking4HostNames { get; private set; }
+        public Thread look4HostNames { get; private set; }
         public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime, int Index = -1)
         {
             IPAddress = ipAddress;
@@ -27,59 +29,51 @@ namespace ipScan.Classes
         public IPInfo(IPAddress ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
         {
             
-        }
+        }        
 
-        public void getHostName()
+        public void setHostNameAsync()
         {
-            isLooking4HostNames = true;
-            OnPropertyBeforeChanged("HostName");
-            try
-            {
-                HostName = (Dns.GetHostEntry(IPAddress)).HostName;
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine("Cancelled");
-            }
-            catch (Exception)
-            {
-                HostName = string.Empty;                
-            }
-            finally
-            {
-                isLooking4HostNames = false;
-                OnPropertyAfterChanged("HostName");
-            }
-        }
-
-        public async void setHostNameAsync()
-        {
-            //Task.Factory.StartNew(getHostName);
-            
-            isLooking4HostNames = true;
-            OnPropertyBeforeChanged("HostName");
-
-            try
-            {
-                Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 10, Timeout.Infinite);
-                HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
-                timer.Dispose();
-            }
-            catch (Exception)
-            {
-                HostName = string.Empty;
-            }
-            finally
-            {
-                isLooking4HostNames = false;
-                OnPropertyAfterChanged("HostName");
-            }
-            
+            look4HostNames = new Thread(() => {
+                isLooking4HostNames = true;
+                OnPropertyBeforeChanged("HostName");
+                try
+                {
+                    Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 10, Timeout.Infinite);
+                    HostName = Dns.GetHostEntry(IPAddress).HostName;
+                    timer.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);
+                }
+                finally
+                {
+                    HostName = string.Empty;
+                    isLooking4HostNames = false;
+                    OnPropertyAfterChanged("HostName");
+                }
+            });
+            look4HostNames.Start();
+            //HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
         }
         public void StopLooking4HostNames(object obj)
         {
+            /*
             isLooking4HostNames = false;
-            OnPropertyAfterChanged("HostName");
+            OnPropertyAfterChanged("HostName");   
+            */
+            
+            if (look4HostNames != null)
+            {
+                try
+                {
+                    look4HostNames.Abort();
+                    look4HostNames.Join();
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
 
         
