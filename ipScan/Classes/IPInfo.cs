@@ -38,7 +38,7 @@ namespace ipScan.Classes
                 OnPropertyBeforeChanged("HostName");
                 try
                 {
-                    Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 10, Timeout.Infinite);
+                    Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 100, Timeout.Infinite);
                     HostName = Dns.GetHostEntry(IPAddress).HostName;
                     timer.Dispose();
                 }

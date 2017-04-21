@@ -385,11 +385,12 @@ namespace ipScan
 
         private void button_Pause_Click(object sender, EventArgs e)
         {
-            
+            /*
             for (int i = 0; i < mySearchTasks.Count(); i++)
             {
                 mySearchTasks[i].Pause();
             }
+            */
             checkTasks.Pause();
         }
 

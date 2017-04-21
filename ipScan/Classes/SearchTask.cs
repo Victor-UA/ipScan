@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -72,21 +73,17 @@ namespace ipScan.Classes
             }
             return reply;
         }
-
-        private void isLooking4HostNamesTimeOuted() { }
-        private void isLooking4HostNamesTimeOuted(IPAddress ipAddress, double timeLength)
-        {
-            DateTime timeStart = DateTime.Now;
-            do
-            {
-                Thread.Sleep(100);
-            } while ((DateTime.Now - timeStart).TotalMilliseconds < timeLength && isLooking4HostNames[ipAddress]);
-            isLooking4HostNames[ipAddress] = false;
-        }
+        
         void HostName_BeforeChanged(object sender, PropertyChangedEventArgs e)
         {
-            isLooking4HostNames.Add(((IPInfo)sender).IPAddress, true);
-            Task.Factory.StartNew(isLooking4HostNamesTimeOuted);
+            try
+            {
+                isLooking4HostNames.Add(((IPInfo)sender).IPAddress, true);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.StackTrace);
+            }
         }
         private void HostName_AfterChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -109,7 +106,7 @@ namespace ipScan.Classes
             {
                 while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
                 {                    
-                    //if (isPaused)
+                    //if (isPaused)                    
                     if (false)
                     {
                         Thread.Sleep(500);
@@ -123,8 +120,10 @@ namespace ipScan.Classes
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
                             ipInfo.RoundtripTime = reply.RoundtripTime;
+                            
                             ipInfo.PropertyBeforeChanged += HostName_BeforeChanged;
                             ipInfo.PropertyAfterChanged += HostName_AfterChanged;
+                            
                             ipInfo.setHostNameAsync();
                             buffer.AddLine(ipInfo);
                         }

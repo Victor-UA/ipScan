@@ -24,6 +24,7 @@ namespace ipScan.Classes
         private DateTime timeStart { get; set; }
         public bool isStarting { get; private set; }
         public bool isPaused { get; private set; }
+        public bool firstPause { get; set; }
         public bool isStopped { get; private set; }
         private bool isResultOutputBlocked { get; set; }
         public void Stop()
@@ -90,7 +91,7 @@ namespace ipScan.Classes
                         List<int> ListHostNames = new List<int>();
                         ListIPInfo IpArePassed = new ListIPInfo();
                         ListIPInfo IpAreFound = new ListIPInfo();
-                        ListIPInfo IpAreLooking4HostName = new ListIPInfo();
+                        ListIPInfo IpAreLooking4HostName = new ListIPInfo();                        
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
@@ -127,7 +128,7 @@ namespace ipScan.Classes
 
                                 if (mySearchTasks[i] != null && mySearchTasks[i].isRunning)
                                 {
-                                    thread4IpCount++;
+                                    thread4IpCount++;                                    
                                 }
                                 else
                                 {
@@ -197,6 +198,7 @@ namespace ipScan.Classes
                             }
                             i++;
                         }
+                        
                         if (TasksAreRunning)
                         {
                             isStarting = false;
@@ -222,6 +224,7 @@ namespace ipScan.Classes
                             Debug.WriteLine(ex.StackTrace);
                         }
                         setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft);
+                        
                     }
                 } while ((TasksAreRunning || isStarting) && !isStopped);
                 disposeTasks(null);
