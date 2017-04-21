@@ -31,15 +31,35 @@ namespace ipScan.Classes
             
         }        
 
-        public void setHostNameAsync()
+        public async void setHostNameAsync()
         {
-            look4HostNames = new Thread(async () => {
+            /*
+            isLooking4HostNames = true;
+            OnPropertyBeforeChanged("HostName");
+            try
+            {
+                HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
+            }
+            catch (Exception ex)
+            {
+                //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);   
+            }
+            finally
+            {
+                HostName = string.Empty;
+                isLooking4HostNames = false;
+                OnPropertyAfterChanged("HostName");
+            }
+            */
+            
+            look4HostNames = new Thread(() => {
                 isLooking4HostNames = true;
                 OnPropertyBeforeChanged("HostName");
                 try
                 {
                     Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 100, Timeout.Infinite);
-                    HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
+                    HostName = Dns.GetHostEntry(IPAddress).HostName;
+                    //HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
                     timer.Dispose();
                 }
                 catch (Exception ex)
@@ -54,7 +74,7 @@ namespace ipScan.Classes
                 }
             });
             look4HostNames.Start();
-            //HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
+            
         }
         public void StopLooking4HostNames(object obj)
         {

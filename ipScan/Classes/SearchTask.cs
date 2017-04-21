@@ -117,16 +117,16 @@ namespace ipScan.Classes
                         PingReply reply = PingHost(address);
                         IPInfo ipInfo = new IPInfo(address);
                         IpArePassed.AddLine(ipInfo);
+                        
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
-                            ipInfo.RoundtripTime = reply.RoundtripTime;
-                            
+                            ipInfo.RoundtripTime = reply.RoundtripTime;                            
                             ipInfo.PropertyBeforeChanged += HostName_BeforeChanged;
                             ipInfo.PropertyAfterChanged += HostName_AfterChanged;
-                            
                             ipInfo.setHostNameAsync();
                             buffer.AddLine(ipInfo);
                         }
+                        
                         progress++;
                         currentPosition++;                        
                     }
