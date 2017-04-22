@@ -19,9 +19,11 @@ namespace ipScan.Classes
         private Action<object> resultAppendBuffer { get; set; }
         private BufferResult bufferResult { get; set; }        
         private Action<object> disposeTasks { get; set; }
-        Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan> setProgress { get; set; }
+        Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int> setProgress { get; set; }
         private int IPListCount { get; set; }
         private DateTime timeStart { get; set; }
+        public DateTime lastTime { get; private set; }
+        public TimeSpan loopTime { get; private set; }
         public bool isStarting { get; private set; }
         public bool isPaused { get; private set; }
         public bool firstPause { get; set; }
@@ -43,7 +45,7 @@ namespace ipScan.Classes
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan> SetProgress,
+            Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int> SetProgress,
             int IPListCount,
             BufferResult BufferResult)
         {
@@ -55,6 +57,8 @@ namespace ipScan.Classes
             setProgress = SetProgress;
             this.IPListCount = IPListCount;
             timeStart = DateTime.Now;
+            lastTime = DateTime.Now;
+            loopTime = TimeSpan.FromMilliseconds(0);
             bufferResult = BufferResult;
             disposeTasks = DisposeTasks;
             isStopped = false;
@@ -73,6 +77,8 @@ namespace ipScan.Classes
                 bool TasksAreRunning;
                 TasksAreRunning = false;                
                 int maxRemaind = OkRemaind;
+                lastTime = DateTime.Now;
+                int mySearchTasksPauseTime = 1000;
                 do
                 {
                     if (isPaused)
@@ -81,7 +87,15 @@ namespace ipScan.Classes
                     }
                     else
                     {
-                        Thread.Sleep(1000);
+                        Thread.Sleep(mySearchTasksPauseTime);                        
+
+                        loopTime = DateTime.Now - lastTime;
+                        lastTime = DateTime.Now;
+                        mySearchTasksPauseTime += (int)(1000 - loopTime.TotalMilliseconds);
+                        if (mySearchTasksPauseTime < 0)
+                        {
+                            mySearchTasksPauseTime = 0;
+                        }
 
                         TasksAreRunning = false;
                         int progress = 0;
@@ -95,6 +109,7 @@ namespace ipScan.Classes
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
+                            //mySearchTasks[i].pauseTime = mySearchTasksPauseTime;                            
                             try
                             {
                                 bool SubTasksAreRunning = false;
@@ -223,7 +238,7 @@ namespace ipScan.Classes
                             timeLeft = TimeSpan.MinValue;
                             Debug.WriteLine(ex.StackTrace);
                         }
-                        setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft);
+                        setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
                         
                     }
                 } while ((TasksAreRunning || isStarting) && !isStopped);

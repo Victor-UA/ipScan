@@ -47,6 +47,8 @@
             this.tSSL_ThreadsDNS = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tSSL_pauseTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -70,7 +72,7 @@
             // textBox_ThreadCount
             // 
             this.textBox_ThreadCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_ThreadCount.Location = new System.Drawing.Point(12, 317);
+            this.textBox_ThreadCount.Location = new System.Drawing.Point(12, 431);
             this.textBox_ThreadCount.Name = "textBox_ThreadCount";
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
@@ -80,7 +82,7 @@
             // button_Start
             // 
             this.button_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_Start.Location = new System.Drawing.Point(12, 398);
+            this.button_Start.Location = new System.Drawing.Point(12, 512);
             this.button_Start.Name = "button_Start";
             this.button_Start.Size = new System.Drawing.Size(75, 23);
             this.button_Start.TabIndex = 4;
@@ -92,7 +94,7 @@
             // 
             this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Stop.Enabled = false;
-            this.button_Stop.Location = new System.Drawing.Point(497, 398);
+            this.button_Stop.Location = new System.Drawing.Point(497, 512);
             this.button_Stop.Name = "button_Stop";
             this.button_Stop.Size = new System.Drawing.Size(75, 23);
             this.button_Stop.TabIndex = 6;
@@ -109,7 +111,7 @@
             this.richTextBox_result.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.richTextBox_result.Location = new System.Drawing.Point(12, 38);
             this.richTextBox_result.Name = "richTextBox_result";
-            this.richTextBox_result.Size = new System.Drawing.Size(562, 273);
+            this.richTextBox_result.Size = new System.Drawing.Size(562, 387);
             this.richTextBox_result.TabIndex = 2;
             this.richTextBox_result.TabStop = false;
             this.richTextBox_result.Text = "";
@@ -120,7 +122,7 @@
             // textBox_Timeout
             // 
             this.textBox_Timeout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_Timeout.Location = new System.Drawing.Point(68, 317);
+            this.textBox_Timeout.Location = new System.Drawing.Point(68, 431);
             this.textBox_Timeout.Name = "textBox_Timeout";
             this.textBox_Timeout.Size = new System.Drawing.Size(50, 20);
             this.textBox_Timeout.TabIndex = 3;
@@ -131,7 +133,7 @@
             // 
             this.label_Progress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label_Progress.AutoSize = true;
-            this.label_Progress.Location = new System.Drawing.Point(12, 373);
+            this.label_Progress.Location = new System.Drawing.Point(12, 487);
             this.label_Progress.Name = "label_Progress";
             this.label_Progress.Size = new System.Drawing.Size(0, 13);
             this.label_Progress.TabIndex = 7;
@@ -140,10 +142,11 @@
             // 
             this.button_Pause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Pause.Enabled = false;
-            this.button_Pause.Location = new System.Drawing.Point(416, 398);
+            this.button_Pause.Location = new System.Drawing.Point(416, 512);
             this.button_Pause.Name = "button_Pause";
             this.button_Pause.Size = new System.Drawing.Size(75, 23);
             this.button_Pause.TabIndex = 5;
+            this.button_Pause.Tag = "true";
             this.button_Pause.Text = "Pause";
             this.button_Pause.UseVisualStyleBackColor = true;
             this.button_Pause.Click += new System.EventHandler(this.button_Pause_Click);
@@ -157,8 +160,10 @@
             this.tSSL_ThreadIPWorks,
             this.toolStripStatusLabel3,
             this.tSSL_ThreadsDNS,
-            this.toolStripProgressBar1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 435);
+            this.toolStripProgressBar1,
+            this.toolStripStatusLabel4,
+            this.tSSL_pauseTime});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 549);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(584, 22);
             this.statusStrip1.TabIndex = 8;
@@ -227,18 +232,35 @@
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox1.Location = new System.Drawing.Point(13, 344);
+            this.pictureBox1.Location = new System.Drawing.Point(13, 458);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(559, 19);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 9;
             this.pictureBox1.TabStop = false;
             // 
+            // toolStripStatusLabel4
+            // 
+            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(65, 17);
+            this.toolStripStatusLabel4.Text = "pauseTime";
+            // 
+            // tSSL_pauseTime
+            // 
+            this.tSSL_pauseTime.AutoSize = false;
+            this.tSSL_pauseTime.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.tSSL_pauseTime.BorderStyle = System.Windows.Forms.Border3DStyle.SunkenOuter;
+            this.tSSL_pauseTime.Name = "tSSL_pauseTime";
+            this.tSSL_pauseTime.Size = new System.Drawing.Size(50, 17);
+            this.tSSL_pauseTime.Text = "0";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(584, 457);
+            this.ClientSize = new System.Drawing.Size(584, 571);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.button_Pause);
@@ -283,6 +305,8 @@
         private System.Windows.Forms.ToolStripStatusLabel tSSL_ThreadsDNS;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
+        private System.Windows.Forms.ToolStripStatusLabel tSSL_pauseTime;
     }
 }
 

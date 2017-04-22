@@ -16,6 +16,13 @@ namespace ipScan.Classes
         public bool wasStopped { get; private set; }
         public CancellationToken cancellationToken { get; private set; }
         public int taskId { get; private set; }
+        private int _pauseTime;
+        public int pauseTime
+        {
+            get { return _pauseTime; }
+            set { _pauseTime = value >= 0 ? value : 0; }
+        }
+        private CheckTasks checkTasks { get; set; }
         public BufferResult buffer { get; private set; }
         public BufferResult IpArePassed { get; private set; }
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
@@ -39,12 +46,14 @@ namespace ipScan.Classes
         private PingOptions options = new PingOptions(50, true);
         private AutoResetEvent reset = new AutoResetEvent(false);
 
-        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken)
+        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, CheckTasks CheckTasks)
         {
             buffer = new BufferResult();
             IpArePassed = new BufferResult();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
             taskId = TaskId;
+            pauseTime = 0;
+            checkTasks = CheckTasks;
             ipList = IPList;
             index = Index;
             count = Count;
@@ -102,33 +111,60 @@ namespace ipScan.Classes
         private void LookingForIp()
         {
             Console.WriteLine(taskId + " is started");
+            bool waiting4CheckTasks = false;
+            int checkTasksLoopTimeMax = 60;
             if (!wasStopped)
             {
                 while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
-                {                    
-                    //if (isPaused)                    
-                    if (false)
+                {
+                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.lastTime;
+                    if (checkTasksLoopTime.TotalSeconds > checkTasksLoopTimeMax)
                     {
-                        Thread.Sleep(500);
+                        if (!waiting4CheckTasks)
+                        {
+                            Console.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
+                            waiting4CheckTasks = true;
+                        }
                     }
                     else
                     {
+                        if (waiting4CheckTasks)
+                        {
+                            waiting4CheckTasks = false;
+                            Console.WriteLine(taskId.ToString() + " resumed its work");
+                        }
+                    }
+
+                    if (isPaused || waiting4CheckTasks)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    else
+                    {                        
+                        /*
+                        if (pauseTime > 0)
+                        {
+                            Thread.Sleep(pauseTime);
+                        }
+                        */
+
                         IPAddress address = ipList[currentPosition];
                         PingReply reply = PingHost(address);
                         IPInfo ipInfo = new IPInfo(address);
                         IpArePassed.AddLine(ipInfo);
-                        
+
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
-                            ipInfo.RoundtripTime = reply.RoundtripTime;                            
+                            ipInfo.RoundtripTime = reply.RoundtripTime;
                             ipInfo.PropertyBeforeChanged += HostName_BeforeChanged;
                             ipInfo.PropertyAfterChanged += HostName_AfterChanged;
                             ipInfo.setHostNameAsync();
                             buffer.AddLine(ipInfo);
                         }
-                        
+
                         progress++;
-                        currentPosition++;                        
+                        currentPosition++;
+
                     }
                     if (cancellationToken.IsCancellationRequested)
                     {

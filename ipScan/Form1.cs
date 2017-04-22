@@ -114,11 +114,11 @@ namespace ipScan
             oldLines = null;
             System.GC.Collect();
         }        
-        private void SetProgress(int Progress, int Thread4IpCount, ListIPInfo IpArePassed, ListIPInfo IpAreFound, int Thread4HostNameCount, ListIPInfo IpAreLooking4HostName, TimeSpan timePassed, TimeSpan timeLeft)
+        private void SetProgress(int Progress, int Thread4IpCount, ListIPInfo IpArePassed, ListIPInfo IpAreFound, int Thread4HostNameCount, ListIPInfo IpAreLooking4HostName, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan>(SetProgress), Progress, Thread4IpCount, IpArePassed, IpAreFound, Thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft);
+                this.Invoke(new Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, IpArePassed, IpAreFound, Thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft, pauseTime);
                 return;
             }
             try
@@ -128,6 +128,7 @@ namespace ipScan
                 tSSL_Found.Text = richTextBox_result.Lines.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
+                tSSL_pauseTime.Text = pauseTime.ToString();
                 
                 //DrawMultiProgress(IpAreLooking4HostName, Color.Yellow);                
                 DrawMultiProgress(IpArePassed, Color.Green);
@@ -251,7 +252,7 @@ namespace ipScan
                 try
                 {
                     SetProgressMaxValue(ipList.Count);
-                    SetProgress(0, 0, null, null, 0, null, TimeSpan.MinValue, TimeSpan.MinValue);
+                    SetProgress(0, 0, null, null, 0, null, TimeSpan.MinValue, TimeSpan.MinValue, 0);
                 }
                 catch(Exception ex)
                 {
@@ -288,7 +289,7 @@ namespace ipScan
                 int range = (int)Math.Truncate((double)ipList.Count / taskCount);
                 for (int i = 0; i < taskCount; i++)
                 {
-                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, i == taskCount - 1 ? ipList.Count - range * i : range, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token));
+                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, i == taskCount - 1 ? ipList.Count - range * i : range, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
                 }                
@@ -392,6 +393,16 @@ namespace ipScan
             }
             */
             checkTasks.Pause();
+            if ((bool)button_Pause.Tag)
+            {
+                button_Pause.Tag = false;
+                button_Pause.Text = "Resume";
+            }
+            else
+            {
+                button_Pause.Tag = true;
+                button_Pause.Text = "Pause";
+            }
         }
 
         private void richTextBox_result_Enter(object sender, EventArgs e)

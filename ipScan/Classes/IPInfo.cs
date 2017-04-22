@@ -31,7 +31,7 @@ namespace ipScan.Classes
             
         }        
 
-        public async void setHostNameAsync()
+        public void setHostNameAsync()
         {
             /*
             isLooking4HostNames = true;
