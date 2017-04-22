@@ -113,6 +113,7 @@ namespace ipScan.Classes
             Console.WriteLine(taskId + " is started");
             bool waiting4CheckTasks = false;
             int checkTasksLoopTimeMax = 60;
+            int sleepTime = 100;
             if (!wasStopped)
             {
                 while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
@@ -125,6 +126,11 @@ namespace ipScan.Classes
                             Console.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
                             waiting4CheckTasks = true;
                         }
+                        sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
+                        if (sleepTime > 1000)
+                        {
+                            sleepTime = 1000;
+                        }
                     }
                     else
                     {
@@ -133,11 +139,12 @@ namespace ipScan.Classes
                             waiting4CheckTasks = false;
                             Console.WriteLine(taskId.ToString() + " resumed its work");
                         }
+                        sleepTime = 100;
                     }
 
                     if (isPaused || waiting4CheckTasks)
                     {
-                        Thread.Sleep(100);
+                        Thread.Sleep(sleepTime);
                     }
                     else
                     {                        

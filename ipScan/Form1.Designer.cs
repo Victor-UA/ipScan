@@ -242,8 +242,8 @@
             // toolStripStatusLabel4
             // 
             this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
-            this.toolStripStatusLabel4.Size = new System.Drawing.Size(65, 17);
-            this.toolStripStatusLabel4.Text = "pauseTime";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(58, 17);
+            this.toolStripStatusLabel4.Text = "loopTime";
             // 
             // tSSL_pauseTime
             // 
