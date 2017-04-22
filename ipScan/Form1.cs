@@ -168,8 +168,8 @@ namespace ipScan
                 Dictionary<int, int> progress = mySearchTasks[i].Progress;
                 foreach (int index in progress.Keys)
                 {
-                    int x0 = (index * bmp.Width) / ipList.Count;
-                    int x1 = (progress[index] * bmp.Width) / ipList.Count;
+                    int x0 = (int)((double)index * bmp.Width / ipList.Count);
+                    int x1 = (int)((double)progress[index] * bmp.Width / ipList.Count);
                     int width = x1 - x0;
 
                     Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
@@ -184,7 +184,7 @@ namespace ipScan
             foreach (IPInfo item in bufferResult.getAllBuffer())
             {
                 int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
-                int x = (index * bmp.Width) / ipList.Count;
+                int x = (int)((double)index * bmp.Width / ipList.Count);
                 if (rectWidth < 2)
                 {
                     graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
