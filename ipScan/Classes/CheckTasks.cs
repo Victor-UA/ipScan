@@ -19,7 +19,7 @@ namespace ipScan.Classes
         private Action<object> resultAppendBuffer { get; set; }
         private BufferResult bufferResult { get; set; }        
         private Action<object> disposeTasks { get; set; }
-        Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int> setProgress { get; set; }
+        Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
         private int IPListCount { get; set; }
         private DateTime timeStart { get; set; }
         public DateTime lastTime { get; private set; }
@@ -45,7 +45,7 @@ namespace ipScan.Classes
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int> SetProgress,
+            Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
             int IPListCount,
             BufferResult BufferResult)
         {
@@ -102,10 +102,7 @@ namespace ipScan.Classes
                         int thread4IpCount = 0;
                         int thread4HostNameCount = 0;
                         List<int> ListIp = new List<int>();
-                        List<int> ListHostNames = new List<int>();
-                        ListIPInfo IpArePassed = new ListIPInfo();
-                        ListIPInfo IpAreFound = new ListIPInfo();
-                        ListIPInfo IpAreLooking4HostName = new ListIPInfo();                        
+                        List<int> ListHostNames = new List<int>();                                              
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
@@ -196,13 +193,6 @@ namespace ipScan.Classes
                                 if (buffer.Count() > 0)
                                 {
                                     bufferResult.AddLines(buffer);
-                                    IpAreFound.AddRange(buffer);
-                                }
-                                
-                                buffer = mySearchTasks[i].IpArePassed.getBuffer();
-                                if (buffer.Count() > 0)
-                                {
-                                    IpArePassed.AddRange(buffer);
                                 }
                                 
                                 progress += mySearchTasks[i].progress;
@@ -238,7 +228,7 @@ namespace ipScan.Classes
                             timeLeft = TimeSpan.MinValue;
                             Debug.WriteLine(ex.StackTrace);
                         }
-                        setProgress(progress, thread4IpCount, IpArePassed, IpAreFound, thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
+                        setProgress(progress, thread4IpCount, thread4HostNameCount, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
                         
                     }
                 } while ((TasksAreRunning || isStarting) && !isStopped);

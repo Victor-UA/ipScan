@@ -23,9 +23,9 @@ namespace ipScan.Classes
             set { _pauseTime = value >= 0 ? value : 0; }
         }
         private CheckTasks checkTasks { get; set; }
-        public BufferResult buffer { get; private set; }
-        public BufferResult IpArePassed { get; private set; }
+        public BufferResult buffer { get; private set; }        
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
+        public Dictionary<int, int> Progress { get; private set; }
         public List<IPAddress> ipList { get; set; }
         public int index { get; private set; }
         public int currentPosition { get; private set; }
@@ -49,8 +49,8 @@ namespace ipScan.Classes
         public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, CheckTasks CheckTasks)
         {
             buffer = new BufferResult();
-            IpArePassed = new BufferResult();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
+            Progress = new Dictionary<int, int>();
             taskId = TaskId;
             pauseTime = 0;
             checkTasks = CheckTasks;
@@ -114,6 +114,7 @@ namespace ipScan.Classes
             bool waiting4CheckTasks = false;
             int checkTasksLoopTimeMax = 60;
             int sleepTime = 100;
+            Progress.Add(index, currentPosition);
             if (!wasStopped)
             {
                 while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
@@ -158,7 +159,6 @@ namespace ipScan.Classes
                         IPAddress address = ipList[currentPosition];
                         PingReply reply = PingHost(address);
                         IPInfo ipInfo = new IPInfo(address);
-                        IpArePassed.AddLine(ipInfo);
 
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
@@ -169,6 +169,7 @@ namespace ipScan.Classes
                             buffer.AddLine(ipInfo);
                         }
 
+                        Progress[index] = currentPosition;
                         progress++;
                         currentPosition++;
 

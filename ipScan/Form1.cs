@@ -114,11 +114,12 @@ namespace ipScan
             oldLines = null;
             System.GC.Collect();
         }        
-        private void SetProgress(int Progress, int Thread4IpCount, ListIPInfo IpArePassed, ListIPInfo IpAreFound, int Thread4HostNameCount, ListIPInfo IpAreLooking4HostName, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
+
+        private void SetProgress(int Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<int, int, ListIPInfo, ListIPInfo, int, ListIPInfo, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, IpArePassed, IpAreFound, Thread4HostNameCount, IpAreLooking4HostName, timePassed, timeLeft, pauseTime);
+                this.Invoke(new Action<int, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
                 return;
             }
             try
@@ -130,10 +131,7 @@ namespace ipScan
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
                 
-                //DrawMultiProgress(IpAreLooking4HostName, Color.Yellow);                
-                DrawMultiProgress(IpArePassed, Color.Green);
-                DrawMultiProgress(IpAreFound, Color.Lime);
-                //DrawMultiProgress(bufferResult.Buffer, Color.Lime);
+                DrawMultiProgress();
             }
             catch (Exception ex)
             {
@@ -157,33 +155,50 @@ namespace ipScan
             }
         }
 
-        private void DrawMultiProgress(ListIPInfo Buffer, Color color)
+        private void DrawMultiProgress()
         {
-            if (Buffer != null && Buffer.Count > 0)
-            {                
-                Graphics graphics = Graphics.FromImage(pictureBox1.Image);
-                Pen pen = new Pen(color);
-                Brush brush = color == Color.Green ? Brushes.Green : color == Color.Lime ? Brushes.Lime : Brushes.Yellow;
-                
-                int x = 0;
-                int rectWidth = pictureBox1.Image.Width / ipList.Count;
-                foreach (IPInfo item in Buffer)
+            Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
+            Graphics graphics = Graphics.FromImage(bmp);
+
+            Pen pen = new Pen(Color.Green);
+            Brush brush = Brushes.Green;
+
+            for (int i = 0; i < mySearchTasks.Count; i++)
+            {
+                Dictionary<int, int> progress = mySearchTasks[i].Progress;
+                foreach (int index in progress.Keys)
                 {
-                    int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
-                    x = (index * pictureBox1.Image.Width) / ipList.Count;
-                    if (rectWidth < 2)
-                    {
-                        graphics.DrawLine(pen, new Point(x, 0), new Point(x, pictureBox1.Image.Height));
-                    }
-                    else
-                    {
-                        Rectangle rectangle = new Rectangle(x, 0, rectWidth, pictureBox1.Image.Height);
-                        graphics.DrawRectangle(pen, rectangle);
-                        graphics.FillRectangle(brush, rectangle);
-                    }
+                    int x0 = (index * bmp.Width) / ipList.Count;
+                    int x1 = (progress[index] * bmp.Width) / ipList.Count;
+                    int width = x1 - x0;
+
+                    Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
+                    graphics.DrawRectangle(pen, rectangle);
+                    graphics.FillRectangle(brush, rectangle);
                 }
-                pictureBox1.Refresh();
             }
+
+            pen = new Pen(Color.Lime);
+            brush = Brushes.Lime;
+            int rectWidth = bmp.Width / ipList.Count;
+            foreach (IPInfo item in bufferResult.getAllBuffer())
+            {
+                int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
+                int x = (index * bmp.Width) / ipList.Count;
+                if (rectWidth < 2)
+                {
+                    graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
+                }
+                else
+                {
+                    Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
+                    graphics.DrawRectangle(pen, rectangle);
+                    graphics.FillRectangle(brush, rectangle);
+                }
+            }
+
+            pictureBox1.Image = bmp;
+            pictureBox1.Refresh();
         }
 
 
@@ -252,7 +267,7 @@ namespace ipScan
                 try
                 {
                     SetProgressMaxValue(ipList.Count);
-                    SetProgress(0, 0, null, null, 0, null, TimeSpan.MinValue, TimeSpan.MinValue, 0);
+                    SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
                 }
                 catch(Exception ex)
                 {
@@ -285,14 +300,26 @@ namespace ipScan
                 //Task.Factory.StartNew(checkTasks.Check);
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
-
+                /*
                 int range = (int)Math.Truncate((double)ipList.Count / taskCount);
                 for (int i = 0; i < taskCount; i++)
                 {
-                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, i == taskCount - 1 ? ipList.Count - range * i : range, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
+                    int count = i == taskCount - 1 ? ipList.Count - range * i : range;
+                    mySearchTasks.Add(new SearchTask(i, ipList.GetRange(i * range, count), 0, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
-                }                
+                }
+                */
+                
+                int range = (int)Math.Truncate((double)ipList.Count / taskCount);
+                for (int i = 0; i < taskCount; i++)
+                {
+                    int count = i == taskCount - 1 ? ipList.Count - range * i : range;
+                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
+                    Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
+                    myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
+                } 
+                
             }
         }      
 

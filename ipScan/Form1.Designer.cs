@@ -67,7 +67,7 @@
             this.textBox_IPLast.Name = "textBox_IPLast";
             this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
             this.textBox_IPLast.TabIndex = 1;
-            this.textBox_IPLast.Text = "10.10.20.10";
+            this.textBox_IPLast.Text = "11.10.20.10";
             // 
             // textBox_ThreadCount
             // 
@@ -77,7 +77,7 @@
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
-            this.textBox_ThreadCount.Text = "64";
+            this.textBox_ThreadCount.Text = "12";
             // 
             // button_Start
             // 
