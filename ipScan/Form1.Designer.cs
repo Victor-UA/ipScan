@@ -1,6 +1,6 @@
 ﻿namespace ipScan
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.textBox_IPFirst = new System.Windows.Forms.TextBox();
             this.textBox_IPLast = new System.Windows.Forms.TextBox();
             this.textBox_ThreadCount = new System.Windows.Forms.TextBox();
@@ -48,7 +48,7 @@
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tSSL_pauseTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.SourceGrid_Result = new SourceGrid.Grid();
+            this.SG_Result = new SourceGrid.Grid();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -119,7 +119,7 @@
             this.label_Progress.Location = new System.Drawing.Point(12, 487);
             this.label_Progress.Name = "label_Progress";
             this.label_Progress.Size = new System.Drawing.Size(0, 13);
-            this.label_Progress.TabIndex = 7;
+            this.label_Progress.TabIndex = 8;
             // 
             // button_Pause
             // 
@@ -149,7 +149,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 549);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(584, 22);
-            this.statusStrip1.TabIndex = 8;
+            this.statusStrip1.TabIndex = 9;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
@@ -239,32 +239,37 @@
             this.pictureBox1.TabIndex = 9;
             this.pictureBox1.TabStop = false;
             // 
-            // SourceGrid_Result
+            // SG_Result
             // 
-            this.SourceGrid_Result.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.SG_Result.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SourceGrid_Result.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.SourceGrid_Result.AutoStretchColumnsToFitWidth = true;
-            this.SourceGrid_Result.ColumnsCount = 3;
-            this.SourceGrid_Result.EnableSort = true;
-            this.SourceGrid_Result.FixedRows = 1;
-            this.SourceGrid_Result.Location = new System.Drawing.Point(15, 38);
-            this.SourceGrid_Result.Name = "SourceGrid_Result";
-            this.SourceGrid_Result.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
-            this.SourceGrid_Result.RowsCount = 10;
-            this.SourceGrid_Result.SelectionMode = SourceGrid.GridSelectionMode.Row;
-            this.SourceGrid_Result.Size = new System.Drawing.Size(557, 387);
-            this.SourceGrid_Result.TabIndex = 10;
-            this.SourceGrid_Result.TabStop = true;
-            this.SourceGrid_Result.ToolTipText = "";
+            this.SG_Result.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.SG_Result.AutoStretchColumnsToFitWidth = true;
+            this.SG_Result.ClipboardMode = SourceGrid.ClipboardMode.Copy;
+            this.SG_Result.ColumnsCount = 3;
+            this.SG_Result.EnableSort = true;
+            this.SG_Result.FixedRows = 1;
+            this.SG_Result.Location = new System.Drawing.Point(15, 38);
+            this.SG_Result.Name = "SG_Result";
+            this.SG_Result.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
+            this.SG_Result.RowsCount = 1;
+            this.SG_Result.SelectionMode = SourceGrid.GridSelectionMode.Row;
+            this.SG_Result.Size = new System.Drawing.Size(557, 387);
+            this.SG_Result.TabIndex = 7;
+            this.SG_Result.TabStop = true;
+            this.SG_Result.ToolTipText = "";
+            this.SG_Result.Enter += new System.EventHandler(this.SG_Result_Enter);
+            this.SG_Result.Leave += new System.EventHandler(this.SG_Result_Leave);
+            this.SG_Result.MouseEnter += new System.EventHandler(this.SG_Result_MouseEnter);
+            this.SG_Result.MouseLeave += new System.EventHandler(this.SG_Result_MouseLeave);
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 571);
-            this.Controls.Add(this.SourceGrid_Result);
+            this.Controls.Add(this.SG_Result);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.button_Pause);
@@ -277,7 +282,7 @@
             this.Controls.Add(this.textBox_IPFirst);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(600, 450);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "ipScan";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.statusStrip1.ResumeLayout(false);
@@ -309,7 +314,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.ToolStripStatusLabel tSSL_pauseTime;
-        private SourceGrid.Grid SourceGrid_Result;
+        private SourceGrid.Grid SG_Result;
     }
 }
 

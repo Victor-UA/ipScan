@@ -233,7 +233,7 @@ namespace ipScan.Classes
                         
                     }
                 } while ((TasksAreRunning || isStarting) && !isStopped);
-                disposeTasks(null);
+                disposeTasks(null);                
             }
             catch (Exception ex)
             {

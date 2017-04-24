@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ using ipScan.Classes;
 
 namespace ipScan
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private List<Task> myTasks { get; set; }
         private List<SearchTask> mySearchTasks { get; set; }
@@ -32,7 +33,7 @@ namespace ipScan
                 _resultIsUpdatable = value;
                 try
                 {
-                    if (bufferResult.Buffer.Count() != SourceGrid_Result.RowsCount)
+                    if (bufferResult.Buffer.Count() != SG_Result.RowsCount - 1)
                     {
                         ResultFillFromBuffer(null);
                     }
@@ -71,10 +72,12 @@ namespace ipScan
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
-            GridFill(SourceGrid_Result, null);
+            button_Pause.Tag = false;
+            //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
+            GridFill(SG_Result, null);
         }
 
         private void StartButtonEnable(bool Enable)
@@ -99,18 +102,20 @@ namespace ipScan
             //Columns filling
             grid.ColumnsCount = fields.Count;
             grid.FixedRows = 1;
-            grid.Rows.Insert(0);            
-            for (int i = 0; i < (fields.Count); i++)
-            {
+            grid.Rows.Insert(0);
+            SourceGrid.Cells.ColumnHeader columnHeader = new SourceGrid.Cells.ColumnHeader(fields[0]);
+            columnHeader.SortComparer = new IPAddressComparer();
+            grid[0, 0] = columnHeader;
+            for (int i = 1; i < (fields.Count); i++)
+            {                
                 grid[0, i] = new SourceGrid.Cells.ColumnHeader(fields[i]);
-            }
+            }                        
 
             //Data filling
-            if (IPList != null) { 
-                int index = grid.RowsCount;
+            if (IPList != null) {                 
                 for (int r = 0; r < IPList.Count; r++)
                 {
-                    grid.Rows.Insert(index++);
+                    grid.Rows.Insert(r + 1);
                     try
                     {
                         grid.Rows[grid.RowsCount - 1].Tag = new RowTag(r, IPList[r]);
@@ -142,7 +147,7 @@ namespace ipScan
                     }
                     try
                     {
-                        GridFill(SourceGrid_Result, bufferResult.getAllBufferSorted());
+                        GridFill(SG_Result, bufferResult.getAllBufferSorted());
                     }
                     catch (Exception ex)
                     {
@@ -317,6 +322,7 @@ namespace ipScan
 
                 StartButtonEnable(false);
                 StopButtonEnable(true);
+                button_Stop.Focus();
 
                 bufferResult = new BufferResult();
                 oldLines = new ListIPInfo();
@@ -524,15 +530,24 @@ namespace ipScan
             }            
         }
 
-        private void richTextBox_result_MouseDown(object sender, MouseEventArgs e)
+        private void SG_Result_MouseEnter(object sender, EventArgs e)
+        {
+            resultIsUpdatable = false;
+        }
+        private void SG_Result_Enter(object sender, EventArgs e)
         {
             resultIsUpdatable = false;
         }
 
-        private void richTextBox_result_MouseUp(object sender, MouseEventArgs e)
+        private void SG_Result_MouseLeave(object sender, EventArgs e)
         {
             resultIsUpdatable = true;
         }
+
+        private void SG_Result_Leave(object sender, EventArgs e)
+        {
+            resultIsUpdatable = true;
+        }        
     }
 
     

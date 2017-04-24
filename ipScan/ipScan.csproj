@@ -56,6 +56,8 @@
   <ItemGroup>
     <Compile Include="Classes\BufferResult.cs" />
     <Compile Include="Classes\CheckTasks.cs" />
+    <Compile Include="Classes\IPAddressComparer.cs" />
+    <Compile Include="Classes\GridController.cs" />
     <Compile Include="Classes\RowTag.cs" />
     <Compile Include="Classes\IPInfo.cs" />
     <Compile Include="Classes\IPInfoComparer.cs" />
