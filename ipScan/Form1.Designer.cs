@@ -34,7 +34,6 @@
             this.textBox_ThreadCount = new System.Windows.Forms.TextBox();
             this.button_Start = new System.Windows.Forms.Button();
             this.button_Stop = new System.Windows.Forms.Button();
-            this.richTextBox_result = new System.Windows.Forms.RichTextBox();
             this.textBox_Timeout = new System.Windows.Forms.TextBox();
             this.label_Progress = new System.Windows.Forms.Label();
             this.button_Pause = new System.Windows.Forms.Button();
@@ -49,6 +48,7 @@
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tSSL_pauseTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.SourceGrid_Result = new SourceGrid.Grid();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -101,23 +101,6 @@
             this.button_Stop.Text = "Stop";
             this.button_Stop.UseVisualStyleBackColor = true;
             this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
-            // 
-            // richTextBox_result
-            // 
-            this.richTextBox_result.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
-            this.richTextBox_result.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBox_result.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.richTextBox_result.Location = new System.Drawing.Point(12, 38);
-            this.richTextBox_result.Name = "richTextBox_result";
-            this.richTextBox_result.Size = new System.Drawing.Size(562, 387);
-            this.richTextBox_result.TabIndex = 2;
-            this.richTextBox_result.TabStop = false;
-            this.richTextBox_result.Text = "";
-            this.richTextBox_result.Enter += new System.EventHandler(this.richTextBox_result_Enter);
-            this.richTextBox_result.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.richTextBox_result_KeyPress);
-            this.richTextBox_result.Leave += new System.EventHandler(this.richTextBox_result_Leave);
             // 
             // textBox_Timeout
             // 
@@ -256,11 +239,32 @@
             this.pictureBox1.TabIndex = 9;
             this.pictureBox1.TabStop = false;
             // 
+            // SourceGrid_Result
+            // 
+            this.SourceGrid_Result.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SourceGrid_Result.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.SourceGrid_Result.AutoStretchColumnsToFitWidth = true;
+            this.SourceGrid_Result.ColumnsCount = 3;
+            this.SourceGrid_Result.EnableSort = true;
+            this.SourceGrid_Result.FixedRows = 1;
+            this.SourceGrid_Result.Location = new System.Drawing.Point(15, 38);
+            this.SourceGrid_Result.Name = "SourceGrid_Result";
+            this.SourceGrid_Result.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
+            this.SourceGrid_Result.RowsCount = 10;
+            this.SourceGrid_Result.SelectionMode = SourceGrid.GridSelectionMode.Row;
+            this.SourceGrid_Result.Size = new System.Drawing.Size(557, 387);
+            this.SourceGrid_Result.TabIndex = 10;
+            this.SourceGrid_Result.TabStop = true;
+            this.SourceGrid_Result.ToolTipText = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 571);
+            this.Controls.Add(this.SourceGrid_Result);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.button_Pause);
@@ -269,7 +273,6 @@
             this.Controls.Add(this.button_Stop);
             this.Controls.Add(this.button_Start);
             this.Controls.Add(this.textBox_ThreadCount);
-            this.Controls.Add(this.richTextBox_result);
             this.Controls.Add(this.textBox_IPLast);
             this.Controls.Add(this.textBox_IPFirst);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -292,7 +295,6 @@
         private System.Windows.Forms.TextBox textBox_ThreadCount;
         private System.Windows.Forms.Button button_Start;
         private System.Windows.Forms.Button button_Stop;
-        private System.Windows.Forms.RichTextBox richTextBox_result;
         private System.Windows.Forms.TextBox textBox_Timeout;
         private System.Windows.Forms.Label label_Progress;
         private System.Windows.Forms.Button button_Pause;
@@ -307,6 +309,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.ToolStripStatusLabel tSSL_pauseTime;
+        private SourceGrid.Grid SourceGrid_Result;
     }
 }
 

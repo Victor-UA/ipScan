@@ -37,6 +37,10 @@
     <ApplicationIcon>ip_icon32.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SourceGrid, Version=4.40.4580.29115, Culture=neutral, PublicKeyToken=df6f5e538749e85d, processorArchitecture=MSIL">
+      <HintPath>..\packages\SourceGrid.4.4.0\lib\net35\SourceGrid.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,6 +56,7 @@
   <ItemGroup>
     <Compile Include="Classes\BufferResult.cs" />
     <Compile Include="Classes\CheckTasks.cs" />
+    <Compile Include="Classes\RowTag.cs" />
     <Compile Include="Classes\IPInfo.cs" />
     <Compile Include="Classes\IPInfoComparer.cs" />
     <Compile Include="Classes\ListIPInfo.cs" />
@@ -77,6 +82,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

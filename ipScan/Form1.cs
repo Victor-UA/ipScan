@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -19,6 +20,28 @@ namespace ipScan
         private List<SearchTask> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
         private CheckTasks checkTasks { get; set; }
+        private bool _resultIsUpdatable = true;
+        private bool resultIsUpdatable
+        {
+            get
+            {
+                return _resultIsUpdatable;
+            }
+            set
+            {
+                _resultIsUpdatable = value;
+                try
+                {
+                    if (bufferResult.Buffer.Count() != SourceGrid_Result.RowsCount)
+                    {
+                        ResultFillFromBuffer(null);
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
         private bool isRunning
         {
             get {
@@ -51,6 +74,7 @@ namespace ipScan
         public Form1()
         {
             InitializeComponent();
+            GridFill(SourceGrid_Result, null);
         }
 
         private void StartButtonEnable(bool Enable)
@@ -62,33 +86,69 @@ namespace ipScan
             SetControlPropertyThreadSafe(button_Stop, "Enabled", Enable);
             SetControlPropertyThreadSafe(button_Pause, "Enabled", Enable);            
         }
-        private void ResultAddRow(string row)
-        {
-            if (InvokeRequired)
-            {
-                this.Invoke(new Action<string>(ResultAddRow), new object[] { row });
-                return;
-            }
-            richTextBox_result.AppendText(row + Environment.NewLine);
-        }
 
-        private void ResultAppendBuffer(object Buffer)
+        private void GridFill(SourceGrid.Grid grid, ListIPInfo IPList, List<string> Fields = null, Dictionary<string, object> filter = null, string filtertype = "", bool casesensitive = false)
+        {
+            grid.Columns.Clear();
+            grid.Rows.Clear();
+
+            List<string> fields = Fields == null ? 
+                new List<string>() { "IP Address", "TTL", "Host Name"} : 
+                Fields;
+
+            //Columns filling
+            grid.ColumnsCount = fields.Count;
+            grid.FixedRows = 1;
+            grid.Rows.Insert(0);            
+            for (int i = 0; i < (fields.Count); i++)
+            {
+                grid[0, i] = new SourceGrid.Cells.ColumnHeader(fields[i]);
+            }
+
+            //Data filling
+            if (IPList != null) { 
+                int index = grid.RowsCount;
+                for (int r = 0; r < IPList.Count; r++)
+                {
+                    grid.Rows.Insert(index++);
+                    try
+                    {
+                        grid.Rows[grid.RowsCount - 1].Tag = new RowTag(r, IPList[r]);
+                    }
+                    catch (Exception ex)
+                    {
+                        grid.Rows[grid.RowsCount - 1].Tag = new RowTag(r, null);
+                        Debug.WriteLine(ex.StackTrace);
+                    }
+
+                    grid[grid.RowsCount - 1, 0] = new SourceGrid.Cells.Cell(IPList[r].IPAddress);
+                    grid[grid.RowsCount - 1, 1] = new SourceGrid.Cells.Cell(IPList[r].RoundtripTime);
+                    grid[grid.RowsCount - 1, 2] = new SourceGrid.Cells.Cell(IPList[r].HostName);
+                }
+            }
+            grid.AutoSizeCells();
+        }  
+
+        private void ResultFillFromBuffer(object Buffer = null)
         {
             try
             {
-                if (InvokeRequired)
+                if (resultIsUpdatable)
                 {
-                    this.Invoke(new Action<object>(ResultAppendBuffer), new object[] { bufferResult });
-                    return;
-                }
-                try
-                {
-                    richTextBox_result.Lines = bufferResult.getAllBufferSorted().toArray();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
-                    Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
+                    if (InvokeRequired)
+                    {
+                        this.Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
+                        return;
+                    }
+                    try
+                    {
+                        GridFill(SourceGrid_Result, bufferResult.getAllBufferSorted());
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
+                        Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
+                    }
                 }
             }
             catch (Exception ex)
@@ -106,7 +166,7 @@ namespace ipScan
         }
         private void DisposeTasks(object Buffer)
         {
-            bufferResult = null;
+            //bufferResult = null;
             mySearchTasks = null;
             myTasks = null;
             ipList = null;
@@ -126,7 +186,7 @@ namespace ipScan
             {
                 toolStripProgressBar1.Value = Progress;
                 label_Progress.Text = Progress.ToString() + @"\" + toolStripProgressBar1.Maximum.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
-                tSSL_Found.Text = richTextBox_result.Lines.Count().ToString();
+                tSSL_Found.Text = bufferResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
@@ -260,7 +320,6 @@ namespace ipScan
 
                 bufferResult = new BufferResult();
                 oldLines = new ListIPInfo();
-                richTextBox_result.Clear();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
                 ipList = IPAddressesRange(firstIpAddress, lastIpAddress);
@@ -292,7 +351,7 @@ namespace ipScan
                     mySearchTasks,
                     StartButtonEnable,
                     StopButtonEnable,
-                    ResultAppendBuffer,
+                    ResultFillFromBuffer,
                     DisposeTasks,
                     SetProgress,
                     ipList.Count,
@@ -463,6 +522,16 @@ namespace ipScan
             {
                 e.Cancel = false;
             }            
+        }
+
+        private void richTextBox_result_MouseDown(object sender, MouseEventArgs e)
+        {
+            resultIsUpdatable = false;
+        }
+
+        private void richTextBox_result_MouseUp(object sender, MouseEventArgs e)
+        {
+            resultIsUpdatable = true;
         }
     }
 
