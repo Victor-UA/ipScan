@@ -46,9 +46,9 @@
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tSSL_ThreadsDNS = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tSSL_pauseTime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -59,7 +59,7 @@
             this.textBox_IPFirst.Name = "textBox_IPFirst";
             this.textBox_IPFirst.Size = new System.Drawing.Size(165, 20);
             this.textBox_IPFirst.TabIndex = 0;
-            this.textBox_IPFirst.Text = "10.10.10.10";
+            this.textBox_IPFirst.Text = "10.65.56.0";
             // 
             // textBox_IPLast
             // 
@@ -67,7 +67,7 @@
             this.textBox_IPLast.Name = "textBox_IPLast";
             this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
             this.textBox_IPLast.TabIndex = 1;
-            this.textBox_IPLast.Text = "11.10.20.10";
+            this.textBox_IPLast.Text = "10.65.57.0";
             // 
             // textBox_ThreadCount
             // 
@@ -77,7 +77,7 @@
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
-            this.textBox_ThreadCount.Text = "12";
+            this.textBox_ThreadCount.Text = "64";
             // 
             // button_Start
             // 
@@ -227,18 +227,6 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.pictureBox1.Location = new System.Drawing.Point(13, 458);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(559, 19);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 9;
-            this.pictureBox1.TabStop = false;
-            // 
             // toolStripStatusLabel4
             // 
             this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
@@ -255,6 +243,18 @@
             this.tSSL_pauseTime.Name = "tSSL_pauseTime";
             this.tSSL_pauseTime.Size = new System.Drawing.Size(50, 17);
             this.tSSL_pauseTime.Text = "0";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pictureBox1.Location = new System.Drawing.Point(13, 458);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(559, 19);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 9;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 

@@ -38,15 +38,15 @@ namespace ipScan.Classes
             OnPropertyBeforeChanged("HostName");
             try
             {
-                HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
+                HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;                
             }
             catch (Exception ex)
             {
                 //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);   
+                HostName = string.Empty;
             }
             finally
             {
-                HostName = string.Empty;
                 isLooking4HostNames = false;
                 OnPropertyAfterChanged("HostName");
             }
@@ -57,18 +57,19 @@ namespace ipScan.Classes
                 OnPropertyBeforeChanged("HostName");
                 try
                 {
-                    Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 100, Timeout.Infinite);
+                    //Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 1000, Timeout.Infinite);
                     HostName = Dns.GetHostEntry(IPAddress).HostName;
                     //HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
-                    timer.Dispose();
+                    //Debug.WriteLine(HostName);
+                    //timer.Dispose();
                 }
                 catch (Exception ex)
                 {
                     //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);
+                    HostName = string.Empty;
                 }
                 finally
                 {
-                    HostName = string.Empty;
                     isLooking4HostNames = false;
                     OnPropertyAfterChanged("HostName");
                 }

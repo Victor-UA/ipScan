@@ -169,9 +169,9 @@ namespace ipScan.Classes
                             buffer.AddLine(ipInfo);
                         }
 
-                        Progress[index] = currentPosition;
                         progress++;
                         currentPosition++;
+                        Progress[index] = currentPosition;
 
                     }
                     if (cancellationToken.IsCancellationRequested)

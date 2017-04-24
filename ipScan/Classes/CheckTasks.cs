@@ -187,14 +187,15 @@ namespace ipScan.Classes
                                 }
 
 
-                                TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;                                
-
+                                TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
+                                bufferResult.AddLines(mySearchTasks[i].buffer.getBuffer());
+                                /*
                                 ListIPInfo buffer = mySearchTasks[i].buffer.getBuffer();
                                 if (buffer.Count() > 0)
                                 {
                                     bufferResult.AddLines(buffer);
                                 }
-                                
+                                */
                                 progress += mySearchTasks[i].progress;
                             }
                             catch (Exception ex)
