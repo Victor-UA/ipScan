@@ -258,6 +258,7 @@
             this.SG_Result.Size = new System.Drawing.Size(557, 387);
             this.SG_Result.TabIndex = 7;
             this.SG_Result.TabStop = true;
+            this.SG_Result.Tag = "123434";
             this.SG_Result.ToolTipText = "";
             this.SG_Result.Enter += new System.EventHandler(this.SG_Result_Enter);
             this.SG_Result.Leave += new System.EventHandler(this.SG_Result_Leave);

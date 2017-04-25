@@ -10,7 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ipScan.Classes.Grid;
+using ipScan.Classes.Host;
 using ipScan.Classes.IP;
+using ipScan.Classes.Main.Grid;
 
 namespace ipScan.Classes.Main
 {
@@ -69,14 +71,14 @@ namespace ipScan.Classes.Main
         private IPAddress lastIpAddress;
         private BufferResult bufferResult { get; set; }
         private int TimeOut { get; set; }
-        private ListIPInfo oldLines { get; set; }
+        private ListIPInfo oldLines { get; set; }        
 
         public MainForm()
         {
             InitializeComponent();
             button_Pause.Tag = false;
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
-            GridFill(SG_Result, null);
+            GridFill(SG_Result, null);            
         }
 
         private void StartButtonEnable(bool Enable)
@@ -125,9 +127,11 @@ namespace ipScan.Classes.Main
                         Debug.WriteLine(ex.StackTrace);
                     }
 
-                    grid[grid.RowsCount - 1, 0] = newCell(IPList[r].IPAddress, new GridController(Color.LightBlue));
-                    grid[grid.RowsCount - 1, 1] = newCell(IPList[r].RoundtripTime, new GridController(Color.LightBlue));
-                    grid[grid.RowsCount - 1, 2] = newCell(IPList[r].HostName, new GridController(Color.LightBlue));
+                    IPInfo ipInfo = IPList[r];
+
+                    grid[grid.RowsCount - 1, 0] = newCell(ipInfo.IPAddress, new GridCellController(ipInfo, Color.LightBlue));
+                    grid[grid.RowsCount - 1, 1] = newCell(ipInfo.RoundtripTime, new GridCellController(ipInfo, Color.LightBlue));
+                    grid[grid.RowsCount - 1, 2] = newCell(ipInfo.HostName, new GridCellController(ipInfo, Color.LightBlue));
                 }
             }
             grid.AutoSizeCells();

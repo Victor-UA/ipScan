@@ -1,20 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using ipScan.Classes.Host;
+using ipScan.Classes.IP;
 using SourceGrid;
 
-namespace ipScan.Classes.Grid
+namespace ipScan.Classes.Main.Grid
 {
-    public class GridController : SourceGrid.Cells.Controllers.ControllerBase
+    public class GridCellController : SourceGrid.Cells.Controllers.ControllerBase
     {
         private SourceGrid.Cells.Views.Cell MouseEnterView = new SourceGrid.Cells.Views.Cell();
         private SourceGrid.Cells.Views.Cell MouseLeaveView = new SourceGrid.Cells.Views.Cell();
-        
-        public GridController(Color BackColor)
+
+        public IPInfo ipInfo { get; private set; }
+
+        public GridCellController(IPInfo IPInfo, Color BackColor)
         {
             MouseEnterView.BackColor = BackColor;
+            ipInfo = IPInfo;
         }
-        public GridController() : this(Color.LightGreen) { }
+        public GridCellController() : this(null, Color.LightGreen) { }
         public override void OnMouseEnter(SourceGrid.CellContext sender, EventArgs e)
         {
             base.OnMouseEnter(sender, e);
@@ -30,7 +36,7 @@ namespace ipScan.Classes.Grid
         public override void OnDoubleClick(CellContext sender, EventArgs e)
         {
             base.OnDoubleClick(sender, e);
-            Debug.WriteLine("OnDoubleClick");
+            ipInfo.ShowHostForm();
         }
     }
 }

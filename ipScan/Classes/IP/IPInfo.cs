@@ -1,13 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
+using ipScan.Classes.Host;
 
 namespace ipScan.Classes.IP
 {
-    class IPInfo 
+    public class IPInfo 
     {
         public IPAddress IPAddress { get; set; }
         public int Index { get; set; }
@@ -15,12 +14,15 @@ namespace ipScan.Classes.IP
         public long RoundtripTime { get; set; }
         public bool isLooking4HostNames { get; private set; }
         public Thread look4HostNames { get; private set; }
+        public HostForm hostForm { get; private set; }
+
         public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime, int Index = -1)
         {
             IPAddress = ipAddress;
             HostName = hostName;
             RoundtripTime = roundtripTime;
             this.Index = Index;
+            hostForm = null;
         }
         public IPInfo(IPAddress ipAddress, int Index = -1) : this(ipAddress, string.Empty, 0, Index)
         {
@@ -29,7 +31,28 @@ namespace ipScan.Classes.IP
         public IPInfo(IPAddress ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
         {
             
-        }        
+        }
+        
+
+        public void ShowHostForm(System.Windows.Forms.IWin32Window owner = null)
+        {
+            if (hostForm == null)
+            {
+                hostForm = new HostForm(this);
+            }
+            if (hostForm.Visible)
+            {
+                if (hostForm.WindowState == System.Windows.Forms.FormWindowState.Minimized)
+                {
+                    hostForm.WindowState = System.Windows.Forms.FormWindowState.Normal;
+                }
+                hostForm.Focus();
+            }
+            else
+            {
+                hostForm.Show(owner);
+            }
+        }
 
         public void setHostNameAsync()
         {
@@ -127,6 +150,10 @@ namespace ipScan.Classes.IP
                 result += ip[i].PadLeft(3, ' ') + (i < ip.Length - 1 ? "." : string.Empty);
             }
             return result + "\t" + RoundtripTime.ToString().PadLeft(4, ' ') + "\t" + HostName;
+        }
+        public override string ToString()
+        {
+            return IPAddress.ToString();
         }
     }
 }
