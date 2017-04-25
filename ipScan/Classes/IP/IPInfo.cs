@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ipScan.Classes
+namespace ipScan.Classes.IP
 {
     class IPInfo 
     {

@@ -7,8 +7,9 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ipScan.Classes.IP;
 
-namespace ipScan.Classes
+namespace ipScan.Classes.Main
 {
     class SearchTask
     {        

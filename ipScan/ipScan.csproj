@@ -54,26 +54,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\BufferResult.cs" />
-    <Compile Include="Classes\CheckTasks.cs" />
-    <Compile Include="Classes\IPAddressComparer.cs" />
-    <Compile Include="Classes\GridController.cs" />
-    <Compile Include="Classes\RowTag.cs" />
-    <Compile Include="Classes\IPInfo.cs" />
-    <Compile Include="Classes\IPInfoComparer.cs" />
-    <Compile Include="Classes\ListIPInfo.cs" />
-    <Compile Include="Classes\Looking4HostNamesTimer.cs" />
-    <Compile Include="Classes\SearchTask.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="Classes\Main\BufferResult.cs" />
+    <Compile Include="Classes\Main\CheckTasks.cs" />
+    <Compile Include="Classes\IP\IPAddressComparer.cs" />
+    <Compile Include="Classes\Grid\GridController.cs" />
+    <Compile Include="Classes\Grid\RowTag.cs" />
+    <Compile Include="Classes\IP\IPInfo.cs" />
+    <Compile Include="Classes\IP\IPInfoComparer.cs" />
+    <Compile Include="Classes\IP\ListIPInfo.cs" />
+    <Compile Include="Classes\Main\SearchTask.cs" />
+    <Compile Include="Classes\Main\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Classes\Main\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="Classes\Main\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

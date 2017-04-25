@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -11,9 +9,10 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ipScan.Classes;
+using ipScan.Classes.Grid;
+using ipScan.Classes.IP;
 
-namespace ipScan
+namespace ipScan.Classes.Main
 {
     public partial class MainForm : Form
     {
@@ -126,13 +125,23 @@ namespace ipScan
                         Debug.WriteLine(ex.StackTrace);
                     }
 
-                    grid[grid.RowsCount - 1, 0] = new SourceGrid.Cells.Cell(IPList[r].IPAddress);
-                    grid[grid.RowsCount - 1, 1] = new SourceGrid.Cells.Cell(IPList[r].RoundtripTime);
-                    grid[grid.RowsCount - 1, 2] = new SourceGrid.Cells.Cell(IPList[r].HostName);
+                    grid[grid.RowsCount - 1, 0] = newCell(IPList[r].IPAddress, new GridController(Color.LightBlue));
+                    grid[grid.RowsCount - 1, 1] = newCell(IPList[r].RoundtripTime, new GridController(Color.LightBlue));
+                    grid[grid.RowsCount - 1, 2] = newCell(IPList[r].HostName, new GridController(Color.LightBlue));
                 }
             }
             grid.AutoSizeCells();
         }  
+
+        private SourceGrid.Cells.Cell newCell(object Value, SourceGrid.Cells.Controllers.IController Controller = null)
+        {
+            SourceGrid.Cells.Cell cell = new SourceGrid.Cells.Cell(Value);
+            if (Controller != null)
+            {
+                cell.AddController(Controller);
+            }
+            return cell;
+        }
 
         private void ResultFillFromBuffer(object Buffer = null)
         {

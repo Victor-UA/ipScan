@@ -1,4 +1,4 @@
-﻿namespace ipScan
+﻿namespace ipScan.Classes.Main
 {
     partial class MainForm
     {
