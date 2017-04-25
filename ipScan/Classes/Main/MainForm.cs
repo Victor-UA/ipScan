@@ -78,7 +78,7 @@ namespace ipScan.Classes.Main
             InitializeComponent();
             button_Pause.Tag = false;
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
-            GridFill(SG_Result, null);            
+            Fill.GridFill(SG_Result, null as ListIPInfo, null);
         }
 
         private void StartButtonEnable(bool Enable)
@@ -89,63 +89,7 @@ namespace ipScan.Classes.Main
         {
             SetControlPropertyThreadSafe(button_Stop, "Enabled", Enable);
             SetControlPropertyThreadSafe(button_Pause, "Enabled", Enable);            
-        }
-
-        private void GridFill(SourceGrid.Grid grid, ListIPInfo IPList, List<string> Fields = null, Dictionary<string, object> filter = null, string filtertype = "", bool casesensitive = false)
-        {
-            grid.Columns.Clear();
-            grid.Rows.Clear();
-
-            List<string> fields = Fields == null ? 
-                new List<string>() { "IP Address", "TTL", "Host Name"} : 
-                Fields;
-
-            //Columns filling
-            grid.ColumnsCount = fields.Count;
-            grid.FixedRows = 1;
-            grid.Rows.Insert(0);
-            SourceGrid.Cells.ColumnHeader columnHeader = new SourceGrid.Cells.ColumnHeader(fields[0]);
-            columnHeader.SortComparer = new IPAddressComparer();
-            grid[0, 0] = columnHeader;
-            for (int i = 1; i < (fields.Count); i++)
-            {                
-                grid[0, i] = new SourceGrid.Cells.ColumnHeader(fields[i]);
-            }                        
-
-            //Data filling
-            if (IPList != null) {                 
-                for (int r = 0; r < IPList.Count; r++)
-                {
-                    grid.Rows.Insert(r + 1);
-                    try
-                    {
-                        grid.Rows[grid.RowsCount - 1].Tag = new RowTag(r, IPList[r]);
-                    }
-                    catch (Exception ex)
-                    {
-                        grid.Rows[grid.RowsCount - 1].Tag = new RowTag(r, null);
-                        Debug.WriteLine(ex.StackTrace);
-                    }
-
-                    IPInfo ipInfo = IPList[r];
-
-                    grid[grid.RowsCount - 1, 0] = newCell(ipInfo.IPAddress, new GridCellController(ipInfo, Color.LightBlue));
-                    grid[grid.RowsCount - 1, 1] = newCell(ipInfo.RoundtripTime, new GridCellController(ipInfo, Color.LightBlue));
-                    grid[grid.RowsCount - 1, 2] = newCell(ipInfo.HostName, new GridCellController(ipInfo, Color.LightBlue));
-                }
-            }
-            grid.AutoSizeCells();
-        }  
-
-        private SourceGrid.Cells.Cell newCell(object Value, SourceGrid.Cells.Controllers.IController Controller = null)
-        {
-            SourceGrid.Cells.Cell cell = new SourceGrid.Cells.Cell(Value);
-            if (Controller != null)
-            {
-                cell.AddController(Controller);
-            }
-            return cell;
-        }
+        }              
 
         private void ResultFillFromBuffer(object Buffer = null)
         {
@@ -155,12 +99,17 @@ namespace ipScan.Classes.Main
                 {
                     if (InvokeRequired)
                     {
-                        this.Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
+                        Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
                         return;
                     }
                     try
-                    {
-                        GridFill(SG_Result, bufferResult.getAllBufferSorted());
+                    {                        
+                        Fill.GridFill(SG_Result, bufferResult.getAllBufferSorted(), 
+                            (IPInfo ipInfo, Color color) => 
+                            {
+                                return new GridCellController(ipInfo, Color.LightBlue);
+                            }
+                        );
                     }
                     catch (Exception ex)
                     {
@@ -375,19 +324,8 @@ namespace ipScan.Classes.Main
                     SetProgress,
                     ipList.Count,
                     bufferResult);
-                //Task.Factory.StartNew(checkTasks.Check);
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
-                /*
-                int range = (int)Math.Truncate((double)ipList.Count / taskCount);
-                for (int i = 0; i < taskCount; i++)
-                {
-                    int count = i == taskCount - 1 ? ipList.Count - range * i : range;
-                    mySearchTasks.Add(new SearchTask(i, ipList.GetRange(i * range, count), 0, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
-                    Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
-                    myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
-                }
-                */
                 
                 int range = (int)Math.Truncate((double)ipList.Count / taskCount);
                 for (int i = 0; i < taskCount; i++)

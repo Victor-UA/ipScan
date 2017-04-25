@@ -54,6 +54,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\EventList.cs" />
+    <Compile Include="Classes\Grid\Fill.cs" />
+    <Compile Include="Classes\Host\Grid\GridCellController.cs" />
     <Compile Include="Classes\Host\HostForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,7 +66,7 @@
     <Compile Include="Classes\Main\BufferResult.cs" />
     <Compile Include="Classes\Main\CheckTasks.cs" />
     <Compile Include="Classes\IP\IPAddressComparer.cs" />
-    <Compile Include="Classes\Main\Grid\GridController.cs" />
+    <Compile Include="Classes\Main\Grid\GridCellController.cs" />
     <Compile Include="Classes\Grid\RowTag.cs" />
     <Compile Include="Classes\IP\IPInfo.cs" />
     <Compile Include="Classes\IP\IPInfoComparer.cs" />
