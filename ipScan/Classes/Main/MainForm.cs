@@ -426,11 +426,6 @@ namespace ipScan.Classes.Main
             checkTasks.Stop();
         }
 
-        private void richTextBox_result_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            e.Handled = true;
-        }
-
         private void button_Pause_Click(object sender, EventArgs e)
         {
             /*
@@ -450,25 +445,7 @@ namespace ipScan.Classes.Main
                 button_Pause.Tag = true;
                 button_Pause.Text = "Pause";
             }
-        }
-
-        private void richTextBox_result_Enter(object sender, EventArgs e)
-        {
-            try
-            {
-                checkTasks.BlockResultOutput(true);
-            }
-            catch (Exception) { }
-        }
-
-        private void richTextBox_result_Leave(object sender, EventArgs e)
-        {
-            try
-            {
-                checkTasks.BlockResultOutput(false);
-            }
-            catch (Exception) { }
-        }
+        }        
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {

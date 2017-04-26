@@ -11,24 +11,29 @@ namespace ipScan.Classes.Main
     class checkIPSearchTask
     {
         private static readonly object lockObject = new object();
-        private int OkRemaind { get; } = 4;
+        private int                 OkRemaind { get; } = 4;
+
         public List<Task> myTasks { get; private set; }
-        public List<IPSearchTask> mySearchTasks { get; private set; }
-        private Action<bool> startButtonEnable { get; set; }
-        private Action<bool> stopButtonEnable { get; set; }
-        private Action<object> resultAppendBuffer { get; set; }
-        private BufferResult bufferResult { get; set; }        
-        private Action<object> disposeTasks { get; set; }
-        Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
-        private int IPListCount { get; set; }
-        private DateTime timeStart { get; set; }
-        public DateTime lastTime { get; private set; }
-        public TimeSpan loopTime { get; private set; }
-        public bool isStarting { get; private set; }
-        public bool isPaused { get; private set; }
-        public bool firstPause { get; set; }
-        public bool isStopped { get; private set; }
-        private bool isResultOutputBlocked { get; set; }
+        public List<IPSearchTask>   mySearchTasks { get; private set; }
+
+        private Action<bool>        startButtonEnable { get; set; }
+        private Action<bool>        stopButtonEnable { get; set; }
+        private Action<object>      resultAppendBuffer { get; set; }
+        private BufferResult        bufferResult { get; set; }        
+        private Action<object>      disposeTasks { get; set; }
+
+        private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
+
+        private int             IPListCount { get; set; }
+        private DateTime        timeStart { get; set; }
+        public DateTime         lastTime { get; private set; }
+        public TimeSpan         loopTime { get; private set; }
+        public bool             isStarting { get; private set; }
+        public bool             isPaused { get; private set; }
+        public bool             isStopped { get; private set; }
+        public bool             firstPause { get; set; }
+        public bool            isResultOutputBlocked { get; set; }
+
         public void Stop()
         {
             isStopped = true;
@@ -63,11 +68,7 @@ namespace ipScan.Classes.Main
             disposeTasks = DisposeTasks;
             isStopped = false;
         }
-
-        public void BlockResultOutput (bool IsResultOutputBlocked)
-        {
-            isResultOutputBlocked = IsResultOutputBlocked;
-        }
+        
         public void Check()
         {
             isStarting = true;
@@ -106,7 +107,6 @@ namespace ipScan.Classes.Main
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
-                            //mySearchTasks[i].pauseTime = mySearchTasksPauseTime;                            
                             try
                             {
                                 bool SubTasksAreRunning = false;
@@ -126,10 +126,8 @@ namespace ipScan.Classes.Main
                                             else
                                             {
                                                 thread4HostNameCount++;
-                                                //IpAreLooking4HostName.Add(new IPInfo(key));
                                             }
                                         }
-
                                     }
                                 }
 
@@ -179,9 +177,6 @@ namespace ipScan.Classes.Main
                                             mySearchTasks[i].Init(index + newCount, newRemaind);
                                             myTasks[i] = Task.Factory.StartNew(mySearchTasks[i].Start);
                                             Console.WriteLine(i.ToString() + " is joined to " + taskIndex.ToString());
-                                            //myTasks[i] = NewTask(mySearchTasks[i].Start);                                            
-                                            //myTasks[i] = new Task(mySearchTasks[i].Start);
-                                            //myTasks[i].Start();
                                         }
                                     }
                                 }
