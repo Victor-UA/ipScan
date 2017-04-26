@@ -64,14 +64,14 @@
       <DependentUpon>HostForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\Main\BufferResult.cs" />
-    <Compile Include="Classes\Main\CheckTasks.cs" />
+    <Compile Include="Classes\Main\checkIPSearchTask.cs" />
     <Compile Include="Classes\IP\IPAddressComparer.cs" />
     <Compile Include="Classes\Main\Grid\GridCellController.cs" />
     <Compile Include="Classes\Grid\RowTag.cs" />
     <Compile Include="Classes\IP\IPInfo.cs" />
     <Compile Include="Classes\IP\IPInfoComparer.cs" />
     <Compile Include="Classes\IP\ListIPInfo.cs" />
-    <Compile Include="Classes\Main\SearchTask.cs" />
+    <Compile Include="Classes\Main\IPSearchTask.cs" />
     <Compile Include="Classes\Main\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

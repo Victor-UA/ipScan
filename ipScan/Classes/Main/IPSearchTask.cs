@@ -11,7 +11,7 @@ using ipScan.Classes.IP;
 
 namespace ipScan.Classes.Main
 {
-    class SearchTask
+    class IPSearchTask
     {        
         public bool isRunning { get; private set; }        
         public bool wasStopped { get; private set; }
@@ -23,7 +23,7 @@ namespace ipScan.Classes.Main
             get { return _pauseTime; }
             set { _pauseTime = value >= 0 ? value : 0; }
         }
-        private CheckTasks checkTasks { get; set; }
+        private checkIPSearchTask checkTasks { get; set; }
         public BufferResult buffer { get; private set; }        
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
         public Dictionary<int, int> Progress { get; private set; }
@@ -47,7 +47,7 @@ namespace ipScan.Classes.Main
         private PingOptions options = new PingOptions(50, true);
         private AutoResetEvent reset = new AutoResetEvent(false);
 
-        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, CheckTasks CheckTasks)
+        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkIPSearchTask CheckTasks)
         {
             buffer = new BufferResult();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
@@ -109,7 +109,8 @@ namespace ipScan.Classes.Main
             index = currentPosition = Index;
             count = Count;
         }
-        private void LookingForIp()
+
+        private void Search()
         {
             Console.WriteLine(taskId + " is started");
             bool waiting4CheckTasks = false;
@@ -150,12 +151,6 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {                        
-                        /*
-                        if (pauseTime > 0)
-                        {
-                            Thread.Sleep(pauseTime);
-                        }
-                        */
 
                         IPAddress address = ipList[currentPosition];
                         PingReply reply = PingHost(address);
@@ -188,7 +183,7 @@ namespace ipScan.Classes.Main
         public void Start()
         {
             isRunning = true;
-            LookingForIp();
+            Search();
         }
         public void Stop()
         {            

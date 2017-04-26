@@ -43,9 +43,21 @@ namespace ipScan.Classes.IP
         public Thread look4HostNames { get; private set; }
         public HostForm HostForm { get; private set; }
         private CancellationTokenSource CancelScanHostPorts { get; set; }
+        private int currentHostPort;
         private int waitingForResponses;
-        private int maxWaitingForResponses { get; set; } = 10000;        
-        public EventList<object> HostPorts { get; private set; }       
+        private int maxWaitingForResponses { get; set; } = 200; 
+               
+        public EventList<object> HostPorts { get; private set; }
+        private bool _ScanPortsIsRunning;
+        public bool ScanTCPPortsIsRunning
+        {
+            get { return _ScanPortsIsRunning; }
+            private set
+            {
+                _ScanPortsIsRunning = value;
+                HostForm.switch_btn_ScanHostPorts(value);
+            }
+        }
 
         public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime, int Index = -1)
         {
@@ -53,7 +65,7 @@ namespace ipScan.Classes.IP
             HostName = hostName;
             RoundtripTime = roundtripTime;
             this.Index = Index;
-            HostForm = null;
+            HostForm = null;            
         }
         public IPInfo(IPAddress ipAddress, int Index = -1) : this(ipAddress, string.Empty, 0, Index)
         {
@@ -77,7 +89,7 @@ namespace ipScan.Classes.IP
         }
         public void ShowHostForm(System.Windows.Forms.IWin32Window owner = null)
         {
-            if (HostForm == null)
+            if (HostForm == null || HostForm.IsDisposed)
             {
                 HostForm = new HostForm(this);
                 setHostFormCaption();                
@@ -91,7 +103,7 @@ namespace ipScan.Classes.IP
                 HostForm.Focus();
             }
             else
-            {
+            {                
                 HostForm.Show(owner);
             }
         }
@@ -99,56 +111,77 @@ namespace ipScan.Classes.IP
         public void ScanHostPorts()
         {
             CancelScanHostPorts = new CancellationTokenSource();
-            Task.Run(() =>
+            Task checkScanHostPorts = Task.Run(() =>
+            {
+                while (!ScanTCPPortsIsRunning)
                 {
-                    HostPorts = new EventList<object>();
-                    HostPorts.onChanged += () => 
-                    {
-                        HostForm.FillHostOpenPorts();
-                    };
-                    waitingForResponses = 0;
-                    for (int i = 0; i < 65535 && !CancelScanHostPorts.Token.IsCancellationRequested; i++)
-                    {
-                        while (waitingForResponses >= maxWaitingForResponses)
-                        {
-                            Thread.Sleep(0);
-                        }
-                        try
-                        {
-                            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                            Interlocked.Increment(ref waitingForResponses);
-                            socket.BeginConnect(new IPEndPoint(IPAddress, i), (IAsyncResult asyncResult) =>
-                            {
-                                try
-                                {
-                                    Interlocked.Decrement(ref waitingForResponses);
-                                    Socket socketResult = asyncResult.AsyncState as Socket;
-                                    if (socketResult.Connected)
-                                    {
-                                        try
-                                        {
-                                            HostPorts.Add(i);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            throw;
-                                        }
-                                    }
-                                    socketResult.EndConnect(asyncResult);
-                                }
-                                catch (Exception)
-                                {
-                                }
-                            },
-                                socket
-                            );
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
+                    Thread.Sleep(1000);
+                    HostForm.setScanPortsProgress(currentHostPort, waitingForResponses, maxWaitingForResponses);
                 }
-            );
+                while (ScanTCPPortsIsRunning)
+                {
+                    Thread.Sleep(1000);
+                    HostForm.setScanPortsProgress(currentHostPort, waitingForResponses, maxWaitingForResponses);
+                }
+            });
+            //https://www.codeproject.com/Articles/199016/Simple-TCP-Port-Scanner
+            Task ScanHostTCPPorts = Task.Run(() =>
+            {
+                ScanTCPPortsIsRunning = true;
+                HostPorts = new EventList<object>();
+                HostPorts.onChanged += () => 
+                {
+                    HostForm.FillHostOpenPorts();
+                };
+                waitingForResponses = 0;
+                    
+                for (currentHostPort = 0; currentHostPort < 65535 && !CancelScanHostPorts.Token.IsCancellationRequested; currentHostPort++)
+                {
+                    while (waitingForResponses >= maxWaitingForResponses)
+                    {
+                        Thread.Sleep(0);
+                    }
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);                        
+                        socket.BeginConnect(new IPEndPoint(IPAddress, currentHostPort), (IAsyncResult asyncResult) =>
+                        {
+                            try
+                            {
+                                Interlocked.Decrement(ref waitingForResponses);
+                                Socket socketResult = asyncResult.AsyncState as Socket;
+                                socketResult.EndConnect(asyncResult);
+                                if (socketResult.Connected)
+                                {
+                                    try
+                                    {
+                                        HostPorts.Add(int.Parse(socketResult.RemoteEndPoint.ToString().Split(':')[1]));
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine(ex.StackTrace);
+                                    }
+                                }                                
+                            }
+                            catch
+                            {
+                            }
+                        },
+                            socket
+                        );
+                        Interlocked.Increment(ref waitingForResponses);
+                    }
+                    catch
+                    {
+                    }
+                    
+                }
+                while (waitingForResponses > 0)
+                {
+                    Thread.Sleep(100);
+                }
+                ScanTCPPortsIsRunning = false;
+            });            
         }
         public void StopScanHostPorts()
         {

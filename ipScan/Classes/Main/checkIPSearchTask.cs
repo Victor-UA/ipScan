@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace ipScan.Classes.Main
 {
-    class CheckTasks
+    class checkIPSearchTask
     {
         private static readonly object lockObject = new object();
         private int OkRemaind { get; } = 4;
         public List<Task> myTasks { get; private set; }
-        public List<SearchTask> mySearchTasks { get; private set; }
+        public List<IPSearchTask> mySearchTasks { get; private set; }
         private Action<bool> startButtonEnable { get; set; }
         private Action<bool> stopButtonEnable { get; set; }
         private Action<object> resultAppendBuffer { get; set; }
@@ -38,9 +38,9 @@ namespace ipScan.Classes.Main
             isPaused = !isPaused;
         }
 
-        public CheckTasks(
+        public checkIPSearchTask(
             List<Task> MyTasks,
-            List<SearchTask> MySearchTasks,
+            List<IPSearchTask> MySearchTasks,
             Action<bool> StartButtonEnable,
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,

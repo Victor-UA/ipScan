@@ -28,31 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.grid_HostOpenPorts = new SourceGrid.Grid();
+            this.SG_HostOpenPorts = new SourceGrid.Grid();
             this.btn_ScanHostPorts = new System.Windows.Forms.Button();
+            this.label_ScanPortsProgress = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // grid_HostOpenPorts
+            // SG_HostOpenPorts
             // 
-            this.grid_HostOpenPorts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.grid_HostOpenPorts.AutoStretchColumnsToFitWidth = true;
-            this.grid_HostOpenPorts.ClipboardMode = SourceGrid.ClipboardMode.Copy;
-            this.grid_HostOpenPorts.ColumnsCount = 2;
-            this.grid_HostOpenPorts.EnableSort = true;
-            this.grid_HostOpenPorts.FixedRows = 1;
-            this.grid_HostOpenPorts.Location = new System.Drawing.Point(12, 12);
-            this.grid_HostOpenPorts.Name = "grid_HostOpenPorts";
-            this.grid_HostOpenPorts.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
-            this.grid_HostOpenPorts.FixedRows = 1;
-            this.grid_HostOpenPorts.SelectionMode = SourceGrid.GridSelectionMode.Row;
-            this.grid_HostOpenPorts.Size = new System.Drawing.Size(120, 439);
-            this.grid_HostOpenPorts.TabIndex = 0;
-            this.grid_HostOpenPorts.TabStop = true;
-            this.grid_HostOpenPorts.ToolTipText = "";            
+            this.SG_HostOpenPorts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.SG_HostOpenPorts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.SG_HostOpenPorts.AutoStretchColumnsToFitWidth = true;
+            this.SG_HostOpenPorts.ClipboardMode = SourceGrid.ClipboardMode.Copy;
+            this.SG_HostOpenPorts.ColumnsCount = 2;
+            this.SG_HostOpenPorts.EnableSort = true;
+            this.SG_HostOpenPorts.FixedRows = 1;
+            this.SG_HostOpenPorts.Location = new System.Drawing.Point(12, 12);
+            this.SG_HostOpenPorts.Name = "SG_HostOpenPorts";
+            this.SG_HostOpenPorts.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
+            this.SG_HostOpenPorts.SelectionMode = SourceGrid.GridSelectionMode.Row;
+            this.SG_HostOpenPorts.Size = new System.Drawing.Size(120, 446);
+            this.SG_HostOpenPorts.TabIndex = 0;
+            this.SG_HostOpenPorts.TabStop = true;
+            this.SG_HostOpenPorts.ToolTipText = "";
             // 
             // btn_ScanHostPorts
             // 
-            this.btn_ScanHostPorts.Location = new System.Drawing.Point(32, 457);
+            this.btn_ScanHostPorts.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_ScanHostPorts.Location = new System.Drawing.Point(32, 477);
             this.btn_ScanHostPorts.Name = "btn_ScanHostPorts";
             this.btn_ScanHostPorts.Size = new System.Drawing.Size(75, 23);
             this.btn_ScanHostPorts.TabIndex = 4;
@@ -60,22 +63,35 @@
             this.btn_ScanHostPorts.UseVisualStyleBackColor = true;
             this.btn_ScanHostPorts.Click += new System.EventHandler(this.btn_ScanHostPorts_Click);
             // 
+            // label_ScanPortsProgress
+            // 
+            this.label_ScanPortsProgress.AutoSize = true;
+            this.label_ScanPortsProgress.Location = new System.Drawing.Point(12, 461);
+            this.label_ScanPortsProgress.Name = "label_ScanPortsProgress";
+            this.label_ScanPortsProgress.Size = new System.Drawing.Size(0, 13);
+            this.label_ScanPortsProgress.TabIndex = 5;
+            // 
             // HostForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(648, 492);
+            this.ClientSize = new System.Drawing.Size(634, 512);
+            this.Controls.Add(this.label_ScanPortsProgress);
             this.Controls.Add(this.btn_ScanHostPorts);
-            this.Controls.Add(this.grid_HostOpenPorts);
+            this.Controls.Add(this.SG_HostOpenPorts);
+            this.MinimumSize = new System.Drawing.Size(650, 550);
             this.Name = "HostForm";
             this.Text = "Host";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.HostForm_FormClosing);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
-        private SourceGrid.Grid grid_HostOpenPorts;
+        private SourceGrid.Grid SG_HostOpenPorts;
         private System.Windows.Forms.Button btn_ScanHostPorts;
+        private System.Windows.Forms.Label label_ScanPortsProgress;
     }
 }
