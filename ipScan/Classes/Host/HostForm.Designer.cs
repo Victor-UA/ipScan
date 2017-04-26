@@ -34,16 +34,21 @@
             // 
             // grid_HostOpenPorts
             // 
+            this.grid_HostOpenPorts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.grid_HostOpenPorts.AutoStretchColumnsToFitWidth = true;
+            this.grid_HostOpenPorts.ClipboardMode = SourceGrid.ClipboardMode.Copy;
             this.grid_HostOpenPorts.ColumnsCount = 2;
             this.grid_HostOpenPorts.EnableSort = true;
+            this.grid_HostOpenPorts.FixedRows = 1;
             this.grid_HostOpenPorts.Location = new System.Drawing.Point(12, 12);
             this.grid_HostOpenPorts.Name = "grid_HostOpenPorts";
             this.grid_HostOpenPorts.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
-            this.grid_HostOpenPorts.SelectionMode = SourceGrid.GridSelectionMode.Cell;
+            this.grid_HostOpenPorts.FixedRows = 1;
+            this.grid_HostOpenPorts.SelectionMode = SourceGrid.GridSelectionMode.Row;
             this.grid_HostOpenPorts.Size = new System.Drawing.Size(120, 439);
             this.grid_HostOpenPorts.TabIndex = 0;
             this.grid_HostOpenPorts.TabStop = true;
-            this.grid_HostOpenPorts.ToolTipText = "";
+            this.grid_HostOpenPorts.ToolTipText = "";            
             // 
             // btn_ScanHostPorts
             // 

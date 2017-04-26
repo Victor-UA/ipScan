@@ -10,12 +10,12 @@ namespace ipScan.Classes.Host.Grid
         private SourceGrid.Cells.Views.Cell MouseEnterView = new SourceGrid.Cells.Views.Cell();
         private SourceGrid.Cells.Views.Cell MouseLeaveView = new SourceGrid.Cells.Views.Cell();
 
-        public IPInfo ipInfo { get; private set; }
+        public object Port { get; private set; }
 
-        public GridCellController(IPInfo IPInfo, Color BackColor)
+        public GridCellController(object Port, Color BackColor)
         {
             MouseEnterView.BackColor = BackColor;
-            ipInfo = IPInfo;
+            this.Port = Port;
         }
         public GridCellController() : this(null, Color.LightGreen) { }
         public override void OnMouseEnter(SourceGrid.CellContext sender, EventArgs e)
@@ -32,8 +32,7 @@ namespace ipScan.Classes.Host.Grid
         }
         public override void OnDoubleClick(CellContext sender, EventArgs e)
         {
-            base.OnDoubleClick(sender, e);
-            ipInfo.ShowHostForm();
+            base.OnDoubleClick(sender, e);            
         }
     }
 }

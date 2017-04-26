@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
+using ipScan.Classes.Host.Grid;
 using ipScan.Classes.IP;
 
 namespace ipScan.Classes.Host
@@ -28,7 +30,12 @@ namespace ipScan.Classes.Host
                     {
                         try
                         {
-                            Classes.Grid.Fill.GridFill(grid_HostOpenPorts, ipInfo.HostPorts);
+                            Classes.Grid.Fill.GridFill(grid_HostOpenPorts, ipInfo.HostPorts,
+                                (object item, Color color) =>
+                                    {
+                                        return new GridCellController(item, Color.LightBlue);
+                                    }
+                            );
                         }
                         catch (Exception ex)
                         {

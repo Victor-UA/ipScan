@@ -19,35 +19,6 @@ namespace ipScan.Classes.Grid
             }
             return cell;
         }
-        /*
-        public static void GridFill(
-            SourceGrid.Grid grid, 
-            ListIPInfo IPList, 
-            Func<object, Color, SourceGrid.Cells.Controllers.IController> newCellController = null, 
-            List<string> Fields = null)
-        {
-            grid.Columns.Clear();
-            grid.Rows.Clear();
-
-            List<string> fields = Fields == null ?
-                new List<string>() { "IP Address", "TTL", "Host Name" } :
-                Fields;
-
-            //Columns filling
-            grid.ColumnsCount = fields.Count;
-            grid.FixedRows = 1;
-            grid.Rows.Insert(0);
-            SourceGrid.Cells.ColumnHeader columnHeader = new SourceGrid.Cells.ColumnHeader(fields[0]);
-            columnHeader.SortComparer = new IPAddressComparer();
-            grid[0, 0] = columnHeader;
-            for (int i = 1; i < (fields.Count); i++)
-            {
-                grid[0, i] = new SourceGrid.Cells.ColumnHeader(fields[i]);
-            }
-
-            GridAddRows(grid, IPList, newCellController);
-            grid.AutoSizeCells();
-        }*/
         
         public static void GridFill(
             SourceGrid.Grid grid, 
