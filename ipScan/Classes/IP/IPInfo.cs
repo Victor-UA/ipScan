@@ -11,8 +11,9 @@ using ipScan.Classes.Host;
 
 namespace ipScan.Classes.IP
 {
-    public class IPInfo 
+    public class IPInfo : object
     {
+        public static string ClassName { get; } = "IPInfo";
         public IPAddress IPAddress { get; set; }
         public int Index { get; set; }
         private string _HostName;

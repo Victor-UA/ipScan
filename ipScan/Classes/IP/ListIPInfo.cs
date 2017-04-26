@@ -5,6 +5,7 @@ namespace ipScan.Classes.IP
 {
     class ListIPInfo : List<IPInfo>
     {
+        public static string ClassName { get; } = "ListIPInfo";
         public ListIPInfo() : base()
         {
         }
@@ -25,7 +26,7 @@ namespace ipScan.Classes.IP
             ListIPInfo result = new ListIPInfo();
             result.AddRange(base.GetRange(index, count));
             return result;
-        }
+        }        
 
     }
 }

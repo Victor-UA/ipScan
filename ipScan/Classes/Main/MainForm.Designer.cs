@@ -259,11 +259,7 @@
             this.SG_Result.TabIndex = 7;
             this.SG_Result.TabStop = true;
             this.SG_Result.Tag = "123434";
-            this.SG_Result.ToolTipText = "";
-            this.SG_Result.Enter += new System.EventHandler(this.SG_Result_Enter);
-            this.SG_Result.Leave += new System.EventHandler(this.SG_Result_Leave);
-            this.SG_Result.MouseEnter += new System.EventHandler(this.SG_Result_MouseEnter);
-            this.SG_Result.MouseLeave += new System.EventHandler(this.SG_Result_MouseLeave);
+            this.SG_Result.ToolTipText = "";            
             // 
             // MainForm
             // 

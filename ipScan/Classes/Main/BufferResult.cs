@@ -20,20 +20,18 @@ namespace ipScan.Classes.Main
         {
             Buffer.AddRange(Lines);
         }
-        public ListIPInfo getBuffer(int count, bool changeIndex = true)
-        {
+
+        public ListIPInfo getBuffer(int Count, bool changeIndex = true)
+        {                                   
             if(changeIndex)
-                Index += count;
-            return Buffer.GetRange(Index - count, count);
+                Index += Count;            
+            return Buffer.GetRange(Index - Count, Count);
+            
         }
-        public ListIPInfo getBuffer()
+        public ListIPInfo getBuffer(bool changeIndex = true)
         {
             int count = Buffer.Count() - Index;
-            return this.getBuffer(count);
-        }
-        public ListIPInfo getAllBuffer()
-        {
-            return Buffer;
+            return getBuffer(count, changeIndex);
         }
         public ListIPInfo getBuffer(ListIPInfo oldLines)
         {
@@ -41,12 +39,17 @@ namespace ipScan.Classes.Main
             oldLines.AddRange(getBuffer(count));
             return oldLines;
         }
+
         public ListIPInfo getBufferSorted(ListIPInfo oldLines)
         {
             int count = Buffer.Count() - Index;
             oldLines.AddRange(getBuffer(count));
             oldLines.Sort();
             return oldLines;
+        }
+        public ListIPInfo getAllBuffer()
+        {
+            return Buffer;
         }
         public ListIPInfo getAllBufferSorted()
         {
@@ -55,6 +58,7 @@ namespace ipScan.Classes.Main
             sortedBuffer.Sort(new IPInfoComparer());
             return sortedBuffer;
         }
+
         public int getBufferTotalCount
         {
             get

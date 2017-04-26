@@ -18,8 +18,7 @@ namespace ipScan.Classes.Host
         public void FillHostOpenPorts()
         {
             try
-            {
-                //if (resultIsUpdatable)
+            {                
                 {
                     if (InvokeRequired)
                     {

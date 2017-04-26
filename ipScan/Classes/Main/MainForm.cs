@@ -78,7 +78,7 @@ namespace ipScan.Classes.Main
             InitializeComponent();
             button_Pause.Tag = false;
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
-            Fill.GridFill(SG_Result, null as ListIPInfo, null);
+            Fill.GridFill(SG_Result, null as ListIPInfo, null, new List<string>() { "IP Address", "TTL", "Host Name" });
         }
 
         private void StartButtonEnable(bool Enable)
@@ -95,34 +95,33 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                if (resultIsUpdatable)
+                if (InvokeRequired)
                 {
-                    if (InvokeRequired)
-                    {
-                        Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
-                        return;
-                    }
-                    try
-                    {                        
-                        Fill.GridFill(SG_Result, bufferResult.getAllBufferSorted(), 
-                            (IPInfo ipInfo, Color color) => 
-                            {
-                                return new GridCellController(ipInfo, Color.LightBlue);
-                            }
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
-                        Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
-                    }
+                    Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
+                    return;
                 }
+                try
+                {                    
+                    Fill.GridUpdateOrInsertRows(SG_Result, bufferResult.getAllBuffer(),
+                        (object item, Color color) =>
+                        {
+                            return new GridCellController(item as IPInfo, Color.LightBlue);
+                        }
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
+                    Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
+                }
+
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.StackTrace);
             }
         }
+
         private void BufferResultAddLine(IPInfo Line)
         {
             bufferResult.AddLine(Line);
@@ -131,6 +130,7 @@ namespace ipScan.Classes.Main
         {
             bufferResult.AddLines(Lines);
         }
+
         private void DisposeTasks(object Buffer)
         {
             //bufferResult = null;
@@ -190,37 +190,40 @@ namespace ipScan.Classes.Main
             Pen pen = new Pen(Color.Green);
             Brush brush = Brushes.Green;
 
-            for (int i = 0; i < mySearchTasks.Count; i++)
+            if (mySearchTasks != null)
             {
-                Dictionary<int, int> progress = mySearchTasks[i].Progress;
-                foreach (int index in progress.Keys)
+                for (int i = 0; i < mySearchTasks.Count; i++)
                 {
-                    int x0 = (int)((double)index * bmp.Width / ipList.Count);
-                    int x1 = (int)((double)progress[index] * bmp.Width / ipList.Count);
-                    int width = x1 - x0;
+                    Dictionary<int, int> progress = mySearchTasks[i].Progress;
+                    foreach (int index in progress.Keys)
+                    {
+                        int x0 = (int)((double)index * bmp.Width / ipList.Count);
+                        int x1 = (int)((double)progress[index] * bmp.Width / ipList.Count);
+                        int width = x1 - x0;
 
-                    Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
-                    graphics.DrawRectangle(pen, rectangle);
-                    graphics.FillRectangle(brush, rectangle);
+                        Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
+                        graphics.DrawRectangle(pen, rectangle);
+                        graphics.FillRectangle(brush, rectangle);
+                    }
                 }
-            }
 
-            pen = new Pen(Color.Lime);
-            brush = Brushes.Lime;
-            int rectWidth = bmp.Width / ipList.Count;
-            foreach (IPInfo item in bufferResult.getAllBuffer())
-            {
-                int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
-                int x = (int)((double)index * bmp.Width / ipList.Count);
-                if (rectWidth < 2)
+                pen = new Pen(Color.Lime);
+                brush = Brushes.Lime;
+                int rectWidth = bmp.Width / ipList.Count;
+                foreach (IPInfo item in bufferResult.getAllBuffer())
                 {
-                    graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
-                }
-                else
-                {
-                    Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
-                    graphics.DrawRectangle(pen, rectangle);
-                    graphics.FillRectangle(brush, rectangle);
+                    int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
+                    int x = (int)((double)index * bmp.Width / ipList.Count);
+                    if (rectWidth < 2)
+                    {
+                        graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
+                    }
+                    else
+                    {
+                        Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
+                        graphics.DrawRectangle(pen, rectangle);
+                        graphics.FillRectangle(brush, rectangle);
+                    }
                 }
             }
 
@@ -287,6 +290,7 @@ namespace ipScan.Classes.Main
                 button_Stop.Focus();
 
                 bufferResult = new BufferResult();
+                Fill.GridFill(SG_Result, null as ListIPInfo, null, new List<string>() { "IP Address", "TTL", "Host Name" });
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
@@ -479,25 +483,6 @@ namespace ipScan.Classes.Main
             {
                 e.Cancel = false;
             }            
-        }
-
-        private void SG_Result_MouseEnter(object sender, EventArgs e)
-        {
-            resultIsUpdatable = false;
-        }
-        private void SG_Result_Enter(object sender, EventArgs e)
-        {
-            resultIsUpdatable = false;
-        }
-
-        private void SG_Result_MouseLeave(object sender, EventArgs e)
-        {
-            resultIsUpdatable = true;
-        }
-
-        private void SG_Result_Leave(object sender, EventArgs e)
-        {
-            resultIsUpdatable = true;
         }        
     }
 
