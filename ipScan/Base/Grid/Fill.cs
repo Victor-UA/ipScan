@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using ipScan.Base.IP;
 using ipScan.Classes.Grid;
-using ipScan.Classes.IP;
 
 namespace ipScan.Base.Grid
 {

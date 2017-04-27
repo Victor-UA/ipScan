@@ -5,10 +5,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using ipScan.Base;
 using ipScan.Classes.Host;
 
-namespace ipScan.Classes.IP
+namespace ipScan.Base.IP
 {
     public class IPInfo : object
     {

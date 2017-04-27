@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace ipScan.Classes.IP
+namespace ipScan.Base.IP
 {
     class IPInfoComparer : IComparer<IPInfo>
     {

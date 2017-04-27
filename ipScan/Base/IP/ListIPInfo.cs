@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace ipScan.Classes.IP
+namespace ipScan.Base.IP
 {
     class ListIPInfo : List<IPInfo>
     {

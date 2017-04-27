@@ -68,12 +68,12 @@
     </Compile>
     <Compile Include="Base\BufferedResult.cs" />
     <Compile Include="Base\SearchTask.cs" />
-    <Compile Include="Classes\IP\IPAddressComparer.cs" />
+    <Compile Include="Base\IP\IPAddressComparer.cs" />
     <Compile Include="Classes\Main\Grid\GridCellController.cs" />
     <Compile Include="Base\Grid\RowTag.cs" />
-    <Compile Include="Classes\IP\IPInfo.cs" />
-    <Compile Include="Classes\IP\IPInfoComparer.cs" />
-    <Compile Include="Classes\IP\ListIPInfo.cs" />
+    <Compile Include="Base\IP\IPInfo.cs" />
+    <Compile Include="Base\IP\IPInfoComparer.cs" />
+    <Compile Include="Base\IP\ListIPInfo.cs" />
     <Compile Include="Classes\Main\IPSearchTask.cs" />
     <Compile Include="Classes\Main\MainForm.cs">
       <SubType>Form</SubType>

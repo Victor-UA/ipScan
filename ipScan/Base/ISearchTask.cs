@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading;
-using ipScan.Classes.IP;
+﻿using System.Collections.Generic;
 
 namespace ipScan.Base
 {

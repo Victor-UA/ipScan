@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using ipScan.Classes.IP;
 using SourceGrid;
 
 namespace ipScan.Classes.Host.Grid

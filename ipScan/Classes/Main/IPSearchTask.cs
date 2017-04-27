@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 using ipScan.Base;
-using ipScan.Classes.IP;
+using ipScan.Base.IP;
 
 namespace ipScan.Classes.Main
 {

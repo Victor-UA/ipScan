@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using ipScan.Classes.Host;
-using ipScan.Classes.IP;
+using ipScan.Base.IP;
 using SourceGrid;
 
 namespace ipScan.Classes.Main.Grid
