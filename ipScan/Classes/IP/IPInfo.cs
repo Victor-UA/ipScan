@@ -257,7 +257,7 @@ namespace ipScan.Classes.IP
         public event PropertyChangedEventHandler PropertyBeforeChanged;
         protected void OnPropertyBeforeChanged(PropertyChangedEventArgs e)
         {
-            PropertyBeforeChanged?.Invoke(this, e);
+            PropertyBeforeChanged?.Invoke(IPAddress, e);
         }
         protected void OnPropertyBeforeChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
         {
@@ -267,7 +267,7 @@ namespace ipScan.Classes.IP
         public event PropertyChangedEventHandler PropertyAfterChanged;
         protected void OnPropertyAferChanged(PropertyChangedEventArgs e)
         {
-            PropertyAfterChanged?.Invoke(this, e);
+            PropertyAfterChanged?.Invoke(IPAddress, e);
         }
         protected void OnPropertyAfterChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
         {

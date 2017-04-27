@@ -2,59 +2,47 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using ipScan.Base;
-using ipScan.Classes.IP;
 
-namespace ipScan.Classes.Main
+namespace ipScan.Base
 {
-    class checkIPSearchTask
+    class CheckSearchTask<T, TSub> : ICheckSearchTask
     {
-        private static readonly object lockObject = new object();
-        private int                 OkRemaind { get; } = 4;
+        private static readonly object          lockObject = new object();
+        private int                             OkRemaind { get; } = 4;
 
-        public List<Task> myTasks { get; private set; }
-        public List<SearchTask>   mySearchTasks { get; private set; }
+        private List<Task>                      myTasks { get; set; }
+        private List<ISearchTask<T, TSub>>      mySearchTasks { get; set; }
 
-        private Action<bool>            startButtonEnable { get; set; }
-        private Action<bool>            stopButtonEnable { get; set; }
-        private Action<object>          resultAppendBuffer { get; set; }
-        private BufferedResult<IPInfo>    bufferResult { get; set; }        
-        private Action<object>          disposeTasks { get; set; }
+        private Action<bool>                    startButtonEnable { get; set; }
+        private Action<bool>                    stopButtonEnable { get; set; }
+        private Action<object>                  resultAppendBuffer { get; set; }
+        private BufferedResult<T>               bufferResult { get; set; }        
+        private Action<object>                  disposeTasks { get; set; }
 
         private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
 
-        private int             IPListCount { get; set; }
-        private DateTime        timeStart { get; set; }
-        public DateTime         lastTime { get; private set; }
-        public TimeSpan         loopTime { get; private set; }
-        public bool             isStarting { get; private set; }
-        public bool             isPaused { get; private set; }
-        public bool             isStopped { get; private set; }
-        public bool             firstPause { get; set; }
-        public bool            isResultOutputBlocked { get; set; }
+        private int                             TListCount { get; set; }
+        private DateTime                        timeStart { get; set; }
+        public DateTime                         lastTime { get; private set; }
+        private TimeSpan                        loopTime { get; set; }
+        private bool                            isStarting { get; set; }
+        private bool                            isPaused { get; set; }
+        private bool                            isStopped { get; set; }
+        private bool                            isResultOutputBlocked { get; set; }
 
-        public void Stop()
-        {
-            isStopped = true;
-        }
-        public void Pause()
-        {
-            isPaused = !isPaused;
-        }
 
-        public checkIPSearchTask(
+        public CheckSearchTask(
             List<Task> MyTasks,
-            List<SearchTask> MySearchTasks,
+            List<ISearchTask<T, TSub>> MySearchTasks,
             Action<bool> StartButtonEnable,
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
             Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
-            int IPListCount,
-            BufferedResult<IPInfo> BufferResult)
+            int TListCount,
+            BufferedResult<T> BufferResult)
         {
             myTasks = MyTasks;
             mySearchTasks = MySearchTasks;
@@ -62,7 +50,7 @@ namespace ipScan.Classes.Main
             stopButtonEnable = StopButtonEnable;
             resultAppendBuffer = ResultAppendBuffer;
             setProgress = SetProgress;
-            this.IPListCount = IPListCount;
+            this.TListCount = TListCount;
             timeStart = DateTime.Now;
             lastTime = DateTime.Now;
             loopTime = TimeSpan.FromMilliseconds(0);
@@ -76,9 +64,8 @@ namespace ipScan.Classes.Main
             isStarting = true;
             try
             {
-                System.GC.Collect();
-                bool TasksAreRunning;
-                TasksAreRunning = false;                
+                GC.Collect();
+                bool TasksAreRunning = false;                
                 int maxRemaind = OkRemaind;
                 lastTime = DateTime.Now;
                 int mySearchTasksPauseTime = 1000;
@@ -102,10 +89,9 @@ namespace ipScan.Classes.Main
 
                         TasksAreRunning = false;
                         int progress = 0;
-                        int thread4IpCount = 0;
-                        int thread4HostNameCount = 0;
-                        List<int> ListIp = new List<int>();
-                        List<int> ListHostNames = new List<int>();                                              
+                        int TasksCount = 0;
+                        int subTasksCount = 0;
+                        
                         int i = 0;
                         while (i < mySearchTasks.Count())
                         {
@@ -114,20 +100,20 @@ namespace ipScan.Classes.Main
                                 bool SubTasksAreRunning = false;
                                 try
                                 {
-                                    if (mySearchTasks[i] != null && mySearchTasks[i].isLooking4HostNames != null)
+                                    if (mySearchTasks[i] != null && mySearchTasks[i].SubTaskStates != null)
                                     {
-                                        Dictionary<IPAddress, bool> isLooking4HostNames = new Dictionary<IPAddress, bool>(mySearchTasks[i].isLooking4HostNames);
-                                        foreach (IPAddress key in isLooking4HostNames.Keys)
+                                        Dictionary<TSub, bool> subTaskStates = new Dictionary<TSub, bool>(mySearchTasks[i].SubTaskStates);
+                                        foreach (TSub key in subTaskStates.Keys)
                                         {
-                                            bool subIsRunning = isLooking4HostNames[key];
+                                            bool subIsRunning = subTaskStates[key];
                                             SubTasksAreRunning |= subIsRunning;
                                             if (!subIsRunning)
                                             {
-                                                mySearchTasks[i].isLooking4HostNames.Remove(key);
+                                                mySearchTasks[i].SubTaskStates.Remove(key);
                                             }
                                             else
                                             {
-                                                thread4HostNameCount++;
+                                                subTasksCount++;
                                             }
                                         }
                                     }
@@ -140,7 +126,7 @@ namespace ipScan.Classes.Main
 
                                 if (mySearchTasks[i] != null && mySearchTasks[i].isRunning)
                                 {
-                                    thread4IpCount++;                                    
+                                    TasksCount++;                                    
                                 }
                                 else
                                 {
@@ -212,7 +198,7 @@ namespace ipScan.Classes.Main
                         try
                         {
                             timePassed = Now - timeStart;
-                            timeLeft = TimeSpan.FromMilliseconds((IPListCount - progress) * (timePassed.TotalMilliseconds / progress));
+                            timeLeft = TimeSpan.FromMilliseconds((TListCount - progress) * (timePassed.TotalMilliseconds / progress));
                         }
                         catch (Exception ex)
                         {
@@ -220,7 +206,7 @@ namespace ipScan.Classes.Main
                             timeLeft = TimeSpan.MinValue;
                             Debug.WriteLine(ex.StackTrace);
                         }
-                        setProgress(progress, thread4IpCount, thread4HostNameCount, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
+                        setProgress(progress, TasksCount, subTasksCount, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
                         
                     }
                 } while ((TasksAreRunning || isStarting) && !isStopped);
@@ -233,6 +219,15 @@ namespace ipScan.Classes.Main
             Console.WriteLine("Усі задачі зупинено");
             startButtonEnable(true);
             stopButtonEnable(false);
-        }        
+        }
+
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
+        public void Stop()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

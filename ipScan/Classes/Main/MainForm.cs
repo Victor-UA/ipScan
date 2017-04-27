@@ -20,9 +20,9 @@ namespace ipScan.Classes.Main
     public partial class MainForm : Form
     {
         private List<Task> myTasks { get; set; }
-        private List<SearchTask> mySearchTasks { get; set; }
+        private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
-        private checkIPSearchTask checkTasks { get; set; }
+        private CheckSearchTask<IPInfo, IPAddress> checkTasks { get; set; }
         private bool _resultIsUpdatable = true;
         private bool resultIsUpdatable
         {
@@ -317,9 +317,9 @@ namespace ipScan.Classes.Main
                 }
                 
                 myTasks = new List<Task>();//[taskCount];
-                mySearchTasks = new List<SearchTask>();//[taskCount];
+                mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
 
-                checkTasks = new checkIPSearchTask(
+                checkTasks = new CheckSearchTask<IPInfo, IPAddress>(
                     myTasks,
                     mySearchTasks,
                     StartButtonEnable,
@@ -336,7 +336,7 @@ namespace ipScan.Classes.Main
                 for (int i = 0; i < taskCount; i++)
                 {
                     int count = i == taskCount - 1 ? ipList.Count - range * i : range;
-                    mySearchTasks.Add(new SearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
+                    mySearchTasks.Add(new IPSearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
                 } 

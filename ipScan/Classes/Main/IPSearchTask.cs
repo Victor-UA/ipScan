@@ -1,18 +1,116 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
 using ipScan.Base;
 using ipScan.Classes.IP;
 
 namespace ipScan.Classes.Main
 {
-    class SearchTask
-    {        
+    class IPSearchTask : SearchTask<IPInfo, IPAddress>
+    {
+
+        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
+
+        protected override void Search()
+        {
+            Console.WriteLine(taskId + " is started");
+            bool waiting4CheckTasks = false;
+            int checkTasksLoopTimeMax = 60;
+            int sleepTime = 100;
+            Progress.Add(index, currentPosition);
+            if (!wasStopped)
+            {
+                while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
+                {
+                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.lastTime;
+                    if (checkTasksLoopTime.TotalSeconds > checkTasksLoopTimeMax)
+                    {
+                        if (!waiting4CheckTasks)
+                        {
+                            Console.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
+                            waiting4CheckTasks = true;
+                        }
+                        sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
+                        if (sleepTime > 1000)
+                        {
+                            sleepTime = 1000;
+                        }
+                    }
+                    else
+                    {
+                        if (waiting4CheckTasks)
+                        {
+                            waiting4CheckTasks = false;
+                            Console.WriteLine(taskId.ToString() + " resumed its work");
+                        }
+                        sleepTime = 100;
+                    }
+
+                    if (isPaused || waiting4CheckTasks)
+                    {
+                        Thread.Sleep(sleepTime);
+                    }
+                    else
+                    {
+
+                        IPAddress address = ipList[currentPosition];
+                        PingReply reply = PingHost(address);
+                        IPInfo ipInfo = new IPInfo(address);
+
+                        if (reply != null && reply.Status == IPStatus.Success)
+                        {
+                            ipInfo.RoundtripTime = reply.RoundtripTime;
+                            ipInfo.PropertyBeforeChanged += TSub_BeforeChanged;
+                            ipInfo.PropertyAfterChanged += TSub_AfterChanged;
+                            ipInfo.setHostNameAsync();
+                            buffer.AddLine(ipInfo);
+                        }
+
+                        progress++;
+                        currentPosition++;
+                        Progress[index] = currentPosition;
+
+                    }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        Stop();
+                    }
+                }
+            }
+            isRunning = false;
+            Console.WriteLine(taskId + " is stopped");
+        }        
+
+        private PingReply PingHost(IPAddress Address)
+        {
+            //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp
+            Ping pinger = new Ping();
+            PingReply reply = null;
+            try
+            {
+                reply = pinger.Send(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true));
+            }
+            catch (PingException)
+            {
+                // Discard PingExceptions and return false;
+            }
+            return reply;
+        }
+
+        public override void Stop()
+        {
+            foreach (IPInfo item in buffer.Buffer)
+            {
+                item.StopLooking4HostNames(null);
+            }
+            wasStopped = true;
+            isRunning = false;
+        }
+
+        /*
         public bool isRunning { get; private set; }        
         public bool wasStopped { get; private set; }
         public CancellationToken cancellationToken { get; private set; }
@@ -47,7 +145,7 @@ namespace ipScan.Classes.Main
         private PingOptions options = new PingOptions(50, true);
         private AutoResetEvent reset = new AutoResetEvent(false);
 
-        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkIPSearchTask CheckTasks)
+        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkIPSearchTask CheckTasks)
         {
             buffer = new BufferedResult<IPInfo>();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
@@ -202,5 +300,6 @@ namespace ipScan.Classes.Main
         {
             isPaused = IsPaused;
         }
+        */
     }
 }
