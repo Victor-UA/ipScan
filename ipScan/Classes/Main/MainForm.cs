@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ipScan.Base;
+using ipScan.Base.Grid;
 using ipScan.Classes.Grid;
 using ipScan.Classes.IP;
 using ipScan.Classes.Main.Grid;

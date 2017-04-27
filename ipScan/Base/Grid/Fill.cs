@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using ipScan.Classes.Grid;
 using ipScan.Classes.IP;
 
-namespace ipScan.Classes.Grid
+namespace ipScan.Base.Grid
 {
     static class Fill
     {

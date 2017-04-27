@@ -56,7 +56,7 @@
   <ItemGroup>
     <Compile Include="Base\checkIPSearchTask.cs" />
     <Compile Include="Base\EventedList.cs" />
-    <Compile Include="Classes\Grid\Fill.cs" />
+    <Compile Include="Base\Grid\Fill.cs" />
     <Compile Include="Classes\Host\Grid\GridCellController.cs" />
     <Compile Include="Classes\Host\HostForm.cs">
       <SubType>Form</SubType>
@@ -69,7 +69,7 @@
     <Compile Include="Classes\Main\checkIPSearchTask.cs" />
     <Compile Include="Classes\IP\IPAddressComparer.cs" />
     <Compile Include="Classes\Main\Grid\GridCellController.cs" />
-    <Compile Include="Classes\Grid\RowTag.cs" />
+    <Compile Include="Base\Grid\RowTag.cs" />
     <Compile Include="Classes\IP\IPInfo.cs" />
     <Compile Include="Classes\IP\IPInfoComparer.cs" />
     <Compile Include="Classes\IP\ListIPInfo.cs" />
