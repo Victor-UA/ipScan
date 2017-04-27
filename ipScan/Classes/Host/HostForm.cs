@@ -18,13 +18,16 @@ namespace ipScan.Classes.Host
         public HostForm(IPInfo IPInfo)
         {
             InitializeComponent();
-            ipInfo = IPInfo;            
+            ipInfo = IPInfo;
+            
             Fill.GridFill(SG_HostOpenPorts, ipInfo.HostPorts, 
                 (object item, Color color) =>
                 {
                     return new GridCellController(item, Color.LightBlue);
                 }, 
                 new List<string>() { "Ports", "Protocol" });
+            
+            //Fill.GridFill(SG_HostOpenPorts, ipInfo.HostPorts, new GridCellController(ipInfo, Color.LightBlue), new List<string>() { "Ports", "Protocol" });
 
         }        
 
@@ -100,7 +103,7 @@ namespace ipScan.Classes.Host
             }
             else
             {
-                Fill.GridFill(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol" });
+                Fill.GridFill<int>(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol" });
                 ipInfo.ScanHostPorts();
             }
         }

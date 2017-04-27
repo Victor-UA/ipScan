@@ -20,14 +20,14 @@ namespace ipScan.Classes.Grid
             return cell;
         }
         
-        public static void GridFill(
+        public static void GridFill<T>(
             SourceGrid.Grid grid, 
-            object List,
-            Func<object, Color, SourceGrid.Cells.Controllers.IController> newCellController = null, 
+            List<T> List,
+            Func<T, Color, SourceGrid.Cells.Controllers.IController> newCellController = null,                         
             List<string> Fields = null)
         {
             grid.Columns.Clear();
-            grid.Rows.Clear();
+            grid.Rows.Clear(); 
 
             List<string> fields = Fields == null ?
                 new List<string>() { "Port" } :
@@ -44,12 +44,11 @@ namespace ipScan.Classes.Grid
 
             //Data filling
             if (List != null)
-            {
-                List<object> list = List as List<object>;
-                for (int i = 0; i < list.Count; i++)
+            {                
+                for (int i = 0; i < List.Count; i++)
                 {
                     grid.Rows.Insert(i + 1);
-                    object row = list[i];
+                    T row = List[i];
                     try
                     {
                         grid.Rows[grid.RowsCount - 1].Tag = new RowTag(i, row);
@@ -61,7 +60,6 @@ namespace ipScan.Classes.Grid
                     }
                     
                     SourceGrid.Cells.Controllers.IController CellController = newCellController == null ? null : newCellController(row, Color.LightBlue);
-
                     grid[grid.RowsCount - 1, 0] = newCell(row, CellController);                    
                 }
             }
@@ -69,54 +67,37 @@ namespace ipScan.Classes.Grid
         }        
 
 
-        public static void GridAddRows(
+        public static void GridAddRows<T>(
             SourceGrid.Grid grid,
-            object List,
-            Func<object, Color, SourceGrid.Cells.Controllers.IController> newCellController = null)
+            List<T> List, 
+            Func<T, Color, SourceGrid.Cells.Controllers.IController> newCellController = null)
         {
             if (List != null)
-            {
-                List<object> list = List as List<object>;
+            {                
                 int index = grid.RowsCount;
-                for (int i = 0; i < list.Count; i++)
+                for (int i = 0; i < List.Count; i++)
                 {
-                    GridInsertRow(grid, list[i], newCellController);
+                    GridInsertRow(grid, List[i], newCellController);
                 }
             }
             grid.AutoSizeCells();
         }
 
-        public static void GridUpdateOrInsertRows(
+        public static void GridUpdateOrInsertRows<T>(
             SourceGrid.Grid grid,
-            object List,
-            Func<object, Color, SourceGrid.Cells.Controllers.IController> newCellController = null)
+            List<T> List,
+            Func<T, Color, SourceGrid.Cells.Controllers.IController> newCellController = null)
         {
             if (List != null)
-            {                
-                if (List.GetType().Name == ListIPInfo.ClassName)
+            {
+                for (int i = 0; i < List.Count; i++)
                 {
-                    ListIPInfo list = List as ListIPInfo;
-                    for (int i = 0; i < list.Count; i++)
+                    T item = List[i];
+                    if (!GridSeekRowAndUpdate(grid, item))
                     {
-                        IPInfo item = list[i];
-                        if (!GridSeekRowAndUpdate(grid, item))
-                        {
-                            GridInsertRow(grid, item, newCellController);
-                        }
+                        GridInsertRow(grid, item, newCellController);
                     }
-                }
-                else
-                {
-                    List<object> list = List as List<object>;
-                    for (int i = 0; i < list.Count; i++)
-                    {
-                        object item = list[i];
-                        if (!GridSeekRowAndUpdate(grid, item))
-                        {
-                            GridInsertRow(grid, item, newCellController);
-                        }
-                    }
-                }                                
+                }                
             }
             grid.AutoSizeCells();
         }
@@ -138,23 +119,25 @@ namespace ipScan.Classes.Grid
 
         public static void GridUpdateRow(SourceGrid.Grid grid, object item, int Index)
         {
-            if (item.GetType().Name == IPInfo.ClassName)
+            if (item.GetType() == typeof(IPInfo))
             {
                 IPInfo ipInfo = item as IPInfo;
                 grid[Index, 0].Value = ipInfo.IPAddress;
                 grid[Index, 1].Value = ipInfo.RoundtripTime;
                 grid[Index, 2].Value = ipInfo.HostName;
+                return;
             }
-            else
+            
+
             {
                 grid[Index, 0].Value = item;
             }
         }
 
-        public static void GridInsertRow(
+        public static void GridInsertRow<T>(
             SourceGrid.Grid grid,
-            object item, 
-            Func<object, Color, SourceGrid.Cells.Controllers.IController> newCellController = null,
+            T item, 
+            Func<T, Color, SourceGrid.Cells.Controllers.IController> newCellController = null,
             int Index = -1)
         {
             int index = Index < 0 ? grid.RowsCount : Index;
@@ -162,17 +145,17 @@ namespace ipScan.Classes.Grid
 
             RowTag rowTag = new RowTag(item);
             grid.Rows[index].Tag = rowTag;
-            if (item.GetType().Name == IPInfo.ClassName)
+
+            if (item.GetType() == typeof(IPInfo))
             {
                 IPInfo ipInfo = item as IPInfo;
-            
-                SourceGrid.Cells.Controllers.IController CellController = newCellController(ipInfo, Color.LightBlue);
-
+                SourceGrid.Cells.Controllers.IController CellController = newCellController(item, Color.LightBlue);
                 grid[index, 0] = newCell(ipInfo.IPAddress, CellController);            
                 grid[index, 1] = newCell(ipInfo.RoundtripTime, CellController);
                 grid[index, 2] = newCell(ipInfo.HostName, CellController);
+                return;
             }
-            else
+
             {
                 SourceGrid.Cells.Controllers.IController CellController = newCellController(item, Color.LightBlue);
                 grid[index, 0] = newCell(item, CellController);

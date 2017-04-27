@@ -5,7 +5,6 @@ namespace ipScan.Classes.IP
 {
     class ListIPInfo : List<IPInfo>
     {
-        public static string ClassName { get; } = "ListIPInfo";
         public ListIPInfo() : base()
         {
         }

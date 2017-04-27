@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using ipScan.Classes;
+using ipScan.Classes.IP;
 
 namespace ipScan.Classes.Main
 {
@@ -16,11 +18,11 @@ namespace ipScan.Classes.Main
         public List<Task> myTasks { get; private set; }
         public List<IPSearchTask>   mySearchTasks { get; private set; }
 
-        private Action<bool>        startButtonEnable { get; set; }
-        private Action<bool>        stopButtonEnable { get; set; }
-        private Action<object>      resultAppendBuffer { get; set; }
-        private BufferResult        bufferResult { get; set; }        
-        private Action<object>      disposeTasks { get; set; }
+        private Action<bool>            startButtonEnable { get; set; }
+        private Action<bool>            stopButtonEnable { get; set; }
+        private Action<object>          resultAppendBuffer { get; set; }
+        private BufferResult<IPInfo>    bufferResult { get; set; }        
+        private Action<object>          disposeTasks { get; set; }
 
         private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
 
@@ -52,7 +54,7 @@ namespace ipScan.Classes.Main
             Action<object> DisposeTasks,
             Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
             int IPListCount,
-            BufferResult BufferResult)
+            BufferResult<IPInfo> BufferResult)
         {
             myTasks = MyTasks;
             mySearchTasks = MySearchTasks;
