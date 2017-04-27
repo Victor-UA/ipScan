@@ -126,10 +126,6 @@ namespace ipScan.Classes.Main
         {
             bufferedResult.AddLine(Line);
         }
-        private void BufferResultAddLines(ListIPInfo Lines)
-        {
-            bufferedResult.AddLines(Lines);
-        }
 
         private void DisposeTasks(object Buffer)
         {
