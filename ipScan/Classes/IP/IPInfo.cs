@@ -30,10 +30,8 @@ namespace ipScan.Classes.IP
                         setHostFormCaption();
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-
-                    throw;
                 }
             }
         }
@@ -46,7 +44,7 @@ namespace ipScan.Classes.IP
         private int waitingForResponses;
         private int maxWaitingForResponses { get; set; } = 200; 
                
-        public EventList<object> HostPorts { get; private set; }
+        public EventedList<object> HostPorts { get; private set; }
         private bool _ScanPortsIsRunning;
         public bool ScanTCPPortsIsRunning
         {
@@ -127,7 +125,7 @@ namespace ipScan.Classes.IP
             Task ScanHostTCPPorts = Task.Run(() =>
             {
                 ScanTCPPortsIsRunning = true;
-                HostPorts = new EventList<object>();
+                HostPorts = new EventedList<object>();
                 HostPorts.onChanged += () => 
                 {
                     HostForm.FillHostOpenPorts();

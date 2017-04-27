@@ -21,7 +21,7 @@ namespace ipScan.Classes.Main
         private Action<bool>            startButtonEnable { get; set; }
         private Action<bool>            stopButtonEnable { get; set; }
         private Action<object>          resultAppendBuffer { get; set; }
-        private BufferResult<IPInfo>    bufferResult { get; set; }        
+        private BufferedResult<IPInfo>    bufferResult { get; set; }        
         private Action<object>          disposeTasks { get; set; }
 
         private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
@@ -54,7 +54,7 @@ namespace ipScan.Classes.Main
             Action<object> DisposeTasks,
             Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
             int IPListCount,
-            BufferResult<IPInfo> BufferResult)
+            BufferedResult<IPInfo> BufferResult)
         {
             myTasks = MyTasks;
             mySearchTasks = MySearchTasks;

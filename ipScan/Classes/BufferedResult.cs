@@ -5,11 +5,11 @@ using ipScan.Classes.IP;
 
 namespace ipScan.Classes
 {
-    class BufferResult<T>
+    class BufferedResult<T>
     {
         public List<T> Buffer { get; private set; }
         public int Index { get; private set; }
-        public BufferResult()
+        public BufferedResult()
         {
             Buffer = new List<T>();
         }

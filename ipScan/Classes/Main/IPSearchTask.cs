@@ -24,7 +24,7 @@ namespace ipScan.Classes.Main
             set { _pauseTime = value >= 0 ? value : 0; }
         }
         private checkIPSearchTask checkTasks { get; set; }
-        public BufferResult buffer { get; private set; }        
+        public BufferedResult<IPInfo> buffer { get; private set; }        
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
         public Dictionary<int, int> Progress { get; private set; }
         public List<IPAddress> ipList { get; set; }
@@ -49,7 +49,7 @@ namespace ipScan.Classes.Main
 
         public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkIPSearchTask CheckTasks)
         {
-            buffer = new BufferResult();
+            buffer = new BufferedResult<IPInfo>();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();
             Progress = new Dictionary<int, int>();
             taskId = TaskId;

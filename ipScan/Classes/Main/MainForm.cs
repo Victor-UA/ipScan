@@ -34,7 +34,7 @@ namespace ipScan.Classes.Main
                 _resultIsUpdatable = value;
                 try
                 {
-                    if (bufferResult.Buffer.Count() != SG_Result.RowsCount - 1)
+                    if (bufferedResult.Buffer.Count() != SG_Result.RowsCount - 1)
                     {
                         ResultFillFromBuffer(null);
                     }
@@ -69,7 +69,7 @@ namespace ipScan.Classes.Main
         private List<IPAddress> ipList { get; set; }
         private IPAddress firstIpAddress;
         private IPAddress lastIpAddress;
-        private BufferResult bufferResult { get; set; }
+        private BufferedResult<IPInfo> bufferedResult { get; set; }
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }        
 
@@ -97,22 +97,22 @@ namespace ipScan.Classes.Main
             {
                 if (InvokeRequired)
                 {
-                    Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferResult });
+                    Invoke(new Action<object>(ResultFillFromBuffer), new object[] { bufferedResult });
                     return;
                 }
                 try
                 {                    
-                    Fill.GridUpdateOrInsertRows(SG_Result, bufferResult.getAllBuffer(),
-                        (object item, Color color) =>
+                    Fill.GridUpdateOrInsertRows(SG_Result, bufferedResult.getAllBuffer(),
+                        (IPInfo item, Color color) =>
                         {
-                            return new GridCellController(item as IPInfo, Color.LightBlue);
+                            return new GridCellController(item, Color.LightBlue);
                         }
                     );
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace + Environment.NewLine);
-                    Debug.WriteLine(bufferResult.getBufferTotalCount.ToString());
+                    Debug.WriteLine(bufferedResult.getBufferTotalCount.ToString());
                 }
 
             }
@@ -124,11 +124,11 @@ namespace ipScan.Classes.Main
 
         private void BufferResultAddLine(IPInfo Line)
         {
-            bufferResult.AddLine(Line);
+            bufferedResult.AddLine(Line);
         }
         private void BufferResultAddLines(ListIPInfo Lines)
         {
-            bufferResult.AddLines(Lines);
+            bufferedResult.AddLines(Lines);
         }
 
         private void DisposeTasks(object Buffer)
@@ -153,7 +153,7 @@ namespace ipScan.Classes.Main
             {
                 toolStripProgressBar1.Value = Progress;
                 label_Progress.Text = Progress.ToString() + @"\" + toolStripProgressBar1.Maximum.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
-                tSSL_Found.Text = bufferResult.Buffer.Count().ToString();
+                tSSL_Found.Text = bufferedResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
@@ -210,7 +210,7 @@ namespace ipScan.Classes.Main
                 pen = new Pen(Color.Lime);
                 brush = Brushes.Lime;
                 int rectWidth = bmp.Width / ipList.Count;
-                foreach (IPInfo item in bufferResult.getAllBuffer())
+                foreach (IPInfo item in bufferedResult.getAllBuffer())
                 {
                     int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
                     int x = (int)((double)index * bmp.Width / ipList.Count);
@@ -289,7 +289,7 @@ namespace ipScan.Classes.Main
                 StopButtonEnable(true);
                 button_Stop.Focus();
 
-                bufferResult = new BufferResult();
+                bufferedResult = new BufferedResult<IPInfo>();
                 Fill.GridFill(SG_Result, null as ListIPInfo, null, new List<string>() { "IP Address", "TTL", "Host Name" });
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
@@ -327,7 +327,7 @@ namespace ipScan.Classes.Main
                     DisposeTasks,
                     SetProgress,
                     ipList.Count,
-                    bufferResult);
+                    bufferedResult);
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
                 

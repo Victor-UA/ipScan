@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ipScan.Classes
 {
-    public class EventList<T> : List<T>
+    public class EventedList<T> : List<T>
     {
         public event ListChangedEventDelegate onChanged;
         public delegate void ListChangedEventDelegate();
