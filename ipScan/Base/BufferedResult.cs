@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using ipScan.Classes.IP;
 
-namespace ipScan.Classes
+namespace ipScan.Base
 {
     class BufferedResult<T>
     {

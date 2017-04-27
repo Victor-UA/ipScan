@@ -5,12 +5,11 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using ipScan.Base;
 using ipScan.Classes.IP;
 
-namespace ipScan.Classes.Main
+namespace ipScan.Base
 {
-    class checkIPSearchTask
+    class checkSearchTask
     {
         private static readonly object lockObject = new object();
         private int                 OkRemaind { get; } = 4;
@@ -45,7 +44,7 @@ namespace ipScan.Classes.Main
             isPaused = !isPaused;
         }
 
-        public checkIPSearchTask(
+        public checkSearchTask(
             List<Task> MyTasks,
             List<SearchTask> MySearchTasks,
             Action<bool> StartButtonEnable,

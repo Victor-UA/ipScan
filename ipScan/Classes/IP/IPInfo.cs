@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using ipScan.Classes.Grid;
+using ipScan.Base;
 using ipScan.Classes.Host;
 
 namespace ipScan.Classes.IP

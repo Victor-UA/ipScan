@@ -6,10 +6,9 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
-using ipScan.Base;
 using ipScan.Classes.IP;
 
-namespace ipScan.Classes.Main
+namespace ipScan.Base
 {
     class SearchTask
     {        
@@ -23,7 +22,7 @@ namespace ipScan.Classes.Main
             get { return _pauseTime; }
             set { _pauseTime = value >= 0 ? value : 0; }
         }
-        private checkIPSearchTask checkTasks { get; set; }
+        private checkSearchTask checkTasks { get; set; }
         public BufferedResult<IPInfo> buffer { get; private set; }        
         public Dictionary<IPAddress, bool> isLooking4HostNames { get; private set; }
         public Dictionary<int, int> Progress { get; private set; }
@@ -47,7 +46,7 @@ namespace ipScan.Classes.Main
         private PingOptions options = new PingOptions(50, true);
         private AutoResetEvent reset = new AutoResetEvent(false);
 
-        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkIPSearchTask CheckTasks)
+        public SearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, checkSearchTask CheckTasks)
         {
             buffer = new BufferedResult<IPInfo>();
             isLooking4HostNames = new Dictionary<IPAddress, bool>();

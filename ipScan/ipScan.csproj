@@ -54,7 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\EventedList.cs" />
+    <Compile Include="Base\checkIPSearchTask.cs" />
+    <Compile Include="Base\EventedList.cs" />
     <Compile Include="Classes\Grid\Fill.cs" />
     <Compile Include="Classes\Host\Grid\GridCellController.cs" />
     <Compile Include="Classes\Host\HostForm.cs">
@@ -63,7 +64,8 @@
     <Compile Include="Classes\Host\HostForm.Designer.cs">
       <DependentUpon>HostForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Classes\BufferedResult.cs" />
+    <Compile Include="Base\BufferedResult.cs" />
+    <Compile Include="Base\IPSearchTask.cs" />
     <Compile Include="Classes\Main\checkIPSearchTask.cs" />
     <Compile Include="Classes\IP\IPAddressComparer.cs" />
     <Compile Include="Classes\Main\Grid\GridCellController.cs" />
