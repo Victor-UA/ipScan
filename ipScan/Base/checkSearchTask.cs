@@ -9,6 +9,8 @@ namespace ipScan.Base
 {
     class CheckSearchTask<T, TSub> : ICheckSearchTask
     {
+        private bool isRunning { get; set; }
+        private bool wasStopped { get; set; }
         private static readonly object          lockObject = new object();
         private int                             OkRemaind { get; } = 4;
 
@@ -221,13 +223,17 @@ namespace ipScan.Base
             stopButtonEnable(false);
         }
 
-        public void Start()
-        {
-            throw new NotImplementedException();
-        }
         public void Stop()
         {
-            throw new NotImplementedException();
+            isStopped = true;
+        }
+        public void Pause()
+        {
+            isPaused = !isPaused;
+        }        
+        public void Pause(bool IsPaused)
+        {
+            isPaused = IsPaused;
         }
     }
 }

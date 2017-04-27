@@ -53,22 +53,22 @@ namespace ipScan.Base
             progress = 0;
         }
 
-        protected void TSub_BeforeChanged(TSub sender, PropertyChangedEventArgs e)
+        protected void TSub_BeforeChanged(object sender, PropertyChangedEventArgs e)
         {
             try
             {
-                SubTaskStates.Add(sender, true);
+                SubTaskStates.Add((TSub)sender, true);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.StackTrace);
             }
         }
-        protected void TSub_AfterChanged(TSub sender, PropertyChangedEventArgs e)
+        protected void TSub_AfterChanged(object sender, PropertyChangedEventArgs e)
         {
             try
             {
-                SubTaskStates[sender] = false;
+                SubTaskStates[(TSub)sender] = false;
             }
             catch (Exception) { }
         }

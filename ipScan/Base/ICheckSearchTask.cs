@@ -14,7 +14,9 @@ namespace ipScan.Base
         DateTime lastTime { get; }
 
         void Check();
-        void Start();
         void Stop();
+        void Pause();
+        void Pause(bool IsPaused);
+        
     }
 }
