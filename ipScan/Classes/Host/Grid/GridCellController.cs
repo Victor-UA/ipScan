@@ -8,7 +8,7 @@ namespace ipScan.Classes.Host.Grid
 {
     public class GridCellController : GridCellController<PortInfo>
     {
-        public GridCellController(PortInfo Item, Color BackColor) : base(Item, BackColor)
+        public GridCellController(PortInfo Item, Color BackColor) : base(BackColor)
         {
         }
 

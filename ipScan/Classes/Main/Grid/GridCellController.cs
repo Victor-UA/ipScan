@@ -8,14 +8,14 @@ namespace ipScan.Classes.Main.Grid
 {
     public class GridCellController : GridCellController<IPInfo>
     {
-        public GridCellController(IPInfo Item, Color BackColor) : base(Item, BackColor)
+        public GridCellController(IPInfo Item, Color BackColor) : base(BackColor)
         {
         }
 
         public override void OnDoubleClick(CellContext sender, EventArgs e)
         {
             base.OnDoubleClick(sender, e);
-            Item.ShowHostForm();
+            ((sender.Cell as SourceGrid.Cells.Cell).Tag as IPInfo).ShowHostForm();
         }
     }
 }

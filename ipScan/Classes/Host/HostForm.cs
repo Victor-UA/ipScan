@@ -24,7 +24,7 @@ namespace ipScan.Classes.Host
                 {
                     return new GridCellController(item, Color.LightBlue);
                 }, 
-                new List<string>() { "Ports", "Protocol" });
+                new List<string>() { "Ports", "Protocol", "isOpen" });
             
             //Fill.GridFill(SG_HostOpenPorts, ipInfo.HostPorts, new GridCellController(ipInfo, Color.LightBlue), new List<string>() { "Ports", "Protocol" });
 
