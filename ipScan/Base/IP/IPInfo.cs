@@ -138,7 +138,10 @@ namespace ipScan.Base.IP
                     }
                     try
                     {
-                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);                        
+                        Socket socket;
+
+                        socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.ReceiveTimeout = 100;                      
                         socket.BeginConnect(new IPEndPoint(IPAddress, currentHostPort), (IAsyncResult asyncResult) =>
                         {
                             try
@@ -153,7 +156,7 @@ namespace ipScan.Base.IP
                                         Ports.Add(new PortInfo
                                             (
                                                 int.Parse(socketResult.RemoteEndPoint.ToString().Split(':')[1]),
-                                                ProtocolType.Tcp,
+                                                socketResult.ProtocolType,
                                                 true
                                             )
                                         );
