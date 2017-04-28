@@ -5,7 +5,7 @@ using SourceGrid;
 
 namespace ipScan.Base.Grid
 {
-    abstract public class GridCellController<T> : SourceGrid.Cells.Controllers.ControllerBase
+    abstract public class GridCellController : SourceGrid.Cells.Controllers.ControllerBase
     {        
         public SourceGrid.Cells.Views.Cell DefaultView { get; set; }
         public SourceGrid.Cells.Views.Cell MouseEnterView { get; set; }

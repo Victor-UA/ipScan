@@ -6,9 +6,9 @@ using SourceGrid;
 
 namespace ipScan.Classes.Main.Grid
 {
-    public class GridCellController : GridCellController<IPInfo>
+    public class GridCellController : Base.Grid.GridCellController
     {
-        public GridCellController(IPInfo Item, Color BackColor) : base(BackColor)
+        public GridCellController(Color BackColor) : base(BackColor)
         {
         }
 

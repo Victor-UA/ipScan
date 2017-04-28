@@ -26,7 +26,7 @@ namespace ipScan.Base.Grid
         public static void GridFill<T>(
             SourceGrid.Grid grid, 
             List<T> List,
-            Func<T, Color, GridCellController<T>> newCellController = null,                         
+            Func<T, Color, GridCellController> newCellController = null,                         
             List<string> Fields = null)
         {
             grid.Columns.Clear();
@@ -53,7 +53,7 @@ namespace ipScan.Base.Grid
         public static void GridAddRows<T>(
             SourceGrid.Grid grid,
             List<T> List, 
-            Func<T, Color, GridCellController<T>> newCellController = null)
+            Func<T, Color, GridCellController> newCellController = null)
         {
             if (List != null)
             {                
@@ -69,7 +69,7 @@ namespace ipScan.Base.Grid
         public static void GridUpdateOrInsertRows<T>(
             SourceGrid.Grid grid,
             List<T> List,
-            Func<T, Color, GridCellController<T>> newCellController = null)
+            Func<T, Color, GridCellController> newCellController = null)
         {
             if (List != null)
             {
@@ -136,7 +136,7 @@ namespace ipScan.Base.Grid
         public static void GridInsertRow<T>(
             SourceGrid.Grid grid,
             T item, 
-            Func<T, Color, GridCellController<T>> newCellController = null,
+            Func<T, Color, GridCellController> newCellController = null,
             int Index = -1)
         {
             int index = Index < 0 ? grid.RowsCount : Index;

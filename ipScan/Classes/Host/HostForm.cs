@@ -22,7 +22,7 @@ namespace ipScan.Classes.Host
             Fill.GridFill(SG_HostOpenPorts, ipInfo.Ports, 
                 (PortInfo item, Color color) =>
                 {
-                    return new GridCellController(item, Color.LightBlue);
+                    return new Grid.GridCellController(Color.LightBlue);
                 }, 
                 new List<string>() { "Ports", "Protocol", "isOpen" });
             
@@ -46,7 +46,7 @@ namespace ipScan.Classes.Host
                             Fill.GridUpdateOrInsertRows(SG_HostOpenPorts, ipInfo.Ports,
                                 (PortInfo item, Color color) =>
                                     {
-                                        return new GridCellController(item, Color.LightBlue);
+                                        return new Grid.GridCellController(Color.LightBlue);
                                     }
                             );                            
                         }

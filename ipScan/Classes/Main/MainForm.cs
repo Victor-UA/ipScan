@@ -105,7 +105,7 @@ namespace ipScan.Classes.Main
                     Fill.GridUpdateOrInsertRows(SG_Result, bufferedResult.getAllBuffer(),
                         (IPInfo item, Color color) =>
                         {
-                            return new GridCellController(item, Color.LightBlue);
+                            return new Grid.GridCellController(Color.LightBlue);
                         }
                     );
                 }
