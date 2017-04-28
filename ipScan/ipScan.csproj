@@ -59,6 +59,7 @@
     <Compile Include="Base\CheckSearchTask.cs" />
     <Compile Include="Base\EventedList.cs" />
     <Compile Include="Base\Grid\Fill.cs" />
+    <Compile Include="Base\IP\PortInfo.cs" />
     <Compile Include="Base\ISearchTask.cs" />
     <Compile Include="Classes\Host\Grid\GridCellController.cs" />
     <Compile Include="Classes\Host\HostForm.cs">

@@ -47,7 +47,7 @@
             this.SG_HostOpenPorts.Name = "SG_HostOpenPorts";
             this.SG_HostOpenPorts.OptimizeMode = SourceGrid.CellOptimizeMode.ForRows;
             this.SG_HostOpenPorts.SelectionMode = SourceGrid.GridSelectionMode.Row;
-            this.SG_HostOpenPorts.Size = new System.Drawing.Size(120, 446);
+            this.SG_HostOpenPorts.Size = new System.Drawing.Size(200, 446);
             this.SG_HostOpenPorts.TabIndex = 0;
             this.SG_HostOpenPorts.TabStop = true;
             this.SG_HostOpenPorts.ToolTipText = "";
@@ -55,7 +55,7 @@
             // btn_ScanHostPorts
             // 
             this.btn_ScanHostPorts.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btn_ScanHostPorts.Location = new System.Drawing.Point(32, 477);
+            this.btn_ScanHostPorts.Location = new System.Drawing.Point(67, 477);
             this.btn_ScanHostPorts.Name = "btn_ScanHostPorts";
             this.btn_ScanHostPorts.Size = new System.Drawing.Size(75, 23);
             this.btn_ScanHostPorts.TabIndex = 4;

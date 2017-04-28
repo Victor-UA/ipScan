@@ -18,9 +18,9 @@ namespace ipScan.Classes.Host
         {
             InitializeComponent();
             ipInfo = IPInfo;
-            
-            Fill.GridFill(SG_HostOpenPorts, ipInfo.HostPorts, 
-                (object item, Color color) =>
+
+            Fill.GridFill(SG_HostOpenPorts, ipInfo.Ports, 
+                (PortInfo item, Color color) =>
                 {
                     return new GridCellController(item, Color.LightBlue);
                 }, 
@@ -43,8 +43,8 @@ namespace ipScan.Classes.Host
                     {
                         try
                         {
-                            Fill.GridUpdateOrInsertRows(SG_HostOpenPorts, ipInfo.HostPorts,
-                                (object item, Color color) =>
+                            Fill.GridUpdateOrInsertRows(SG_HostOpenPorts, ipInfo.Ports,
+                                (PortInfo item, Color color) =>
                                     {
                                         return new GridCellController(item, Color.LightBlue);
                                     }
@@ -102,7 +102,7 @@ namespace ipScan.Classes.Host
             }
             else
             {
-                Fill.GridFill<int>(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol" });
+                Fill.GridFill<int>(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol", "isOpen" });
                 ipInfo.ScanHostPorts();
             }
         }

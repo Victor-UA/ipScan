@@ -120,17 +120,47 @@ namespace ipScan.Base.Grid
 
         public static void GridUpdateRow(SourceGrid.Grid grid, object item, int Index)
         {
-            if (item.GetType() == typeof(IPInfo))
+            ((RowTag)grid.Rows[Index].Tag).Key = item;
+
+
+            Type itemType = item.GetType();
+            if (itemType == typeof(IPInfo))
             {
                 IPInfo ipInfo = item as IPInfo;
                 grid[Index, 0].Value = ipInfo.IPAddress;
                 grid[Index, 1].Value = ipInfo.RoundtripTime;
                 grid[Index, 2].Value = ipInfo.HostName;
+                try
+                {
+                    Classes.Main.Grid.GridCellController controller = grid[Index, 0].Controller.FindController(typeof(Classes.Main.Grid.GridCellController)) as Classes.Main.Grid.GridCellController;
+                    controller.Item = ipInfo;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.StackTrace);
+                }
                 return;
             }
-            
 
+            if (itemType == typeof(PortInfo))
             {
+                PortInfo portInfo = item as PortInfo;
+                grid[Index, 0].Value = portInfo.Port;
+                grid[Index, 1].Value = portInfo.ProtocolType;
+                grid[Index, 2].Value = portInfo.isOpen;
+                try
+                {
+                    Classes.Host.Grid.GridCellController controller = grid[Index, 0].Controller.FindController(typeof(Classes.Host.Grid.GridCellController)) as Classes.Host.Grid.GridCellController;
+                    controller.Item = portInfo;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.StackTrace);
+                }
+                return;
+            }
+
+            {                
                 grid[Index, 0].Value = item;
             }
         }
@@ -147,13 +177,23 @@ namespace ipScan.Base.Grid
             RowTag rowTag = new RowTag(item);
             grid.Rows[index].Tag = rowTag;
 
-            if (item.GetType() == typeof(IPInfo))
+            Type itemType = item.GetType();
+            if (itemType == typeof(IPInfo))
             {
                 IPInfo ipInfo = item as IPInfo;
                 SourceGrid.Cells.Controllers.IController CellController = newCellController(item, Color.LightBlue);
                 grid[index, 0] = newCell(ipInfo.IPAddress, CellController);            
                 grid[index, 1] = newCell(ipInfo.RoundtripTime, CellController);
                 grid[index, 2] = newCell(ipInfo.HostName, CellController);
+                return;
+            }
+            if (itemType == typeof(PortInfo))
+            {
+                PortInfo portInfo = item as PortInfo;
+                SourceGrid.Cells.Controllers.IController CellController = newCellController(item, Color.LightBlue);
+                grid[index, 0] = newCell(portInfo.Port, CellController);
+                grid[index, 1] = newCell(portInfo.ProtocolType, CellController);
+                grid[index, 2] = newCell(portInfo.isOpen, CellController);
                 return;
             }
 

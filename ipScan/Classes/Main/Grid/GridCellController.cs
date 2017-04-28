@@ -14,7 +14,7 @@ namespace ipScan.Classes.Main.Grid
 
         public override void OnDoubleClick(CellContext sender, EventArgs e)
         {
-            base.OnDoubleClick(sender, e);                        
+            base.OnDoubleClick(sender, e);
             Item.ShowHostForm();
         }
     }

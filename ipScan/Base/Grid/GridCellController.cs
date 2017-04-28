@@ -7,10 +7,11 @@ namespace ipScan.Base.Grid
 {
     abstract public class GridCellController<T> : SourceGrid.Cells.Controllers.ControllerBase
     {
-        protected SourceGrid.Cells.Views.Cell MouseEnterView = new SourceGrid.Cells.Views.Cell();
-        protected SourceGrid.Cells.Views.Cell MouseLeaveView = new SourceGrid.Cells.Views.Cell();
 
-        public T Item { get; private set; }
+        public T Item { get; set; }
+
+        protected SourceGrid.Cells.Views.Cell MouseEnterView = new SourceGrid.Cells.Views.Cell();
+        protected SourceGrid.Cells.Views.Cell MouseLeaveView = new SourceGrid.Cells.Views.Cell();        
 
         public GridCellController(T Item, Color BackColor)
         {
