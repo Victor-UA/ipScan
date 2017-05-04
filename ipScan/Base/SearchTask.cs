@@ -10,14 +10,14 @@ namespace ipScan.Base
     {        
         public bool                         isRunning { get; protected set; }        
         public bool                         wasStopped { get; protected set; }
-        protected CancellationToken           cancellationToken { get; set; }
+        protected CancellationToken         cancellationToken { get; set; }
         public int                          taskId { get; private set; }
         
-        protected ICheckSearchTask            checkTasks { get; set; }
+        protected ICheckSearchTask          checkTasks { get; set; }
         public BufferedResult<T>            buffer { get; private set; }        
         public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
         public Dictionary<int, int>         Progress { get; private set; }
-        protected List<TSub>                ipList { get; set; }
+        protected List<TSub>                mainList { get; set; }
         public int                          index { get; private set; }
         public int                          currentPosition { get; protected set; }
         public int                          count { get; set; }
@@ -29,7 +29,7 @@ namespace ipScan.Base
             }
         }
         public int                          progress { get; protected set; }
-        protected int                         timeOut { get; set; }
+        protected int                       timeOut { get; set; }
         public bool                         isPaused { get; private set; }
         private Action<T>                   bufferResultAddLine { get; set; }        
 
@@ -40,7 +40,7 @@ namespace ipScan.Base
             Progress = new Dictionary<int, int>();
             taskId = TaskId;            
             checkTasks = CheckTasks;
-            this.ipList = TList;
+            this.mainList = TList;
             index = Index;
             count = Count;
             currentPosition = index;

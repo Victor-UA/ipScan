@@ -1,6 +1,6 @@
 ﻿namespace ipScan.Classes.Main
 {
-    partial class MainForm
+    partial class IPScanForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IPScanForm));
             this.textBox_IPFirst = new System.Windows.Forms.TextBox();
             this.textBox_IPLast = new System.Windows.Forms.TextBox();
             this.textBox_ThreadCount = new System.Windows.Forms.TextBox();

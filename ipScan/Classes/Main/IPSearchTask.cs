@@ -23,7 +23,7 @@ namespace ipScan.Classes.Main
             Progress.Add(index, currentPosition);
             if (!wasStopped)
             {
-                while (isRunning && currentPosition < index + count && currentPosition < ipList.Count)
+                while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.lastTime;
                     if (checkTasksLoopTime.TotalSeconds > checkTasksLoopTimeMax)
@@ -56,7 +56,7 @@ namespace ipScan.Classes.Main
                     else
                     {
 
-                        IPAddress address = ipList[currentPosition];
+                        IPAddress address = mainList[currentPosition];
                         PingReply reply = PingHost(address);
                         IPInfo ipInfo = new IPInfo(address);
 

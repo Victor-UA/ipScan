@@ -16,7 +16,7 @@ using ipScan.Classes.Main.Grid;
 
 namespace ipScan.Classes.Main
 {
-    public partial class MainForm : Form
+    public partial class IPScanForm : Form
     {
         private List<Task> myTasks { get; set; }
         private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
@@ -73,7 +73,7 @@ namespace ipScan.Classes.Main
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }        
 
-        public MainForm()
+        public IPScanForm()
         {
             InitializeComponent();
             button_Pause.Tag = false;
