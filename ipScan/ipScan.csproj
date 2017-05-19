@@ -37,6 +37,9 @@
     <ApplicationIcon>ip_icon32.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RawSocketPing">
+      <HintPath>..\..\..\Projects\RawSocketPing\RawSocketPing\bin\Debug\RawSocketPing.dll</HintPath>
+    </Reference>
     <Reference Include="SourceGrid, Version=4.40.4580.29115, Culture=neutral, PublicKeyToken=df6f5e538749e85d, processorArchitecture=MSIL">
       <HintPath>..\packages\SourceGrid.4.4.0\lib\net35\SourceGrid.dll</HintPath>
       <Private>True</Private>
@@ -59,7 +62,12 @@
     <Compile Include="Base\CheckSearchTask.cs" />
     <Compile Include="Base\EventedList.cs" />
     <Compile Include="Base\Grid\Fill.cs" />
+    <Compile Include="Base\IP\ICMP.cs" />
+    <Compile Include="Base\IP\IPTools.cs" />
+    <Compile Include="Base\IP\PingBySocketReply.cs" />
     <Compile Include="Base\IP\PortInfo.cs" />
+    <Compile Include="Base\IP\ProtocolHeaderDefinition\Protocol.cs" />
+    <Compile Include="Base\IP\RawSocketPing.cs" />
     <Compile Include="Base\ISearchTask.cs" />
     <Compile Include="Classes\Host\Grid\GridCellController.cs" />
     <Compile Include="Classes\Host\HostForm.cs">
@@ -118,6 +126,18 @@
   <ItemGroup>
     <Content Include="ip_icon32.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IASRadiusLib">
+      <Guid>{6BC09890-0CE6-11D1-BAAE-00C04FC2E20D}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

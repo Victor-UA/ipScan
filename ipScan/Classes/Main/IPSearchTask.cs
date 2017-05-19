@@ -5,16 +5,19 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using ipScan.Base;
 using ipScan.Base.IP;
+using System.Net.Sockets;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ipScan.Classes.Main
 {
     class IPSearchTask : SearchTask<IPInfo, IPAddress>
     {
-
+        
         public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
 
-        protected override void Search()
+        protected override async void Search()
         {
             Console.WriteLine(taskId + " is started");
             bool waiting4CheckTasks = false;
@@ -57,15 +60,40 @@ namespace ipScan.Classes.Main
                     {
 
                         IPAddress address = mainList[currentPosition];
-                        PingReply reply = PingHost(address);
-                        IPInfo ipInfo = new IPInfo(address);
+                        
+                        PingReply reply = null;
+                        Thread pingHostTask = new Thread(() => { reply = PingHost(address); });
+                        pingHostTask.Start();
+
+                        if (pingHostTask.Join(timeOut))
+                        {                            
+                            pingHostTask.Abort();
+                        }
+
+                        //PingReply reply = PingHost(address);
+
+                        //PingBySocketReply reply = IPTools.PingHostBySocket(address);
+                        /*
+                        List<RawSocketPing.PingReply> replies = new RawSocketPing.Ping(
+                            address, 128, 128, 1, pingReceiveTimeout : timeOut).DoPing();
+                        RawSocketPing.PingReply reply = null;
+                        try
+                        {
+                            if (replies.Count > 0)
+                                reply = replies[0];
+                        }
+                        catch (Exception) { }
+                        */
 
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
-                            ipInfo.RoundtripTime = reply.RoundtripTime;
+                            IPInfo ipInfo = new IPInfo(address)
+                            {
+                                RoundtripTime = reply.RoundtripTime
+                            };
+                            ipInfo.setHostNameAsync();
                             ipInfo.PropertyBeforeChanged += TSub_BeforeChanged;
                             ipInfo.PropertyAfterChanged += TSub_AfterChanged;
-                            ipInfo.setHostNameAsync();
                             buffer.AddLine(ipInfo);
                         }
 
@@ -82,7 +110,25 @@ namespace ipScan.Classes.Main
             }
             isRunning = false;
             Console.WriteLine(taskId + " is stopped");
-        }        
+        }
+
+        private async Task<PingReply> PingHostAsync(IPAddress Address, ManualResetEvent manualResetEvent)
+        {
+            //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp
+            Ping pinger = new Ping();
+            PingReply reply = null;
+            try
+            {
+                reply = await pinger.SendPingAsync(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true));
+                manualResetEvent.Set();
+            }
+            catch (PingException ex)
+            {
+                // Discard PingExceptions and return false;       
+                Debug.WriteLine(ex.StackTrace);
+            }
+            return reply;
+        }
 
         private PingReply PingHost(IPAddress Address)
         {
@@ -99,6 +145,34 @@ namespace ipScan.Classes.Main
             }
             return reply;
         }
+
+        /*private double? PingHostBySocket(IPAddress Address)
+        {
+
+            try
+            {
+                Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
+                sock.Blocking = true;
+                PingReply pr = new PingReply();
+                var stopwatch = new Stopwatch();
+
+                // Measure the Connect call only
+                stopwatch.Start();
+                sock.Connect(Address, 0);
+                stopwatch.Stop();
+
+                sock.Close();
+
+                return stopwatch.Elapsed.TotalMilliseconds;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.StackTrace);
+            }
+
+            return null;
+
+        }*/
 
         public override void Stop()
         {

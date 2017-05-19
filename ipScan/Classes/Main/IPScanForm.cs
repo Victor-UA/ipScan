@@ -22,7 +22,7 @@ namespace ipScan.Classes.Main
         private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
         private CheckSearchTask<IPInfo, IPAddress> checkTasks { get; set; }
-        private bool _resultIsUpdatable = true;
+        private bool _resultIsUpdatable = true; 
         private bool resultIsUpdatable
         {
             get
