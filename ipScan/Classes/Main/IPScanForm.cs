@@ -267,7 +267,7 @@ namespace ipScan.Classes.Main
                 {
                     MessageBox.Show("Помилка у кінцевій адресі", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
-                }
+                }                
 
                 try
                 {
@@ -281,6 +281,24 @@ namespace ipScan.Classes.Main
 
                 #endregion
 
+                ipList = IPAddressesRange(firstIpAddress, lastIpAddress);
+                try
+                {
+                    SetProgressMaxValue(ipList.Count);
+                    SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.StackTrace);
+                    return;
+                }
+
+                if (ipList == null || ipList.Count == 0)
+                {
+                    MessageBox.Show("Помилка у кінцевій адресі", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 StartButtonEnable(false);
                 StopButtonEnable(true);
                 button_Stop.Focus();
@@ -290,16 +308,7 @@ namespace ipScan.Classes.Main
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
-                ipList = IPAddressesRange(firstIpAddress, lastIpAddress);
-                try
-                {
-                    SetProgressMaxValue(ipList.Count);
-                    SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
-                }
-                catch(Exception ex)
-                {
-                    Debug.WriteLine(ex.StackTrace);
-                }
+                
 
                 int taskCount = 1;
                 try
@@ -335,7 +344,6 @@ namespace ipScan.Classes.Main
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
                 } 
-                
             }
         }      
 
@@ -430,15 +438,13 @@ namespace ipScan.Classes.Main
                 mySearchTasks[i].Pause();
             }
             */
-            checkTasks.Pause();
+            button_Pause.Tag = checkTasks.Pause();
             if ((bool)button_Pause.Tag)
             {
-                button_Pause.Tag = false;
                 button_Pause.Text = "Resume";
             }
             else
             {
-                button_Pause.Tag = true;
                 button_Pause.Text = "Pause";
             }
         }        

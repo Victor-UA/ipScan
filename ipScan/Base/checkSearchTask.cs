@@ -27,7 +27,7 @@ namespace ipScan.Base
 
         private int                             TListCount { get; set; }
         private DateTime                        timeStart { get; set; }
-        public DateTime                         lastTime { get; private set; }
+        public DateTime                         LastTime { get; private set; }
         private TimeSpan                        loopTime { get; set; }
         private bool                            isStarting { get; set; }
         private bool                            isPaused { get; set; }
@@ -54,7 +54,7 @@ namespace ipScan.Base
             setProgress = SetProgress;
             this.TListCount = TListCount;
             timeStart = DateTime.Now;
-            lastTime = DateTime.Now;
+            LastTime = DateTime.Now;
             loopTime = TimeSpan.FromMilliseconds(0);
             bufferResult = BufferResult;
             disposeTasks = DisposeTasks;
@@ -67,9 +67,10 @@ namespace ipScan.Base
             try
             {
                 GC.Collect();
-                bool TasksAreRunning = false;                
+                bool TasksAreRunning = false;
+                bool TasksAreCompleted = false;
                 int maxRemaind = OkRemaind;
-                lastTime = DateTime.Now;
+                LastTime = DateTime.Now;
                 int mySearchTasksPauseTime = 1000;
                 do
                 {
@@ -81,8 +82,8 @@ namespace ipScan.Base
                     {
                         Thread.Sleep(mySearchTasksPauseTime);                        
 
-                        loopTime = DateTime.Now - lastTime;
-                        lastTime = DateTime.Now;
+                        loopTime = DateTime.Now - LastTime;
+                        LastTime = DateTime.Now;
                         mySearchTasksPauseTime += (int)(1000 - loopTime.TotalMilliseconds);
                         if (mySearchTasksPauseTime < 0)
                         {
@@ -173,6 +174,7 @@ namespace ipScan.Base
 
 
                                 TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
+                                TasksAreCompleted = TasksAreCompleted || myTasks[i].IsCompleted;
                                 bufferResult.AddLines(mySearchTasks[i].buffer.getBuffer());
                                                                 
                                 progress += mySearchTasks[i].progress;
@@ -184,7 +186,7 @@ namespace ipScan.Base
                             i++;
                         }
                         
-                        if (TasksAreRunning)
+                        if (TasksAreRunning || TasksAreCompleted)
                         {
                             isStarting = false;
                         }
@@ -227,13 +229,13 @@ namespace ipScan.Base
         {
             isStopped = true;
         }
-        public void Pause()
+        public bool Pause()
         {
-            isPaused = !isPaused;
+            return isPaused = !isPaused;
         }        
-        public void Pause(bool IsPaused)
+        public bool Pause(bool IsPaused)
         {
-            isPaused = IsPaused;
+            return isPaused = IsPaused;
         }
     }
 }

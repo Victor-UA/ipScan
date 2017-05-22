@@ -17,7 +17,7 @@ namespace ipScan.Classes.Main
         public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
 
-        protected override async void Search()
+        protected override void Search()
         {
             Console.WriteLine(taskId + " is started");
             bool waiting4CheckTasks = false;
@@ -28,7 +28,7 @@ namespace ipScan.Classes.Main
             {
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
-                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.lastTime;
+                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;
                     if (checkTasksLoopTime.TotalSeconds > checkTasksLoopTimeMax)
                     {
                         if (!waiting4CheckTasks)
