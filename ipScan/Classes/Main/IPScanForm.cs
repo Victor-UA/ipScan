@@ -239,9 +239,12 @@ namespace ipScan.Classes.Main
         private void button_Start_Click(object sender, EventArgs e)
         {
             if (!isRunning)
-            {                
+            {
 
                 #region Перевірка правильності введення ip адрес
+
+                button_Pause.Tag = false;
+                button_Pause.Text = "Pause";                
 
                 //https://toster.ru/q/140605
                 if (String.IsNullOrWhiteSpace(textBox_IPFirst.Text))
@@ -476,6 +479,18 @@ namespace ipScan.Classes.Main
             }            
         }
 
+        private int pictureBox12ipListIndex(int X)
+        {
+            try
+            {
+                return ipList.Count * X / pictureBox1.Image.Width;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
             try
@@ -483,7 +498,18 @@ namespace ipScan.Classes.Main
                 if (pictureBox1MouseLastX != e.X) 
                 {
                     pictureBox1MouseLastX = e.X;
-                    int index = ipList.Count * e.X / pictureBox1.Image.Width;
+                    int index = pictureBox12ipListIndex(e.X);
+                    foreach (var Row in SG_Result.Rows)
+                    {
+                        int rowIndex = Row.Index;
+                        SourceGrid.Cells.ICellVirtual[] cellsAtRow = Row.Grid.GetCellsAtRow(rowIndex);
+                        if (cellsAtRow[0].ToString() == ipList[index].ToString())
+                        {
+                            SG_Result.ShowCell(new SourceGrid.Position(rowIndex, 0), true);
+                            toolTip1.Show("\t" + (cellsAtRow[1].ToString() ?? "") + "\r" + (cellsAtRow[2].ToString() ?? "") + "\r" + ipList[index].ToString(), pictureBox1 as IWin32Window);
+                            return;
+                        }
+                    }
                     toolTip1.Show("\r\r" + ipList[index].ToString(), pictureBox1 as IWin32Window);
                 }
             }
@@ -496,6 +522,26 @@ namespace ipScan.Classes.Main
         private void pictureBox1_MouseLeave(object sender, EventArgs e)
         {
             toolTip1.Hide(sender as IWin32Window);
+        }
+
+        private void pictureBox1_DoubleClick(object sender, EventArgs e)
+        {
+            try
+            {
+                List<IPInfo> ipInfoList = bufferedResult.getAllBuffer();
+                for (int i = 0; i < ipInfoList.Count; i++)
+                {
+                    if (ipInfoList[i].IPAddress.ToString() == ipList[pictureBox12ipListIndex(pictureBox1MouseLastX)].ToString())
+                    {
+                        ipInfoList[i].ShowHostForm();
+                        return;
+                    }
+                } 
+            }
+            catch (Exception)
+            {
+            }
+            
         }
     }
 
