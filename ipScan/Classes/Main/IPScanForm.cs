@@ -483,7 +483,8 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                return ipList.Count * X / pictureBox1.Image.Width;
+                double k = ipList.Count / (double)pictureBox1.Image.Width;
+                return (int)( k * X );
             }
             catch (Exception)
             {
