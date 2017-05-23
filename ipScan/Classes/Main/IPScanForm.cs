@@ -13,6 +13,7 @@ using ipScan.Base;
 using ipScan.Base.Grid;
 using ipScan.Base.IP;
 using ipScan.Classes.Main.Grid;
+using System.Collections;
 
 namespace ipScan.Classes.Main
 {
@@ -78,7 +79,12 @@ namespace ipScan.Classes.Main
             InitializeComponent();
             button_Pause.Tag = false;
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
-            Fill.GridFill(SG_Result, null as ListIPInfo, null, new List<string>() { "IP Address", "TTL", "Host Name" });
+            Fill.GridFill(SG_Result, null as ListIPInfo, null, 
+                new List<KeyValuePair<string, IComparer>>() {
+                    new KeyValuePair<string, IComparer>("IP Address", new IPAddressComparer()),
+                    new KeyValuePair<string, IComparer>("TTL", null),
+                    new KeyValuePair<string, IComparer>("Host Name", null)
+                });
         }
 
         private void StartButtonEnable(bool Enable)
@@ -303,8 +309,13 @@ namespace ipScan.Classes.Main
                 StopButtonEnable(true);
                 button_Stop.Focus();
 
-                bufferedResult = new BufferedResult<IPInfo>();
-                Fill.GridFill(SG_Result, null as ListIPInfo, null, new List<string>() { "IP Address", "TTL", "Host Name" });
+                bufferedResult = new BufferedResult<IPInfo>();                
+                Fill.GridFill(SG_Result, null as ListIPInfo, null,
+                new List<KeyValuePair<string, IComparer>>() {
+                    new KeyValuePair<string, IComparer>("IP Address", new IPAddressComparer()),
+                    new KeyValuePair<string, IComparer>("TTL", null),
+                    new KeyValuePair<string, IComparer>("Host Name", null)
+                });
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 

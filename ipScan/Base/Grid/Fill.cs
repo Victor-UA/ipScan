@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Diagnostics;
 using System.Drawing;
 using ipScan.Base.IP;
@@ -14,27 +15,27 @@ namespace ipScan.Base.Grid
             TSub subItem,                 
             SourceGrid.Cells.Controllers.IController Controller = null)
         {
-            SourceGrid.Cells.Cell cell = new SourceGrid.Cells.Cell(subItem);
-            cell.Tag = Item;
+            SourceGrid.Cells.Cell cell = new SourceGrid.Cells.Cell(subItem)
+            {
+                Tag = Item                
+            };
             if (Controller != null)
             {
                 cell.AddController(Controller);
             }
             return cell;
         }
-        
+
         public static void GridFill<T>(
-            SourceGrid.Grid grid, 
+            SourceGrid.Grid grid,
             List<T> List,
-            Func<T, Color, GridCellController> newCellController = null,                         
-            List<string> Fields = null)
+            Func<T, Color, GridCellController> newCellController = null,
+            List<KeyValuePair<String, IComparer>> Fields = null)
         {
             grid.Columns.Clear();
-            grid.Rows.Clear(); 
+            grid.Rows.Clear();
 
-            List<string> fields = Fields == null ?
-                new List<string>() { "Undefined" } :
-                Fields;
+            List<KeyValuePair<String, IComparer>> fields = Fields ?? new List<KeyValuePair<String, IComparer>>() { new KeyValuePair<string, IComparer>("Undefined", null) };
 
             //Columns filling
             grid.ColumnsCount = fields.Count;
@@ -42,11 +43,36 @@ namespace ipScan.Base.Grid
             grid.Rows.Insert(0);
             for (int i = 0; i < (fields.Count); i++)
             {
-                grid[0, i] = new SourceGrid.Cells.ColumnHeader(fields[i]);
+                SourceGrid.Cells.ColumnHeader ColumnHeader = new SourceGrid.Cells.ColumnHeader(fields[i].Key)
+                {
+                    SortComparer = fields[i].Value
+                };
+                grid[0, i] = ColumnHeader;
             }
 
             //Data filling
             GridUpdateOrInsertRows(grid, List, newCellController);
+        }
+
+        public static void GridFill<T>(
+            SourceGrid.Grid grid, 
+            List<T> List,
+            Func<T, Color, GridCellController> newCellController = null,                         
+            List<string> Fields = null)
+        {
+            List<KeyValuePair<String, IComparer>> fields = new List<KeyValuePair<String, IComparer>>();
+            if (Fields == null)
+            {
+                fields.Add(new KeyValuePair<string, IComparer>("Undefined", null));
+            }
+            else
+            {
+                for (int i = 0; i < Fields.Count; i++)
+                {
+                    fields.Add(new KeyValuePair<string, IComparer>(Fields[i], null));
+                }
+            }
+            GridFill(grid, List, newCellController, fields);
         }        
 
 

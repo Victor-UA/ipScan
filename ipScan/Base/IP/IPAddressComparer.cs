@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+using System.Net;
 
 namespace ipScan.Base.IP
 {
@@ -35,11 +36,16 @@ namespace ipScan.Base.IP
                 throw new NotImplementedException();
             }
         }
-        /*
-        public int Compare(object x, object y)
+
+        public int Compare(IPAddress x, IPAddress y)
         {
-            return ((new SourceGrid.ValueCellComparer()).Compare(y, x));
+            throw new NotImplementedException();
         }
-        */
+        /*
+public int Compare(object x, object y)
+{
+   return ((new SourceGrid.ValueCellComparer()).Compare(y, x));
+}
+*/
     }
 }

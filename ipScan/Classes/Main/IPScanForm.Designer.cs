@@ -77,7 +77,7 @@
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
-            this.textBox_ThreadCount.Text = "64";
+            this.textBox_ThreadCount.Text = "24";
             // 
             // button_Start
             // 
@@ -110,7 +110,7 @@
             this.textBox_Timeout.Size = new System.Drawing.Size(50, 20);
             this.textBox_Timeout.TabIndex = 3;
             this.textBox_Timeout.TabStop = false;
-            this.textBox_Timeout.Text = "10";
+            this.textBox_Timeout.Text = "100";
             // 
             // label_Progress
             // 
@@ -259,9 +259,9 @@
             this.SG_Result.TabIndex = 7;
             this.SG_Result.TabStop = true;
             this.SG_Result.Tag = "123434";
-            this.SG_Result.ToolTipText = "";            
+            this.SG_Result.ToolTipText = "";
             // 
-            // MainForm
+            // IPScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -279,7 +279,7 @@
             this.Controls.Add(this.textBox_IPFirst);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(600, 450);
-            this.Name = "MainForm";
+            this.Name = "IPScanForm";
             this.Text = "ipScan";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.statusStrip1.ResumeLayout(false);
