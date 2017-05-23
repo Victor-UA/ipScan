@@ -83,7 +83,7 @@ namespace ipScan.Classes.Main
             Fill.GridFill(SG_Result, null as ListIPInfo, null, 
                 new List<KeyValuePair<string, IComparer>>() {
                     new KeyValuePair<string, IComparer>("IP Address", new IPAddressComparer()),
-                    new KeyValuePair<string, IComparer>("TTL", null),
+                    new KeyValuePair<string, IComparer>("Trip Time", null),
                     new KeyValuePair<string, IComparer>("Host Name", null)
                 });
         }
@@ -137,7 +137,7 @@ namespace ipScan.Classes.Main
         private void DisposeTasks(object Buffer)
         {
             //bufferResult = null;
-            mySearchTasks = null;
+            //mySearchTasks = null;
             myTasks = null;
             //ipList = null;
             checkTasks = null;
@@ -317,7 +317,7 @@ namespace ipScan.Classes.Main
                 Fill.GridFill(SG_Result, null as ListIPInfo, null,
                 new List<KeyValuePair<string, IComparer>>() {
                     new KeyValuePair<string, IComparer>("IP Address", new IPAddressComparer()),
-                    new KeyValuePair<string, IComparer>("TTL", null),
+                    new KeyValuePair<string, IComparer>("Trip Time", null),
                     new KeyValuePair<string, IComparer>("Host Name", null)
                 });
                 oldLines = new ListIPInfo();
@@ -543,6 +543,14 @@ namespace ipScan.Classes.Main
             {
             }
             
+        }
+
+        private void pictureBox1_SizeChanged(object sender, EventArgs e)
+        {
+            if (!isRunning)
+            {
+                DrawMultiProgress();
+            }
         }
     }
 

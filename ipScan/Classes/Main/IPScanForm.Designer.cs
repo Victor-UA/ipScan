@@ -241,6 +241,7 @@
             this.pictureBox1.TabIndex = 9;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Tag = "0";
+            this.pictureBox1.SizeChanged += new System.EventHandler(this.pictureBox1_SizeChanged);
             this.pictureBox1.DoubleClick += new System.EventHandler(this.pictureBox1_DoubleClick);
             this.pictureBox1.MouseLeave += new System.EventHandler(this.pictureBox1_MouseLeave);
             this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
