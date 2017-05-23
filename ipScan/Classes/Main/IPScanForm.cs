@@ -72,7 +72,8 @@ namespace ipScan.Classes.Main
         private IPAddress lastIpAddress;
         private BufferedResult<IPInfo> bufferedResult { get; set; }
         private int TimeOut { get; set; }
-        private ListIPInfo oldLines { get; set; }        
+        private ListIPInfo oldLines { get; set; }     
+        private int pictureBox1MouseLastX { get; set; }
 
         public IPScanForm()
         {
@@ -138,10 +139,10 @@ namespace ipScan.Classes.Main
             //bufferResult = null;
             mySearchTasks = null;
             myTasks = null;
-            ipList = null;
+            //ipList = null;
             checkTasks = null;
             oldLines = null;
-            System.GC.Collect();
+            GC.Collect();
         }        
 
         private void SetProgress(int Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
@@ -473,7 +474,29 @@ namespace ipScan.Classes.Main
             {
                 e.Cancel = false;
             }            
-        }        
+        }
+
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                if (pictureBox1MouseLastX != e.X) 
+                {
+                    pictureBox1MouseLastX = e.X;
+                    int index = ipList.Count * e.X / pictureBox1.Image.Width;
+                    toolTip1.Show("\r\r" + ipList[index].ToString(), pictureBox1 as IWin32Window);
+                }
+            }
+            catch (Exception)
+            {
+                pictureBox1MouseLastX = -1;
+            }
+        }
+
+        private void pictureBox1_MouseLeave(object sender, EventArgs e)
+        {
+            toolTip1.Hide(sender as IWin32Window);
+        }
     }
 
     

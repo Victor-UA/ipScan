@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IPScanForm));
             this.textBox_IPFirst = new System.Windows.Forms.TextBox();
             this.textBox_IPLast = new System.Windows.Forms.TextBox();
@@ -49,6 +50,7 @@
             this.tSSL_pauseTime = new System.Windows.Forms.ToolStripStatusLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SG_Result = new SourceGrid.Grid();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -238,6 +240,9 @@
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 9;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.Tag = "0";
+            this.pictureBox1.MouseLeave += new System.EventHandler(this.pictureBox1_MouseLeave);
+            this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
             // 
             // SG_Result
             // 
@@ -260,6 +265,10 @@
             this.SG_Result.TabStop = true;
             this.SG_Result.Tag = "123434";
             this.SG_Result.ToolTipText = "";
+            // 
+            // toolTip1
+            // 
+            this.toolTip1.ShowAlways = true;
             // 
             // IPScanForm
             // 
@@ -312,6 +321,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.ToolStripStatusLabel tSSL_pauseTime;
         private SourceGrid.Grid SG_Result;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
