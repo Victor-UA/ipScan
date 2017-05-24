@@ -1,4 +1,4 @@
-﻿namespace ipScan.Classes.Host
+﻿namespace ipScan.Base.IP.Host
 {
     partial class HostForm
     {

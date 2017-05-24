@@ -12,8 +12,7 @@ using System.Threading.Tasks;
 namespace ipScan.Classes.Main
 {
     class IPSearchTask : SearchTask<IPInfo, IPAddress>
-    {
-        
+    {        
         public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
 
@@ -58,32 +57,16 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-
                         IPAddress address = mainList[currentPosition];
                         
                         PingReply reply = null;
-                        Thread pingHostTask = new Thread(() => { reply = PingHost(address); });
+                        Thread pingHostTask = new Thread(() => { reply = IPTools.PingHost(address, timeOut); });
                         pingHostTask.Start();
 
                         if (pingHostTask.Join(timeOut))
                         {                            
                             pingHostTask.Abort();
-                        }
-
-                        //PingReply reply = PingHost(address);
-
-                        //PingBySocketReply reply = IPTools.PingHostBySocket(address);
-                        /*
-                        List<RawSocketPing.PingReply> replies = new RawSocketPing.Ping(
-                            address, 128, 128, 1, pingReceiveTimeout : timeOut).DoPing();
-                        RawSocketPing.PingReply reply = null;
-                        try
-                        {
-                            if (replies.Count > 0)
-                                reply = replies[0];
-                        }
-                        catch (Exception) { }
-                        */
+                        }                        
 
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
@@ -91,9 +74,9 @@ namespace ipScan.Classes.Main
                             {
                                 RoundtripTime = reply.RoundtripTime
                             };
-                            ipInfo.setHostNameAsync();
-                            ipInfo.PropertyBeforeChanged += TSub_BeforeChanged;
-                            ipInfo.PropertyAfterChanged += TSub_AfterChanged;
+                            ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
+                            ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
+                            ipInfo.setHostDetailsAsync();
                             buffer.AddLine(ipInfo);
                         }
 
@@ -130,55 +113,11 @@ namespace ipScan.Classes.Main
             return reply;
         }
 
-        private PingReply PingHost(IPAddress Address)
-        {
-            //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp
-            Ping pinger = new Ping();
-            PingReply reply = null;
-            try
-            {
-                reply = pinger.Send(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true));
-            }
-            catch (PingException)
-            {
-                // Discard PingExceptions and return false;
-            }
-            return reply;
-        }
-
-        /*private double? PingHostBySocket(IPAddress Address)
-        {
-
-            try
-            {
-                Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.Icmp);
-                sock.Blocking = true;
-                PingReply pr = new PingReply();
-                var stopwatch = new Stopwatch();
-
-                // Measure the Connect call only
-                stopwatch.Start();
-                sock.Connect(Address, 0);
-                stopwatch.Stop();
-
-                sock.Close();
-
-                return stopwatch.Elapsed.TotalMilliseconds;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.StackTrace);
-            }
-
-            return null;
-
-        }*/
-
         public override void Stop()
         {
             foreach (IPInfo item in buffer.Buffer)
             {
-                item.StopLooking4HostNames(null);
+                item.StopLooking4HostDetails(null);
             }
             wasStopped = true;
             isRunning = false;

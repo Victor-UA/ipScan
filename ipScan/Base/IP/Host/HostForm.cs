@@ -3,23 +3,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using ipScan.Base.Grid;
-using ipScan.Base.IP;
-using ipScan.Classes.Host.Grid;
 
-namespace ipScan.Classes.Host
+namespace ipScan.Base.IP.Host
 {
     public partial class HostForm : Form
     {
         public IPInfo ipInfo { get; private set; }
-        
+        private Grid.Fill fill;
 
         public HostForm(IPInfo IPInfo)
         {
             InitializeComponent();
             ipInfo = IPInfo;
+            fill = new Grid.Fill();
 
-            Fill.GridFill(SG_HostOpenPorts, ipInfo.Ports, 
+            fill.GridFill(SG_HostOpenPorts, ipInfo.Ports, 
                 (PortInfo item, Color color) =>
                 {
                     return new Grid.GridCellController(Color.LightBlue);
@@ -43,7 +41,7 @@ namespace ipScan.Classes.Host
                     {
                         try
                         {
-                            Fill.GridUpdateOrInsertRows(SG_HostOpenPorts, ipInfo.Ports,
+                            fill.GridUpdateOrInsertRows(SG_HostOpenPorts, ipInfo.Ports,
                                 (PortInfo item, Color color) =>
                                     {
                                         return new Grid.GridCellController(Color.LightBlue);
@@ -102,7 +100,7 @@ namespace ipScan.Classes.Host
             }
             else
             {
-                Fill.GridFill<int>(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol", "isOpen" });
+                fill.GridFill<int>(SG_HostOpenPorts, null, null, new List<string>() { "Ports", "Protocol", "isOpen" });
                 ipInfo.ScanHostPorts();
             }
         }

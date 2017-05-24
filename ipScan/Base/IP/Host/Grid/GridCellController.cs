@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using ipScan.Base.Grid;
-using ipScan.Base.IP;
 using SourceGrid;
 
-namespace ipScan.Classes.Host.Grid
+namespace ipScan.Base.IP.Host.Grid
 {
     public class GridCellController : Base.Grid.GridCellController
     {

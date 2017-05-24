@@ -1,11 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using ipScan.Classes.Host;
+using System.Net.NetworkInformation;
+using ipScan.Base.IP.Host;
 
 namespace ipScan.Base.IP
 {
@@ -35,15 +35,16 @@ namespace ipScan.Base.IP
                 }
             }
         }
+        public PhysicalAddress                  HostMac { get; set; }
 
-        public Thread                           look4HostName { get; private set; }
-        public bool                             isLooking4HostName { get; private set; }
+        public Thread                           look4HostDetails { get; private set; }
+        public bool                             isLooking4HostDetails { get; private set; }
         private CancellationTokenSource         CancelScanHostPorts { get; set; }
         private int                             waitingForResponses;
         private int                             currentHostPort;
         private int                             maxWaitingForResponses { get; set; } = 200; 
                
-        public EventedList<PortInfo>              Ports { get; private set; }
+        public EventedList<PortInfo>            Ports { get; private set; }
         private bool                            _ScanPortsIsRunning;
         public bool                             ScanTCPPortsIsRunning
         {
@@ -70,6 +71,9 @@ namespace ipScan.Base.IP
         {
             
         }
+
+        public event EventHandler HostDetailsBeforeChanged;
+        public event EventHandler HostDetailsAfterChanged;        
 
         private void                            setHostFormCaption()
         {
@@ -102,7 +106,7 @@ namespace ipScan.Base.IP
                 HostForm.Show(owner);
             }
         }
-
+        
         public void                             ScanHostPorts()
         {
             CancelScanHostPorts = new CancellationTokenSource();
@@ -198,91 +202,74 @@ namespace ipScan.Base.IP
             }
         }
 
-        public void                             setHostNameAsync()
+        public void                             setHostDetailsAsync()
         {
-            look4HostName = new Thread(() => {
-                isLooking4HostName = true;
-                OnPropertyBeforeChanged("HostName");
+            look4HostDetails = new Thread(() => {
+                isLooking4HostDetails = true;
+                HostDetailsBeforeChanged(IPAddress, new EventArgs());
                 try
                 {
-                    //Timer timer = new Timer(new TimerCallback(StopLooking4HostNames), null, 1000, Timeout.Infinite);
                     HostName = Dns.GetHostEntry(IPAddress).HostName;
-                    //HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;
-                    //Debug.WriteLine(HostName);
-                    //timer.Dispose();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);
                     HostName = string.Empty;
-                }
-                finally
+                }                
+
+                try
                 {
-                    isLooking4HostName = false;
-                    OnPropertyAfterChanged("HostName");
+                    HostMac = IPTools.GetMACFromNetworkComputer(IPAddress);
                 }
+                catch (Exception)
+                {
+                    //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);
+                    HostMac = null;
+                }
+
+                isLooking4HostDetails = false;
+                HostDetailsAfterChanged(IPAddress, new EventArgs());
             });
-            look4HostName.Start();
-            /*
-            isLooking4HostNames = true;
-            OnPropertyBeforeChanged("HostName");
-            try
-            {
-                HostName = (await Dns.GetHostEntryAsync(IPAddress)).HostName;                
-            }
-            catch (Exception ex)
-            {
-                //Debug.WriteLine(IPAddress.ToString() + ": " + ex.Message);   
-                HostName = string.Empty;
-            }
-            finally
-            {
-                isLooking4HostNames = false;
-                OnPropertyAfterChanged("HostName");
-            }
-            */
+            look4HostDetails.Start();            
         }
-        public void                             StopLooking4HostNames(object obj)
-        {
-            /*
-            isLooking4HostNames = false;
-            OnPropertyAfterChanged("HostName");   
-            */
-            
-            if (look4HostName != null)
+
+        public void                                 StopLooking4HostDetails(object obj)
+        {                      
+            if (look4HostDetails != null)
             {
                 try
                 {
-                    look4HostName.Abort();
-                    look4HostName.Join();
+                    look4HostDetails.Abort();
+                    //look4HostDetails.Join();
                 }
                 catch (Exception)
                 {
                 }
             }
         }
-        
-        public event PropertyChangedEventHandler    PropertyBeforeChanged;
-        protected void                              OnPropertyBeforeChanged(PropertyChangedEventArgs e)
+/*        
+        public event PropertyChangedEventHandler    HostDetailsBeforeChanged;
+        protected void                              OnHostDetailsBeforeChanged(PropertyChangedEventArgs e)
         {
-            PropertyBeforeChanged?.Invoke(IPAddress, e);
+            HostDetailsBeforeChanged?.Invoke(IPAddress, e);
         }
-        protected void                              OnPropertyBeforeChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        protected void                              OnHostDetailsBeforeChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
         {
-            OnPropertyBeforeChanged(new PropertyChangedEventArgs(propertyName));
+            OnHostDetailsBeforeChanged(new PropertyChangedEventArgs(propertyName));
         }
-
-        public event PropertyChangedEventHandler    PropertyAfterChanged;
-        protected void                              OnPropertyAferChanged(PropertyChangedEventArgs e)
+*/
+/*
+        public event PropertyChangedEventHandler    HostDetailsAfterChanged;
+        protected void                              OnHostDetailsAferChanged(PropertyChangedEventArgs e)
         {
-            PropertyAfterChanged?.Invoke(IPAddress, e);
+            HostDetailsAfterChanged?.Invoke(IPAddress, e);
         }
-        protected void                              OnPropertyAfterChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        protected void                              OnHostDetailsAfterChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
         {
-            OnPropertyAferChanged(new PropertyChangedEventArgs(propertyName));
+            OnHostDetailsAferChanged(new PropertyChangedEventArgs(propertyName));
         }
-        
-        public string                           toString()
+*/      
+        public string                               toString()
         {
             string[] ip = IPAddress.ToString().Split('.');
             string result = string.Empty;
@@ -292,9 +279,10 @@ namespace ipScan.Base.IP
             }
             return result + "\t" + RoundtripTime.ToString().PadLeft(4, ' ') + "\t" + HostName;
         }
-        public override string                  ToString()
+        public override string                      ToString()
         {
             return IPAddress.ToString();
         }
+
     }
 }

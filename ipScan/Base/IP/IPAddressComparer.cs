@@ -19,11 +19,46 @@ namespace ipScan.Base.IP
                 string[] Y = y.ToString().Split('.');
                 for (int i = 0; i < 4; i++)
                 {
-                    if (int.Parse(X[i]) > int.Parse(Y[i]))
+                    int xInt;
+                    int yInt;
+                    string xString = X[i];
+                    string yString = Y[i];
+                    if (string.IsNullOrEmpty(xString))
+                    {
+                        xInt = 0;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            xInt = int.Parse(xString);
+                        }
+                        catch (Exception)
+                        {
+                            xInt = 0;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(yString))
+                    {
+                        yInt = 0;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            yInt = int.Parse(yString);
+                        }
+                        catch (Exception)
+                        {
+                            yInt = 0;
+                        }
+                    }
+
+                    if (xInt > yInt)
                     {
                         return 1;
                     }
-                    if (int.Parse(X[i]) < int.Parse(Y[i]))
+                    if (xInt < yInt)
                     {
                         return -1;
                     }
@@ -35,17 +70,6 @@ namespace ipScan.Base.IP
                 Debug.WriteLine(ex.StackTrace);
                 throw new NotImplementedException();
             }
-        }
-
-        public int Compare(IPAddress x, IPAddress y)
-        {
-            throw new NotImplementedException();
-        }
-        /*
-public int Compare(object x, object y)
-{
-   return ((new SourceGrid.ValueCellComparer()).Compare(y, x));
-}
-*/
+        }        
     }
 }

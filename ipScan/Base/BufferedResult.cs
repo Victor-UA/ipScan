@@ -47,10 +47,10 @@ namespace ipScan.Base
             oldLines.Sort();
             return oldLines;
         }
-        public List<T> getAllBuffer()
+        /*public List<T> getAllBuffer()
         {
             return Buffer;
-        }
+        }*/
         public List<T> getAllBufferSorted(IComparer<T> Comparer)
         {
             List<T> sortedBuffer = new List<T>();

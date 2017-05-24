@@ -53,7 +53,7 @@ namespace ipScan.Base
             progress = 0;
         }
 
-        protected void TSub_BeforeChanged(object sender, PropertyChangedEventArgs e)
+        protected void TSub_BeforeChanged(object sender, EventArgs e)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace ipScan.Base
                 Debug.WriteLine(ex.StackTrace);
             }
         }
-        protected void TSub_AfterChanged(object sender, PropertyChangedEventArgs e)
+        protected void TSub_AfterChanged(object sender, EventArgs e)
         {
             try
             {
