@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ipScan.Base.IP
 {
@@ -135,14 +136,14 @@ namespace ipScan.Base.IP
             }
             return reply;
         }
-        public static PingReply PingHostAsync(IPAddress Address, int timeOut = 100)
+        public async static Task<PingReply> PingHostAsync(IPAddress Address, int timeOut = 100)
         {
             //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp
             Ping pinger = new Ping();
             PingReply reply = null;
             try
             {
-                pinger.SendAsync(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true), reply); 
+                reply = await pinger.SendPingAsync(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true)); 
             }
             catch (PingException)
             {
