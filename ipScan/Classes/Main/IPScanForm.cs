@@ -10,17 +10,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ipScan.Base;
-using ipScan.Base.Grid;
 using ipScan.Base.IP;
-using ipScan.Classes.Main.Grid;
 using System.Collections;
+using System.Net.NetworkInformation;
+using System.Text;
 
 namespace ipScan.Classes.Main
 {
     public partial class IPScanForm : Form
     {
         private Base.IP.Grid.Fill fill;
-        private List<Task> myTasks { get; set; }
+        private List<Task<PingReply>> myTasks { get; set; }
         private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
         private CheckSearchTask<IPInfo, IPAddress> checkTasks { get; set; }
@@ -75,9 +75,9 @@ namespace ipScan.Classes.Main
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }
         private int pictureBox1MouseLastX { get; set; }
-        private List<KeyValuePair<string, IComparer>> gridHeaders { get ; set; }
+        private List<KeyValuePair<string, IComparer>> gridHeaders { get ; set; }        
 
-    public IPScanForm()
+        public IPScanForm()
         {
             InitializeComponent();
             fill = new Base.IP.Grid.Fill();
@@ -197,6 +197,56 @@ namespace ipScan.Classes.Main
             Pen pen = new Pen(Color.Green);
             Brush brush = Brushes.Green;
 
+            List<IPInfo> buffer = bufferedResult.Buffer;
+
+            if (buffer != null)
+            {
+                /*
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    int index = ipList.FindIndex(IPAddress => IPAddress == buffer[i].IPAddress);
+                    {
+                        int x0 = (int)((double)index * bmp.Width / ipList.Count);
+                        int width = 1;
+
+                        Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
+                        graphics.DrawRectangle(pen, rectangle);
+                        graphics.FillRectangle(brush, rectangle);
+                    }
+                }
+                */
+                pen = new Pen(Color.Lime);
+                brush = Brushes.Lime;
+                int rectWidth = bmp.Width / ipList.Count;
+                foreach (IPInfo item in buffer)
+                {                    
+                    int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
+                    int x = (int)((double)index * bmp.Width / ipList.Count);
+                    if (rectWidth < 2)
+                    {
+                        graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
+                    }
+                    else
+                    {
+                        Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
+                        graphics.DrawRectangle(pen, rectangle);
+                        graphics.FillRectangle(brush, rectangle);
+                    }
+                }
+            }
+
+            pictureBox1.Image = bmp;
+            pictureBox1.Refresh();
+        }
+
+        private void DrawMultiProgress_old()
+        {
+            Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
+            Graphics graphics = Graphics.FromImage(bmp);
+
+            Pen pen = new Pen(Color.Green);
+            Brush brush = Brushes.Green;
+
             if (mySearchTasks != null)
             {
                 for (int i = 0; i < mySearchTasks.Count; i++)
@@ -240,7 +290,7 @@ namespace ipScan.Classes.Main
 
 
         /*Start*/
-        private void button_Start_Click(object sender, EventArgs e)
+        private async void button_Start_Click(object sender, EventArgs e)
         {
             if (!isRunning)
             {
@@ -322,8 +372,7 @@ namespace ipScan.Classes.Main
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
-                
-
+               
                 int taskCount = 1;
                 try
                 {
@@ -334,6 +383,32 @@ namespace ipScan.Classes.Main
                     Debug.WriteLine(ex.StackTrace);
                 }
                 
+
+                List<Task> myTasks = new List<Task>();
+                for (int i = 0; i < ipList.Count; i++)
+                {
+                    Task task = PingAndUpdateNodeAsync(ipList[i]);
+                    myTasks.Add(task);
+                    Debug.WriteLine(i);
+                }
+
+                await Task.WhenAll(myTasks);
+                Debug.WriteLine("All tasks completed");
+                StartButtonEnable(true);
+                StopButtonEnable(false);
+                /*
+                while (true)
+                {
+                    Debug.WriteLine("\r");
+                    for (int i = 0; i < myTasks.Count; i++)
+                    {
+                        Debug.WriteLine(string.Format("{0}: {1}", i, myTasks[i].Status));
+                    }
+                    Thread.Sleep(1000);
+                }
+                */
+                
+                /*
                 myTasks = new List<Task>();//[taskCount];
                 mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
 
@@ -358,8 +433,45 @@ namespace ipScan.Classes.Main
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
                 } 
+                */
             }
-        }      
+        }
+
+        private async Task PingAndUpdateNodeAsync(IPAddress ipAddress)
+        {
+            try
+            {
+                byte[] buffer = Encoding.ASCII.GetBytes(".");
+                PingOptions options = new PingOptions(50, true);
+                Ping ping = new Ping();
+                ping.PingCompleted += new PingCompletedEventHandler(ping_Complete);
+                PingReply reply = await ping.SendPingAsync(ipAddress, 5000, buffer, options);
+                if (reply.Status == IPStatus.Success)
+                {
+                    Debug.WriteLine(ipAddress + " (OK)");
+                }
+                else
+                {
+                    Debug.WriteLine(ipAddress + " (Failed)");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+            }
+        }
+
+        private void ping_Complete(object sender, PingCompletedEventArgs e)
+        {
+            if (e.Reply.Status == IPStatus.Success)
+            {
+                IPInfo ipInfo = new IPInfo(e.Reply.Address, e.Reply.RoundtripTime);
+                bufferedResult.AddLine(ipInfo);
+                ResultFillFromBuffer(bufferedResult.getBuffer());
+            }
+            SetProgress(0, 0, 0, new TimeSpan(0), new TimeSpan(0), 0);
+            DrawMultiProgress();
+        }
 
         private async void newTask(Action action)
         {
