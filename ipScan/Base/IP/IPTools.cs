@@ -83,6 +83,7 @@ namespace ipScan.Base.IP
         }
 
         /// <summary>
+        /// http://www.dreamincode.net/forums/topic/365661-Get-MAC-address-from-remote-computer/
         /// method for getting the MAC address of a remote computer
         /// NOTE: This only works on a local network computer that you have access to
         /// </summary>
@@ -127,6 +128,21 @@ namespace ipScan.Base.IP
             try
             {
                 reply = pinger.Send(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true));
+            }
+            catch (PingException)
+            {
+                // Discard PingExceptions and return false;
+            }
+            return reply;
+        }
+        public static PingReply PingHostAsync(IPAddress Address, int timeOut = 100)
+        {
+            //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp
+            Ping pinger = new Ping();
+            PingReply reply = null;
+            try
+            {
+                pinger.SendAsync(Address, timeOut, new byte[] { 0 }, new PingOptions(64, true), reply); 
             }
             catch (PingException)
             {

@@ -60,14 +60,23 @@ namespace ipScan.Classes.Main
                         IPAddress address = mainList[currentPosition];
                         
                         PingReply reply = null;
-                        Thread pingHostTask = new Thread(() => { reply = IPTools.PingHost(address, timeOut); });
+                        
+                        Thread pingHostTask = new Thread(() =>
+                        {
+                            reply = IPTools.PingHost(address, timeOut);
+                        });
+                                                
+                        /*
+                        PingBySocketReply reply = null;
+                        Thread pingHostTask = new Thread(() => { reply = IPTools.PingHostBySocket(address); });
+                        */
+                        
                         pingHostTask.Start();
-
                         if (pingHostTask.Join(timeOut))
                         {                            
                             pingHostTask.Abort();
                         }                        
-
+                        
                         if (reply != null && reply.Status == IPStatus.Success)
                         {
                             IPInfo ipInfo = new IPInfo(address)
