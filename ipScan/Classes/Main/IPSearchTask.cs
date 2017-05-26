@@ -22,7 +22,7 @@ namespace ipScan.Classes.Main
             Console.WriteLine(taskId + " is started");
             maxTaskCount = 99;
             bool waiting4CheckTasks = false;
-            int checkTasksLoopTimeMax = 2; //секунди
+            int checkTasksLoopTimeMax = 1; //секунди
             int sleepTime = 100;
             Progress.Add(index, currentPosition);
             if (!wasStopped)
@@ -39,13 +39,14 @@ namespace ipScan.Classes.Main
                             Console.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
                             waiting4CheckTasks = true;
                         }
+                        /*
                         sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
                         if (sleepTime > 1000)
                         {
                             sleepTime = 1000;
                         }
-                        
-                        Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
+                        */
+                        //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
                         maxTaskCount = (int)(maxTaskCount * 0.95) < maxTaskCount ? (int)(maxTaskCount * 0.95) : 1;
                         
                     }
@@ -70,7 +71,7 @@ namespace ipScan.Classes.Main
                             
                             if (checkTasksLoopTime.TotalSeconds <= checkTasksLoopTimeMax)
                             {
-                                Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
+                                //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
                                 maxTaskCount = (int)(maxTaskCount * 1.2) > maxTaskCount ? (int)(maxTaskCount * 1.2) : ++maxTaskCount;
                             }
                             
