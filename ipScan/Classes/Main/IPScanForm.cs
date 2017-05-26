@@ -52,12 +52,15 @@ namespace ipScan.Classes.Main
                 try
                 {
                     bool isRunning = false;
-                    for (int i = 0; i < mySearchTasks.Count(); i++)
+                    if (mySearchTasks != null)
                     {
-                        isRunning = isRunning || mySearchTasks[i].isRunning;
-                        if (isRunning)
+                        for (int i = 0; i < mySearchTasks.Count(); i++)
                         {
-                            return true;
+                            isRunning = isRunning || mySearchTasks[i].isRunning;
+                            if (isRunning)
+                            {
+                                return true;
+                            }
                         }
                     }
                     return isRunning;
@@ -160,7 +163,7 @@ namespace ipScan.Classes.Main
             {
                 toolStripProgressBar1.Value = Progress;
                 label_Progress.Text = Progress.ToString() + @"\" + toolStripProgressBar1.Maximum.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
-                tSSL_Found.Text = bufferedResult.Buffer.Count().ToString();
+                tSSL_Found.Text = bufferedResult == null ? "0" : bufferedResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
@@ -482,8 +485,15 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                double k = ipList.Count / (double)pictureBox1.Image.Width;
-                return (int)( k * X );
+                if (ipList != null)
+                {
+                    double k = ipList.Count / (double)pictureBox1.Image.Width;
+                    return (int)(k * X);
+                }
+                else
+                {
+                    return 0;
+                }
             }
             catch (Exception)
             {
@@ -495,7 +505,7 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                if (pictureBox1MouseLastX != e.X) 
+                if (ipList != null && pictureBox1MouseLastX != e.X) 
                 {
                     pictureBox1MouseLastX = e.X;
                     int index = pictureBox12ipListIndex(e.X);

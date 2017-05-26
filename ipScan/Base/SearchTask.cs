@@ -92,7 +92,17 @@ namespace ipScan.Base
             {
                 SubTaskStates[(TSub)sender] = false;
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+                Thread.Sleep(1);
+                try
+                {
+                    SubTaskStates[(TSub)sender] = false;
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
 
         public void Init(int Index, int Count)

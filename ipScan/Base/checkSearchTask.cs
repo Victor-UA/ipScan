@@ -201,7 +201,14 @@ namespace ipScan.Base
                         try
                         {
                             timePassed = Now - timeStart;
-                            timeLeft = TimeSpan.FromMilliseconds((TListCount - progress) * (timePassed.TotalMilliseconds / progress));
+                            if (progress == 0)
+                            {
+                                timeLeft = TimeSpan.MaxValue;
+                            }
+                            else
+                            {
+                                timeLeft = TimeSpan.FromMilliseconds((TListCount - progress) * (timePassed.TotalMilliseconds / progress));
+                            }
                         }
                         catch (Exception ex)
                         {
