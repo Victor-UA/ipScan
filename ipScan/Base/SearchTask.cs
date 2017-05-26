@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 namespace ipScan.Base
 {
     abstract class SearchTask<T, TSub> : ISearchTask<T, TSub>
-    {        
+    {
+        public object                       Locker { get; } = new object();
+
         public bool                         isRunning { get; protected set; }        
         public bool                         wasStopped { get; protected set; }
         protected CancellationToken         cancellationToken { get; set; }
@@ -23,7 +25,7 @@ namespace ipScan.Base
         public Dictionary<object, Task>  Tasks { get; protected set; }
 
         protected ICheckSearchTask          checkTasks { get; set; }
-        public BufferedResult<T>            buffer { get; private set; }        
+        public BufferedResult<T>            Buffer { get; private set; }        
         public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
         public Dictionary<int, int>         Progress { get; private set; }
         protected List<TSub>                mainList { get; set; }
@@ -54,7 +56,7 @@ namespace ipScan.Base
 
         public SearchTask(int TaskId, List<TSub> TList, int Index, int Count, Action<T> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
         {
-            buffer = new BufferedResult<T>();
+            Buffer = new BufferedResult<T>();
             SubTaskStates = new Dictionary<TSub, bool>();
             Progress = new Dictionary<int, int>();
             taskId = TaskId;            

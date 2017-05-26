@@ -290,7 +290,7 @@ namespace ipScan.Classes.Main
 
 
         /*Start*/
-        private async void button_Start_Click(object sender, EventArgs e)
+        private void button_Start_Click(object sender, EventArgs e)
         {
             if (!isRunning)
             {

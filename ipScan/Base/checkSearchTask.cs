@@ -129,29 +129,8 @@ namespace ipScan.Base
 
                                 if (mySearchTasks[i] != null && mySearchTasks[i].isRunning)
                                 {
-                                    TasksCount++;
-                                    TasksCount += mySearchTasks[i].WorkingTaskCount;
-                                    /*
-                                    try
-                                    {
-                                        List<Task> tasks = mySearchTasks[i].Tasks;
-                                        if (tasks != null)
-                                        {
-
-                                            foreach (Task task in tasks)
-                                            {
-                                                if (task.IsCompleted)
-                                                {
-                                                    tasks.Remove(task);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-                                    }
-                                    */
+                                    TasksCount++;                                    
+                                    TasksCount += mySearchTasks[i].WorkingTaskCount;                                    
                                 }
                                 else
                                 {
@@ -193,11 +172,11 @@ namespace ipScan.Base
                                         }
                                     }
                                 }
-
+                                
 
                                 TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
                                 TasksAreCompleted = TasksAreCompleted || myTasks[i].IsCompleted;
-                                bufferResult.AddLines(mySearchTasks[i].buffer.getBuffer());
+                                bufferResult.AddLines(mySearchTasks[i].Buffer.getBuffer());
                                                                 
                                 progress += mySearchTasks[i].progress;
                             }
