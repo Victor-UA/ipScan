@@ -13,9 +13,10 @@ namespace ipScan.Classes.Main
 {
     class IPSearchTask : SearchTask<IPInfo, IPAddress>
     {        
-        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
-            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
 
+        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }
+        
         protected override void Search()
         {
             Console.WriteLine(taskId + " is started");
@@ -25,6 +26,8 @@ namespace ipScan.Classes.Main
             Progress.Add(index, currentPosition);
             if (!wasStopped)
             {
+                Tasks = new Dictionary<object, Task>();
+                WorkingTaskCount = 0;
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;
@@ -57,41 +60,18 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-                        IPAddress address = mainList[currentPosition];
-                        
-                        PingReply reply = null;
-                        
-                        Thread pingHostTask = new Thread(() =>
+                        if (WorkingTaskCount >= 99)
                         {
-                            reply = IPTools.PingHost(address, timeOut);
-                        });
-                                                
-                        /*
-                        PingBySocketReply reply = null;
-                        Thread pingHostTask = new Thread(() => { reply = IPTools.PingHostBySocket(address); });
-                        */
-                        
-                        pingHostTask.Start();
-                        if (pingHostTask.Join(timeOut))
-                        {                            
-                            pingHostTask.Abort();
-                        }                        
-                        
-                        if (reply != null && reply.Status == IPStatus.Success)
-                        {
-                            IPInfo ipInfo = new IPInfo(address)
-                            {
-                                RoundtripTime = reply.RoundtripTime
-                            };
-                            ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
-                            ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
-                            ipInfo.setHostDetailsAsync();
-                            buffer.AddLine(ipInfo);
+                            Thread.Sleep(100);
                         }
-
-                        progress++;
-                        currentPosition++;
-                        Progress[index] = currentPosition;
+                        else
+                        {
+                            IPAddress address = mainList[currentPosition];
+                            Task task = PingAsync(address);
+                            Tasks.Add(address.ToString(), task);
+                            currentPosition++;
+                            Progress[index] = currentPosition;
+                        }
 
                     }
                     if (cancellationToken.IsCancellationRequested)
@@ -100,8 +80,58 @@ namespace ipScan.Classes.Main
                     }
                 }
             }
+            //while (isRunning && currentPosition - progress != index)
+            while (isRunning && WorkingTaskCount > 0)
+                {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Stop();
+                }
+                Thread.Sleep(1000);
+            }
             isRunning = false;
             Console.WriteLine(taskId + " is stopped");
+        }
+
+        //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
+        private async Task PingAsync(IPAddress ipAddress)
+        {
+            Interlocked.Increment(ref _WorkingTaskCount);
+            try
+            {
+                byte[] buffer = { 1 };
+                PingOptions options = new PingOptions(50, true);
+                Ping ping = new Ping();
+                ping.PingCompleted += new PingCompletedEventHandler(ping_Complete);
+                PingReply reply = await ping.SendPingAsync(ipAddress, 5000, buffer, options);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+            }
+        }
+
+        private void ping_Complete(object sender, PingCompletedEventArgs e)
+        {
+            Interlocked.Decrement(ref _WorkingTaskCount);
+            try
+            {
+                if (e.Reply.Status == IPStatus.Success)
+                {
+                    IPInfo ipInfo = new IPInfo(e.Reply.Address, e.Reply.RoundtripTime);
+                    ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
+                    ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
+                    ipInfo.setHostDetailsAsync();
+                    buffer.AddLine(ipInfo);
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            Interlocked.Increment(ref _progress);
+            Tasks.Remove(e.Reply.Address.ToString());
+            //Interlocked.Increment(ref _currentPosition);
         }
 
         private async Task<PingReply> PingHostAsync(IPAddress Address, ManualResetEvent manualResetEvent)

@@ -189,7 +189,7 @@ namespace ipScan.Classes.Main
             }
         }
 
-        private void DrawMultiProgress()
+        private void DrawMultiProgress_old()
         {
             Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
             Graphics graphics = Graphics.FromImage(bmp);
@@ -239,7 +239,7 @@ namespace ipScan.Classes.Main
             pictureBox1.Refresh();
         }
 
-        private void DrawMultiProgress_old()
+        private void DrawMultiProgress()
         {
             Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
             Graphics graphics = Graphics.FromImage(bmp);
@@ -269,7 +269,7 @@ namespace ipScan.Classes.Main
                 int rectWidth = bmp.Width / ipList.Count;
                 foreach (IPInfo item in bufferedResult.Buffer)
                 {
-                    int index = ipList.FindIndex(IPAddress => IPAddress == item.IPAddress);
+                    int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
                     int x = (int)((double)index * bmp.Width / ipList.Count);
                     if (rectWidth < 2)
                     {
@@ -382,34 +382,9 @@ namespace ipScan.Classes.Main
                 {
                     Debug.WriteLine(ex.StackTrace);
                 }
-                
 
-                List<Task> myTasks = new List<Task>();
-                for (int i = 0; i < ipList.Count; i++)
-                {
-                    Task task = PingAndUpdateNodeAsync(ipList[i]);
-                    myTasks.Add(task);
-                    Debug.WriteLine(i);
-                }
 
-                await Task.WhenAll(myTasks);
-                Debug.WriteLine("All tasks completed");
-                StartButtonEnable(true);
-                StopButtonEnable(false);
-                /*
-                while (true)
-                {
-                    Debug.WriteLine("\r");
-                    for (int i = 0; i < myTasks.Count; i++)
-                    {
-                        Debug.WriteLine(string.Format("{0}: {1}", i, myTasks[i].Status));
-                    }
-                    Thread.Sleep(1000);
-                }
-                */
-                
-                /*
-                myTasks = new List<Task>();//[taskCount];
+                List<Task> myTasks = new List<Task>();//[taskCount];
                 mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
 
                 checkTasks = new CheckSearchTask<IPInfo, IPAddress>(
@@ -432,45 +407,8 @@ namespace ipScan.Classes.Main
                     mySearchTasks.Add(new IPSearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks));
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(mySearchTasks[i].Start));
-                } 
-                */
+                }                 
             }
-        }
-
-        private async Task PingAndUpdateNodeAsync(IPAddress ipAddress)
-        {
-            try
-            {
-                byte[] buffer = Encoding.ASCII.GetBytes(".");
-                PingOptions options = new PingOptions(50, true);
-                Ping ping = new Ping();
-                ping.PingCompleted += new PingCompletedEventHandler(ping_Complete);
-                PingReply reply = await ping.SendPingAsync(ipAddress, 5000, buffer, options);
-                if (reply.Status == IPStatus.Success)
-                {
-                    Debug.WriteLine(ipAddress + " (OK)");
-                }
-                else
-                {
-                    Debug.WriteLine(ipAddress + " (Failed)");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-            }
-        }
-
-        private void ping_Complete(object sender, PingCompletedEventArgs e)
-        {
-            if (e.Reply.Status == IPStatus.Success)
-            {
-                IPInfo ipInfo = new IPInfo(e.Reply.Address, e.Reply.RoundtripTime);
-                bufferedResult.AddLine(ipInfo);
-                ResultFillFromBuffer(bufferedResult.getBuffer());
-            }
-            SetProgress(0, 0, 0, new TimeSpan(0), new TimeSpan(0), 0);
-            DrawMultiProgress();
         }
 
         private async void newTask(Action action)

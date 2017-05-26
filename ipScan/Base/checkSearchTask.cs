@@ -129,7 +129,29 @@ namespace ipScan.Base
 
                                 if (mySearchTasks[i] != null && mySearchTasks[i].isRunning)
                                 {
-                                    TasksCount++;                                    
+                                    TasksCount++;
+                                    TasksCount += mySearchTasks[i].WorkingTaskCount;
+                                    /*
+                                    try
+                                    {
+                                        List<Task> tasks = mySearchTasks[i].Tasks;
+                                        if (tasks != null)
+                                        {
+
+                                            foreach (Task task in tasks)
+                                            {
+                                                if (task.IsCompleted)
+                                                {
+                                                    tasks.Remove(task);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                                    }
+                                    */
                                 }
                                 else
                                 {

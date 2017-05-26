@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
@@ -7,7 +9,9 @@ namespace ipScan.Base
         bool                                isRunning { get; }        
         bool                                wasStopped { get; }
         int                                 taskId { get; }
-        
+        int                                 WorkingTaskCount { get; }
+        Dictionary<object, Task>         Tasks { get; }
+
         BufferedResult<T>                   buffer { get; }        
         Dictionary<TSub, bool>              SubTaskStates { get; }
         Dictionary<int, int>                Progress { get; }

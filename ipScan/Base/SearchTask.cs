@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
@@ -12,14 +14,26 @@ namespace ipScan.Base
         public bool                         wasStopped { get; protected set; }
         protected CancellationToken         cancellationToken { get; set; }
         public int                          taskId { get; private set; }
-        
+        public int                          _WorkingTaskCount;
+        public int                          WorkingTaskCount
+        {
+            get { return _WorkingTaskCount; }
+            protected set { _WorkingTaskCount = value; }
+        }
+        public Dictionary<object, Task>  Tasks { get; protected set; }
+
         protected ICheckSearchTask          checkTasks { get; set; }
         public BufferedResult<T>            buffer { get; private set; }        
         public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
         public Dictionary<int, int>         Progress { get; private set; }
         protected List<TSub>                mainList { get; set; }
         public int                          index { get; private set; }
-        public int                          currentPosition { get; protected set; }
+        protected int                       _currentPosition;
+        public int                          currentPosition
+        {
+            get { return _currentPosition; }
+            protected set { _currentPosition = value; }
+        }
         public int                          count { get; set; }
         public int                          remaind
         {
@@ -28,7 +42,12 @@ namespace ipScan.Base
                 return (index + count - 1 - currentPosition);
             }
         }
-        public int                          progress { get; protected set; }
+        protected int                       _progress;
+        public int                          progress
+        {
+            get { return _progress; }
+            protected set { _progress = value; }
+        }
         protected int                       timeOut { get; set; }
         public bool                         isPaused { get; private set; }
         private Action<T>                   bufferResultAddLine { get; set; }        
