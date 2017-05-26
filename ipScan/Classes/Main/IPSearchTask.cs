@@ -20,8 +20,9 @@ namespace ipScan.Classes.Main
         protected override void Search()
         {
             Console.WriteLine(taskId + " is started");
+            maxTaskCount = 99;
             bool waiting4CheckTasks = false;
-            int checkTasksLoopTimeMax = 60;
+            int checkTasksLoopTimeMax = 2; //секунди
             int sleepTime = 100;
             Progress.Add(index, currentPosition);
             if (!wasStopped)
@@ -43,6 +44,10 @@ namespace ipScan.Classes.Main
                         {
                             sleepTime = 1000;
                         }
+                        
+                        Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
+                        maxTaskCount = (int)(maxTaskCount * 0.95) < maxTaskCount ? (int)(maxTaskCount * 0.95) : 1;
+                        
                     }
                     else
                     {
@@ -51,7 +56,7 @@ namespace ipScan.Classes.Main
                             waiting4CheckTasks = false;
                             Console.WriteLine(taskId.ToString() + " resumed its work");
                         }
-                        sleepTime = 100;
+                        sleepTime = 100;                        
                     }
 
                     if (isPaused || waiting4CheckTasks)
@@ -60,8 +65,15 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-                        if (WorkingTaskCount >= 99)
+                        if (WorkingTaskCount >= maxTaskCount)
                         {
+                            
+                            if (checkTasksLoopTime.TotalSeconds <= checkTasksLoopTimeMax)
+                            {
+                                Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
+                                maxTaskCount = (int)(maxTaskCount * 1.2) > maxTaskCount ? (int)(maxTaskCount * 1.2) : ++maxTaskCount;
+                            }
+                            
                             Thread.Sleep(100);
                         }
                         else
@@ -147,12 +159,21 @@ namespace ipScan.Classes.Main
         {
             lock (Locker)
             {
-                foreach (IPInfo item in Buffer.Buffer)
+                while (true)
                 {
-                    if (item != null)
+                    try
                     {
-                        item.StopLooking4HostDetails(null);
+                        foreach (IPInfo item in Buffer.Buffer)
+                        {
+                            if (item != null)
+                            {
+                                item.StopLooking4HostDetails(null);
+                            }
+                        }
+
                     }
+                    catch (Exception) { }
+                    break;
                 }
                 wasStopped = true;
                 isRunning = false;

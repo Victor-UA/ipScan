@@ -189,56 +189,6 @@ namespace ipScan.Classes.Main
             }
         }
 
-        private void DrawMultiProgress_old()
-        {
-            Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
-            Graphics graphics = Graphics.FromImage(bmp);
-
-            Pen pen = new Pen(Color.Green);
-            Brush brush = Brushes.Green;
-
-            List<IPInfo> buffer = bufferedResult.Buffer;
-
-            if (buffer != null)
-            {
-                /*
-                for (int i = 0; i < buffer.Count; i++)
-                {
-                    int index = ipList.FindIndex(IPAddress => IPAddress == buffer[i].IPAddress);
-                    {
-                        int x0 = (int)((double)index * bmp.Width / ipList.Count);
-                        int width = 1;
-
-                        Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
-                        graphics.DrawRectangle(pen, rectangle);
-                        graphics.FillRectangle(brush, rectangle);
-                    }
-                }
-                */
-                pen = new Pen(Color.Lime);
-                brush = Brushes.Lime;
-                int rectWidth = bmp.Width / ipList.Count;
-                foreach (IPInfo item in buffer)
-                {                    
-                    int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
-                    int x = (int)((double)index * bmp.Width / ipList.Count);
-                    if (rectWidth < 2)
-                    {
-                        graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
-                    }
-                    else
-                    {
-                        Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
-                        graphics.DrawRectangle(pen, rectangle);
-                        graphics.FillRectangle(brush, rectangle);
-                    }
-                }
-            }
-
-            pictureBox1.Image = bmp;
-            pictureBox1.Refresh();
-        }
-
         private void DrawMultiProgress()
         {
             Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);

@@ -22,7 +22,8 @@ namespace ipScan.Base
             get { return _WorkingTaskCount; }
             protected set { _WorkingTaskCount = value; }
         }
-        public Dictionary<object, Task>  Tasks { get; protected set; }
+        public Dictionary<object, Task>     Tasks { get; protected set; }
+        public int                          maxTaskCount { get; set; }
 
         protected ICheckSearchTask          checkTasks { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        

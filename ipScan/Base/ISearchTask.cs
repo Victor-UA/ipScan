@@ -12,7 +12,8 @@ namespace ipScan.Base
         bool                                wasStopped { get; }
         int                                 taskId { get; }
         int                                 WorkingTaskCount { get; }
-        Dictionary<object, Task>         Tasks { get; }
+        Dictionary<object, Task>            Tasks { get; }
+        int                                 maxTaskCount { get; set; }
 
         BufferedResult<T>                   Buffer { get; }        
         Dictionary<TSub, bool>              SubTaskStates { get; }

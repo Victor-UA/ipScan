@@ -73,23 +73,20 @@ namespace ipScan.Base
                 LastTime = DateTime.Now;
                 int mySearchTasksPauseTime = 1000;
                 do
-                {
+                {                    
                     if (isPaused)
                     {
                         Thread.Sleep(1000);
                     }
                     else
                     {
-                        Thread.Sleep(mySearchTasksPauseTime);                        
-
-                        loopTime = DateTime.Now - LastTime;
-                        LastTime = DateTime.Now;
+                        Thread.Sleep(mySearchTasksPauseTime);   
                         mySearchTasksPauseTime += (int)(1000 - loopTime.TotalMilliseconds);
                         if (mySearchTasksPauseTime < 0)
                         {
                             mySearchTasksPauseTime = 0;
                         }
-
+                                               
                         TasksAreRunning = false;
                         int progress = 0;
                         int TasksCount = 0;
@@ -105,6 +102,7 @@ namespace ipScan.Base
                                 {
                                     if (mySearchTasks[i] != null && mySearchTasks[i].SubTaskStates != null)
                                     {
+                                                                                  
                                         Dictionary<TSub, bool> subTaskStates = new Dictionary<TSub, bool>(mySearchTasks[i].SubTaskStates);
                                         foreach (TSub key in subTaskStates.Keys)
                                         {
@@ -214,6 +212,8 @@ namespace ipScan.Base
                         setProgress(progress, TasksCount, subTasksCount, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
                         
                     }
+                    loopTime = DateTime.Now - LastTime;
+                    LastTime = DateTime.Now;
                 } while ((TasksAreRunning || isStarting) && !isStopped);
                 disposeTasks(null);                
             }
