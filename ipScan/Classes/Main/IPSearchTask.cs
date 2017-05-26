@@ -18,25 +18,29 @@ namespace ipScan.Classes.Main
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
-        {
-            Console.WriteLine(taskId + " is started");
-            maxTaskCount = 99;
+        {            
+            Debug.WriteLine(taskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
             bool waiting4CheckTasks = false;
-            int checkTasksLoopTimeMax = 1; //секунди
+            int checkTasksLoopTimeMax = 1000; //мілісекунди
             int sleepTime = 100;
             Progress.Add(index, currentPosition);
+
+            byte[] buffer = { 1 };
+            PingOptions options = new PingOptions(50, true);            
+
             if (!wasStopped)
             {
                 Tasks = new Dictionary<object, Task>();
                 WorkingTaskCount = 0;
+
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
-                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;
-                    if (checkTasksLoopTime.TotalSeconds > checkTasksLoopTimeMax)
+                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
+                    if (checkTasksLoopTime.TotalMilliseconds > checkTasksLoopTimeMax * 1.5)
                     {
                         if (!waiting4CheckTasks)
                         {
-                            Console.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
+                            Debug.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
                             waiting4CheckTasks = true;
                         }
                         /*
@@ -47,7 +51,8 @@ namespace ipScan.Classes.Main
                         }
                         */
                         //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
-                        maxTaskCount = (int)(maxTaskCount * 0.95) < maxTaskCount ? (int)(maxTaskCount * 0.95) : 1;
+                        int newMaxTaskCount = (int)(maxTaskCount * 0.9);
+                        maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
                         
                     }
                     else
@@ -55,9 +60,9 @@ namespace ipScan.Classes.Main
                         if (waiting4CheckTasks)
                         {
                             waiting4CheckTasks = false;
-                            Console.WriteLine(taskId.ToString() + " resumed its work");
+                            Debug.WriteLine(taskId.ToString() + " resumed its work");
                         }
-                        sleepTime = 100;                        
+                        sleepTime = 100;
                     }
 
                     if (isPaused || waiting4CheckTasks)
@@ -66,13 +71,17 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-                        if (WorkingTaskCount >= maxTaskCount)
+                        if (WorkingTaskCount > maxTaskCount)
                         {
                             
-                            if (checkTasksLoopTime.TotalSeconds <= checkTasksLoopTimeMax)
-                            {
+                            //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
+                            if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
+                                && 
+                                checkTasks.loopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1)
+                                {
                                 //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
-                                maxTaskCount = (int)(maxTaskCount * 1.2) > maxTaskCount ? (int)(maxTaskCount * 1.2) : ++maxTaskCount;
+                                int newMaxTaskCount = (int)(maxTaskCount * 1.1);
+                                maxTaskCount =  newMaxTaskCount > maxTaskCount ? newMaxTaskCount : ++maxTaskCount;
                             }
                             
                             Thread.Sleep(100);
@@ -80,25 +89,25 @@ namespace ipScan.Classes.Main
                         else
                         {
                             IPAddress address = mainList[currentPosition];
-                            Task task = PingHostAsync(address);
                             lock(Locker)
                             {
-                                Tasks.Add(address.ToString(), task);
+                                Tasks.Add(address, PingHostAsync(address, timeOut, buffer, options));
                             }
                             currentPosition++;
                             Progress[index] = currentPosition;
+                            //Thread.Sleep(0);
                         }
 
                     }
                     if (cancellationToken.IsCancellationRequested)
                     {
                         Stop();
-                    }
+                    }                    
                 }
             }
-            //while (isRunning && currentPosition - progress != index)
+            
             while (isRunning && WorkingTaskCount > 0)
-                {
+            {
                 if (cancellationToken.IsCancellationRequested)
                 {
                     Stop();
@@ -106,25 +115,32 @@ namespace ipScan.Classes.Main
                 Thread.Sleep(1000);
             }
             isRunning = false;
-            Console.WriteLine(taskId + " is stopped");
+            Debug.WriteLine(taskId + " is stopped");
         }
 
         //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
-        private async Task PingHostAsync(IPAddress ipAddress)
+        private async Task PingHostAsync(IPAddress ipAddress, int TimeOut, byte[] buffer, PingOptions options)
         {
             Interlocked.Increment(ref _WorkingTaskCount);
             try
             {
-                byte[] buffer = { 1 };
-                PingOptions options = new PingOptions(50, true);
                 Ping ping = new Ping();
-                PingReply reply = await ping.SendPingAsync(ipAddress, 5000, buffer, options);
+                PingReply reply = await ping.SendPingAsync(ipAddress, TimeOut, buffer, options);
                 
                 try
                 {
                     if (reply.Status == IPStatus.Success)
                     {
-                        IPInfo ipInfo = new IPInfo(reply.Address, reply.RoundtripTime);
+                        IPAddress address = reply.Address;
+                        foreach (IPAddress item in mainList)
+                        {
+                            if (item.ToString() == reply.Address.ToString())
+                            {
+                                address = item;
+                                break;
+                            }
+                        } 
+                        IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
                         ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
                         ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
                         ipInfo.setHostDetailsAsync();
@@ -147,7 +163,7 @@ namespace ipScan.Classes.Main
             {
                 lock (Locker)
                 {
-                    Tasks.Remove(ipAddress.ToString());
+                    Tasks.Remove(ipAddress);
                 }
             }
             catch (Exception ex)
@@ -174,6 +190,16 @@ namespace ipScan.Classes.Main
 
                     }
                     catch (Exception) { }
+                    try
+                    {
+                        Tasks.Clear();
+                        Tasks = null;
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
                     break;
                 }
                 wasStopped = true;

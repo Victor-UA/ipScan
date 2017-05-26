@@ -73,6 +73,7 @@ namespace ipScan.Base
             wasStopped = false;
             cancellationToken = CancellationToken;
             progress = 0;
+            maxTaskCount = 1;
         }
 
         protected void TSub_BeforeChanged(object sender, EventArgs e)
@@ -90,18 +91,12 @@ namespace ipScan.Base
         {
             try
             {
-                SubTaskStates[(TSub)sender] = false;
+                if (SubTaskStates.ContainsKey((TSub)sender))
+                    SubTaskStates[(TSub)sender] = false;
             }
             catch (Exception)
             {
-                Thread.Sleep(1);
-                try
-                {
-                    SubTaskStates[(TSub)sender] = false;
-                }
-                catch (Exception)
-                {
-                }
+                
             }
         }
 

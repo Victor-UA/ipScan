@@ -61,7 +61,7 @@
             this.textBox_IPFirst.Name = "textBox_IPFirst";
             this.textBox_IPFirst.Size = new System.Drawing.Size(165, 20);
             this.textBox_IPFirst.TabIndex = 0;
-            this.textBox_IPFirst.Text = "10.65.56.0";
+            this.textBox_IPFirst.Text = "10.0.0.1";
             // 
             // textBox_IPLast
             // 
@@ -69,7 +69,7 @@
             this.textBox_IPLast.Name = "textBox_IPLast";
             this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
             this.textBox_IPLast.TabIndex = 1;
-            this.textBox_IPLast.Text = "10.65.57.0";
+            this.textBox_IPLast.Text = "11.0.0.1";
             // 
             // textBox_ThreadCount
             // 
@@ -112,7 +112,7 @@
             this.textBox_Timeout.Size = new System.Drawing.Size(50, 20);
             this.textBox_Timeout.TabIndex = 3;
             this.textBox_Timeout.TabStop = false;
-            this.textBox_Timeout.Text = "100";
+            this.textBox_Timeout.Text = "1000";
             // 
             // label_Progress
             // 
