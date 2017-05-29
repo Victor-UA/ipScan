@@ -218,7 +218,9 @@ namespace ipScan.Classes.Main
                             graphics.FillRectangle(brush, rectangle);
                         }
                     }
-
+                    
+                    /*
+                    //Додати інший bmp як маску знайдених
                     pen = new Pen(Color.Lime);
                     brush = Brushes.Lime;
                     int rectWidth = bmp.Width / ipList.Count;
@@ -237,6 +239,7 @@ namespace ipScan.Classes.Main
                             graphics.FillRectangle(brush, rectangle);
                         }
                     }
+                    */
                 }
 
                 pictureBox1.Image = bmp;
@@ -365,7 +368,7 @@ namespace ipScan.Classes.Main
                         .Cast<ManagementObject>()
                         .First();
 
-                    taskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2 + 1;
+                    taskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 1;
 
                 }
                 catch (Exception)

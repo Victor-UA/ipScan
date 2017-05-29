@@ -33,27 +33,25 @@ namespace ipScan.Classes.Main
             {
                 Tasks = new Dictionary<object, Task>();
                 WorkingTaskCount = 0;
-                int maxTaskCountLimit = 100;
+                int maxTaskCountLimit = 600;
                 int minTaskCountLimit = 100;
 
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
 
-                    
+                    /*
                     ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
                     ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
                     int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
                     int newMaxTaskCount = maxTaskCount + deltaCount;
                     maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
+                    */
 
-                    if (WorkingTaskCount < minTaskCountLimit)
-                    {
-                        maxTaskCountLimit++;
-                    }
+                    maxTaskCount = maxTaskCountLimit;
 
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
-                    /*
-                    if (checkTasksLoopTime.TotalMilliseconds > checkTasksLoopTimeMax * 1.5)
+                    
+                    if (checkTasksLoopTime.TotalMilliseconds > checkTasksLoopTimeMax * 10)
                     {
                         if (!waiting4CheckTasks)
                         {
@@ -62,15 +60,17 @@ namespace ipScan.Classes.Main
                         }
                         
                         sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
-                        if (sleepTime > 1000)
+                        if (sleepTime > 1000 || sleepTime < 0)
                         {
                             sleepTime = 1000;
                         }
-                        
+
                         //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
-                        int newMaxTaskCount = (int)(maxTaskCount * 0.9);
-                        maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
-                        
+                        //int newMaxTaskCount = (int)(maxTaskCount * 0.9);
+                        //maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
+                        maxTaskCount = minTaskCountLimit / 2;
+
+
                     }
                     else
                     {
@@ -81,7 +81,7 @@ namespace ipScan.Classes.Main
                         }
                         sleepTime = 100;
                     }
-                    */
+                    
 
                     if (isPaused || waiting4CheckTasks)
                     {
@@ -91,17 +91,20 @@ namespace ipScan.Classes.Main
                     {
                         if (WorkingTaskCount > maxTaskCount)
                         {
-                            /*
+                            
                             //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
                             if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
                                 && 
                                 checkTasks.loopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1)
                                 {
                                 //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
-                                int newMaxTaskCount = (int)(maxTaskCount * 1.1);
-                                maxTaskCount =  newMaxTaskCount > maxTaskCount ? newMaxTaskCount : ++maxTaskCount;
-                            }
-                            */                            
+                                //int newMaxTaskCount = (int)(maxTaskCount * 1.1);
+                                //maxTaskCount = newMaxTaskCount > maxTaskCount ? 
+                                //    newMaxTaskCount <= maxTaskCountLimit ? 
+                                //    newMaxTaskCount : maxTaskCountLimit : ++maxTaskCount;
+                                maxTaskCount = maxTaskCountLimit;
+                            }                         
+                                                           
                             Thread.Sleep(100);
                         }
                         else
@@ -113,7 +116,6 @@ namespace ipScan.Classes.Main
                             }
                             currentPosition++;
                             Progress[index] = currentPosition;
-                            //Thread.Sleep(0);
                         }
 
                     }
