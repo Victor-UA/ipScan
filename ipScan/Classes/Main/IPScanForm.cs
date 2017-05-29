@@ -13,7 +13,7 @@ using ipScan.Base;
 using ipScan.Base.IP;
 using System.Collections;
 using System.Net.NetworkInformation;
-using System.Text;
+using System.Management;
 
 namespace ipScan.Classes.Main
 {
@@ -168,7 +168,7 @@ namespace ipScan.Classes.Main
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
                 
-                //DrawMultiProgress();
+                DrawMultiProgress();
             }
             catch (Exception ex)
             {
@@ -328,7 +328,7 @@ namespace ipScan.Classes.Main
                 oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
-               
+                /*               
                 int taskCount = 1;
                 try
                 {
@@ -338,7 +338,7 @@ namespace ipScan.Classes.Main
                 {
                     Debug.WriteLine(ex.StackTrace);
                 }
-
+                */
 
                 List<Task> myTasks = new List<Task>();//[taskCount];
                 mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
@@ -356,12 +356,28 @@ namespace ipScan.Classes.Main
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
 
-                int maxInternalTasks = taskCount == 0 ? 400 : 400 / taskCount;
+                int taskCount = 1;
+                try
+                {
+                    var cpu =
+                        new ManagementObjectSearcher("select * from Win32_Processor")
+                        .Get()
+                        .Cast<ManagementObject>()
+                        .First();
+
+                    taskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2 + 1;
+
+                }
+                catch (Exception)
+                {
+                }
+                //int maxInternalTasks = taskCount == 0 ? 400 : 400 / taskCount;
                 int range = (int)Math.Truncate((double)ipList.Count / taskCount);
                 for (int i = 0; i < taskCount; i++)
                 {
                     int count = i == taskCount - 1 ? ipList.Count - range * i : range;
-                    IPSearchTask ipSearchTask = new IPSearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks) { maxTaskCount = maxInternalTasks };
+                    IPSearchTask ipSearchTask = new IPSearchTask(i, ipList, i * range, count, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks);
+                       // { maxTaskCount = maxInternalTasks };
                     mySearchTasks.Add(ipSearchTask);
                     Console.WriteLine(i + ": " + i * range + ", " + (i == taskCount - 1 ? ipList.Count - range * i : range));
                     myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start));

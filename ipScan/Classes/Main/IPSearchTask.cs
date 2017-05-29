@@ -8,6 +8,7 @@ using ipScan.Base.IP;
 using System.Net.Sockets;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace ipScan.Classes.Main
 {
@@ -35,7 +36,16 @@ namespace ipScan.Classes.Main
 
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
+
+                    
+                    ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
+                    ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
+                    int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
+                    int newMaxTaskCount = maxTaskCount + deltaCount;
+                    maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < 1000) ? newMaxTaskCount : 1000 : maxTaskCount;
+
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
+                    /*
                     if (checkTasksLoopTime.TotalMilliseconds > checkTasksLoopTimeMax * 1.5)
                     {
                         if (!waiting4CheckTasks)
@@ -43,13 +53,13 @@ namespace ipScan.Classes.Main
                             Debug.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
                             waiting4CheckTasks = true;
                         }
-                        /*
+                        
                         sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
                         if (sleepTime > 1000)
                         {
                             sleepTime = 1000;
                         }
-                        */
+                        
                         //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
                         int newMaxTaskCount = (int)(maxTaskCount * 0.9);
                         maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
@@ -64,6 +74,7 @@ namespace ipScan.Classes.Main
                         }
                         sleepTime = 100;
                     }
+                    */
 
                     if (isPaused || waiting4CheckTasks)
                     {
@@ -73,7 +84,7 @@ namespace ipScan.Classes.Main
                     {
                         if (WorkingTaskCount > maxTaskCount)
                         {
-                            
+                            /*
                             //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
                             if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
                                 && 
@@ -83,7 +94,7 @@ namespace ipScan.Classes.Main
                                 int newMaxTaskCount = (int)(maxTaskCount * 1.1);
                                 maxTaskCount =  newMaxTaskCount > maxTaskCount ? newMaxTaskCount : ++maxTaskCount;
                             }
-                            
+                            */                            
                             Thread.Sleep(100);
                         }
                         else
@@ -125,31 +136,34 @@ namespace ipScan.Classes.Main
             try
             {
                 Ping ping = new Ping();
-                PingReply reply = await ping.SendPingAsync(ipAddress, TimeOut, buffer, options);
-                
-                try
-                {
-                    if (reply.Status == IPStatus.Success)
-                    {
-                        IPAddress address = reply.Address;
-                        foreach (IPAddress item in mainList)
-                        {
-                            if (item.ToString() == reply.Address.ToString())
-                            {
-                                address = item;
-                                break;
-                            }
-                        } 
-                        IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
-                        ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
-                        ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
-                        ipInfo.setHostDetailsAsync();
-                        Buffer.AddLine(ipInfo);
-                    }
-                }
-                catch (Exception)
-                {
 
+                PingReply reply = await ping.SendPingAsync(ipAddress, TimeOut, buffer, options);
+
+                if (!wasStopped) {
+                    try
+                    {
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            IPAddress address = reply.Address;
+                            foreach (IPAddress item in mainList)
+                            {
+                                if (item.ToString() == reply.Address.ToString())
+                                {
+                                    address = item;
+                                    break;
+                                }
+                            }
+                            IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
+                            ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
+                            ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
+                            ipInfo.setHostDetailsAsync();
+                            Buffer.AddLine(ipInfo);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                    }
                 }
                 Interlocked.Decrement(ref _WorkingTaskCount);
                 Interlocked.Increment(ref _progress);
@@ -158,18 +172,21 @@ namespace ipScan.Classes.Main
             {
                 Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
             }
-            
-            try
+
+            if (!wasStopped)
             {
-                lock (Locker)
+                try
                 {
-                    Tasks.Remove(ipAddress);
+                    lock (Locker)
+                    {
+                        Tasks.Remove(ipAddress);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-            }            
         }          
 
         public override void Stop()

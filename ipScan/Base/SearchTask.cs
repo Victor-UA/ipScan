@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.Devices;
 
 namespace ipScan.Base
 {
@@ -53,7 +54,8 @@ namespace ipScan.Base
         }
         protected int                       timeOut { get; set; }
         public bool                         isPaused { get; private set; }
-        private Action<T>                   bufferResultAddLine { get; set; }        
+        private Action<T>                   bufferResultAddLine { get; set; }    
+        protected ComputerInfo              ComputerInfo { get; set; }
 
         public SearchTask(int TaskId, List<TSub> TList, int Index, int Count, Action<T> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
         {
