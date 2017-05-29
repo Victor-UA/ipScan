@@ -33,6 +33,8 @@ namespace ipScan.Classes.Main
             {
                 Tasks = new Dictionary<object, Task>();
                 WorkingTaskCount = 0;
+                int maxTaskCountLimit = 100;
+                int minTaskCountLimit = 100;
 
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
@@ -42,7 +44,12 @@ namespace ipScan.Classes.Main
                     ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
                     int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
                     int newMaxTaskCount = maxTaskCount + deltaCount;
-                    maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < 1000) ? newMaxTaskCount : 1000 : maxTaskCount;
+                    maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
+
+                    if (WorkingTaskCount < minTaskCountLimit)
+                    {
+                        maxTaskCountLimit++;
+                    }
 
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
                     /*
