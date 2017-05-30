@@ -136,13 +136,9 @@ namespace ipScan.Classes.Main
             isRunning = false;
             Debug.WriteLine(taskId + " is stopped");
         }
-
-        private async Task PingHostAsync(string ipAddress, int TimeOut, byte[] buffer, PingOptions options)
-        {
-            PingHostAsync(IPAddress.Parse(ipAddress), TimeOut, buffer, options);
-        }
+        
         //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
-        private async Task PingHostAsync(IPAddress ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        private async Task PingHostAsync(string ipAddress, int TimeOut, byte[] buffer, PingOptions options)
         {
             Interlocked.Increment(ref _WorkingTaskCount);
             try
