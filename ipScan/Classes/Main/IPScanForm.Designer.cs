@@ -80,6 +80,7 @@
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
             this.textBox_ThreadCount.Text = "24";
+            this.textBox_ThreadCount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_ThreadCount_KeyPress);
             // 
             // button_Start
             // 

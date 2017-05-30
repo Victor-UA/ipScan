@@ -13,7 +13,7 @@ namespace ipScan.Base
         int                                 taskId { get; }
         int                                 WorkingTaskCount { get; }
         Dictionary<object, Task>            Tasks { get; }
-        int                                 maxTaskCount { get; set; }
+        int                                 MaxTaskCountLimit { get; set; }
 
         BufferedResult<T>                   Buffer { get; }        
         Dictionary<TSub, bool>              SubTaskStates { get; }

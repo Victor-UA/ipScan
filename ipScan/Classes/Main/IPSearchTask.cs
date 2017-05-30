@@ -15,8 +15,8 @@ namespace ipScan.Classes.Main
     class IPSearchTask : SearchTask<IPInfo, IPAddress>
     {        
 
-        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
-            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }        
+        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
         {            
@@ -33,8 +33,7 @@ namespace ipScan.Classes.Main
             {
                 Tasks = new Dictionary<object, Task>();
                 WorkingTaskCount = 0;
-                int maxTaskCountLimit = 300;
-                int minTaskCountLimit = 100;
+                
 
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
                 {
@@ -47,7 +46,7 @@ namespace ipScan.Classes.Main
                     maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
                     */
 
-                    maxTaskCount = maxTaskCountLimit;
+                    int maxTaskCount = MaxTaskCountLimit;
 
                     TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
                     
@@ -68,7 +67,7 @@ namespace ipScan.Classes.Main
                         //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
                         //int newMaxTaskCount = (int)(maxTaskCount * 0.9);
                         //maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
-                        maxTaskCount = minTaskCountLimit / 2;
+                        maxTaskCount = MaxTaskCountLimit / 2;
 
 
                     }
@@ -89,7 +88,7 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-                        if (WorkingTaskCount > maxTaskCount)
+                        if (WorkingTaskCount >= maxTaskCount)
                         {
                             
                             //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
@@ -102,7 +101,7 @@ namespace ipScan.Classes.Main
                                 //maxTaskCount = newMaxTaskCount > maxTaskCount ? 
                                 //    newMaxTaskCount <= maxTaskCountLimit ? 
                                 //    newMaxTaskCount : maxTaskCountLimit : ++maxTaskCount;
-                                maxTaskCount = maxTaskCountLimit;
+                                maxTaskCount = MaxTaskCountLimit;
                             }                         
                                                            
                             Thread.Sleep(100);

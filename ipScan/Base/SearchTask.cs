@@ -24,7 +24,7 @@ namespace ipScan.Base
             protected set { _WorkingTaskCount = value; }
         }
         public Dictionary<object, Task>     Tasks { get; protected set; }
-        public int                          maxTaskCount { get; set; }
+        public int                          MaxTaskCountLimit { get; set; }
 
         protected ICheckSearchTask          checkTasks { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
@@ -57,7 +57,7 @@ namespace ipScan.Base
         private Action<T>                   bufferResultAddLine { get; set; }    
         protected ComputerInfo              ComputerInfo { get; set; }
 
-        public SearchTask(int TaskId, List<TSub> TList, int Index, int Count, Action<T> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public SearchTask(int TaskId, List<TSub> TList, int Index, int Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
         {
             Buffer = new BufferedResult<T>();
             SubTaskStates = new Dictionary<TSub, bool>();
@@ -75,7 +75,7 @@ namespace ipScan.Base
             wasStopped = false;
             cancellationToken = CancellationToken;
             progress = 0;
-            maxTaskCount = 1;
+            MaxTaskCountLimit = maxTaskCountLimit;
         }
 
         protected void TSub_BeforeChanged(object sender, EventArgs e)
