@@ -21,9 +21,9 @@ namespace ipScan.Classes.Main
     {
         private Base.IP.Grid.Fill fill;
         private List<Task<PingReply>> myTasks { get; set; }
-        private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
+        private List<ISearchTask<IPInfo, string>> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
-        private CheckSearchTask<IPInfo, IPAddress> checkTasks { get; set; }
+        private CheckSearchTask<IPInfo, string> checkTasks { get; set; }
         private bool _resultIsUpdatable = true;
         private bool resultIsUpdatable
         {
@@ -71,9 +71,9 @@ namespace ipScan.Classes.Main
                 }
             }
         }
-        private List<IPAddress> ipList { get; set; }
-        private IPAddress firstIpAddress;
-        private IPAddress lastIpAddress;
+        private List<string> ipList { get; set; }
+        private string firstIpAddress;
+        private string lastIpAddress;
         private BufferedResult<IPInfo> bufferedResult { get; set; }
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }
@@ -279,7 +279,8 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    firstIpAddress = IPAddress.Parse(textBox_IPFirst.Text);
+                    IPAddress.Parse(textBox_IPFirst.Text);
+                    firstIpAddress = textBox_IPFirst.Text;
                 }
                 catch (FormatException)
                 {
@@ -289,7 +290,8 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    lastIpAddress = IPAddress.Parse(textBox_IPLast.Text);
+                    IPAddress.Parse(textBox_IPLast.Text);
+                    lastIpAddress = textBox_IPLast.Text;
                 }
                 catch (FormatException)
                 {
@@ -352,9 +354,9 @@ namespace ipScan.Classes.Main
                 
 
                 List<Task> myTasks = new List<Task>();//[taskCount];
-                mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
+                mySearchTasks = new List<ISearchTask<IPInfo, string>>();//[taskCount];
 
-                checkTasks = new CheckSearchTask<IPInfo, IPAddress>(
+                checkTasks = new CheckSearchTask<IPInfo, string>(
                     myTasks,
                     mySearchTasks,
                     StartButtonEnable,
@@ -455,6 +457,23 @@ namespace ipScan.Classes.Main
                 var bytes = BitConverter.GetBytes(i);
                 var newIp = new IPAddress(new[] { bytes[3], bytes[2], bytes[1], bytes[0] });
                 ipAddressesInTheRange.Add(newIp);
+            }
+            return ipAddressesInTheRange;
+        }
+        private static List<string> IPAddressesRange(string firstIPAddress, string lastIPAddress)
+        {
+            var firstIPAddressAsBytesArray = IPAddress.Parse(firstIPAddress).GetAddressBytes();
+            var lastIPAddressAsBytesArray = IPAddress.Parse(lastIPAddress).GetAddressBytes();
+            Array.Reverse(firstIPAddressAsBytesArray);
+            Array.Reverse(lastIPAddressAsBytesArray);
+            var firstIPAddressAsInt = BitConverter.ToInt32(firstIPAddressAsBytesArray, 0);
+            var lastIPAddressAsInt = BitConverter.ToInt32(lastIPAddressAsBytesArray, 0);
+            var ipAddressesInTheRange = new List<string>();
+            for (var i = firstIPAddressAsInt; i <= lastIPAddressAsInt; i++)
+            {
+                var bytes = BitConverter.GetBytes(i);
+                var newIp = new IPAddress(new[] { bytes[3], bytes[2], bytes[1], bytes[0] });
+                ipAddressesInTheRange.Add(newIp.ToString());
             }
             return ipAddressesInTheRange;
         }

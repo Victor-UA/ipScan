@@ -12,10 +12,10 @@ using System.Runtime.InteropServices;
 
 namespace ipScan.Classes.Main
 {
-    class IPSearchTask : SearchTask<IPInfo, IPAddress>
+    class IPSearchTask : SearchTask<IPInfo, string>
     {        
 
-        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public IPSearchTask(int TaskId, List<string> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
@@ -108,7 +108,7 @@ namespace ipScan.Classes.Main
                         }
                         else
                         {
-                            IPAddress address = mainList[currentPosition];
+                            string address = mainList[currentPosition];
                             lock(Locker)
                             {
                                 Tasks.Add(address, PingHostAsync(address, timeOut, buffer, options));
@@ -137,6 +137,10 @@ namespace ipScan.Classes.Main
             Debug.WriteLine(taskId + " is stopped");
         }
 
+        private async Task PingHostAsync(string ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        {
+            PingHostAsync(IPAddress.Parse(ipAddress), TimeOut, buffer, options);
+        }
         //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
         private async Task PingHostAsync(IPAddress ipAddress, int TimeOut, byte[] buffer, PingOptions options)
         {
@@ -152,8 +156,8 @@ namespace ipScan.Classes.Main
                     {
                         if (reply.Status == IPStatus.Success)
                         {
-                            IPAddress address = reply.Address;
-                            foreach (IPAddress item in mainList)
+                            string address = reply.Address.ToString();
+                            foreach (string item in mainList)
                             {
                                 if (item.ToString() == reply.Address.ToString())
                                 {

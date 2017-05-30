@@ -121,6 +121,10 @@ namespace ipScan.Base.IP
                 return null;
             }
         }
+        public static PhysicalAddress GetMACFromNetworkComputer(string ipAddress)
+        {
+            return GetMACFromNetworkComputer(IPAddress.Parse(ipAddress));
+        }
         public static PingReply         PingHost(IPAddress Address, int timeOut = 100)
         {
             //http://stackoverflow.com/questions/11800958/using-ping-in-c-sharp

@@ -11,7 +11,7 @@ namespace ipScan.Base.IP
 {
     public class IPInfo : object
     {
-        public IPAddress                        IPAddress { get; set; }
+        public string                           IPAddress { get; set; }
         public long                             RoundtripTime { get; set; }
 
         public HostForm                         HostForm { get; private set; }
@@ -56,18 +56,18 @@ namespace ipScan.Base.IP
             }
         }
 
-        public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime)
+        public IPInfo(string ipAddress, string hostName, long roundtripTime)
         {
             IPAddress = ipAddress;
             HostName = hostName;
             RoundtripTime = roundtripTime;
             HostForm = null;            
         }
-        public IPInfo(IPAddress ipAddress) : this(ipAddress, string.Empty, 0)
+        public IPInfo(string ipAddress) : this(ipAddress, string.Empty, 0)
         {
             
         }
-        public IPInfo(IPAddress ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
+        public IPInfo(string ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
         {
             
         }
@@ -146,7 +146,7 @@ namespace ipScan.Base.IP
 
                         socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         socket.ReceiveTimeout = 100;                      
-                        socket.BeginConnect(new IPEndPoint(IPAddress, currentHostPort), (IAsyncResult asyncResult) =>
+                        socket.BeginConnect(new IPEndPoint(System.Net.IPAddress.Parse(IPAddress), currentHostPort), (IAsyncResult asyncResult) =>
                         {
                             try
                             {
