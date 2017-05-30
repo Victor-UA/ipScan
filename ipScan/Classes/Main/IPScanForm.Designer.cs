@@ -51,6 +51,8 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.SG_Result = new SourceGrid.Grid();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -61,7 +63,7 @@
             this.textBox_IPFirst.Name = "textBox_IPFirst";
             this.textBox_IPFirst.Size = new System.Drawing.Size(165, 20);
             this.textBox_IPFirst.TabIndex = 0;
-            this.textBox_IPFirst.Text = "10.65.56.0";
+            this.textBox_IPFirst.Text = "10.65.56.1";
             // 
             // textBox_IPLast
             // 
@@ -69,17 +71,18 @@
             this.textBox_IPLast.Name = "textBox_IPLast";
             this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
             this.textBox_IPLast.TabIndex = 1;
-            this.textBox_IPLast.Text = "10.65.57.0";
+            this.textBox_IPLast.Text = "10.66.56.1";
             // 
             // textBox_ThreadCount
             // 
             this.textBox_ThreadCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_ThreadCount.Location = new System.Drawing.Point(12, 431);
+            this.textBox_ThreadCount.Location = new System.Drawing.Point(125, 431);
             this.textBox_ThreadCount.Name = "textBox_ThreadCount";
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
-            this.textBox_ThreadCount.Text = "24";
+            this.textBox_ThreadCount.Text = "100";
+            this.textBox_ThreadCount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_ThreadCount_KeyPress);
             // 
             // button_Start
             // 
@@ -107,12 +110,12 @@
             // textBox_Timeout
             // 
             this.textBox_Timeout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_Timeout.Location = new System.Drawing.Point(68, 431);
+            this.textBox_Timeout.Location = new System.Drawing.Point(256, 431);
             this.textBox_Timeout.Name = "textBox_Timeout";
             this.textBox_Timeout.Size = new System.Drawing.Size(50, 20);
             this.textBox_Timeout.TabIndex = 3;
             this.textBox_Timeout.TabStop = false;
-            this.textBox_Timeout.Text = "100";
+            this.textBox_Timeout.Text = "1000";
             // 
             // label_Progress
             // 
@@ -272,11 +275,31 @@
             // 
             this.toolTip1.ShowAlways = true;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 434);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(109, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Threads per Segment";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(181, 434);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(69, 13);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "Ping Timeout";
+            // 
             // IPScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 571);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.SG_Result);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.statusStrip1);
@@ -324,6 +347,8 @@
         private System.Windows.Forms.ToolStripStatusLabel tSSL_pauseTime;
         private SourceGrid.Grid SG_Result;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 

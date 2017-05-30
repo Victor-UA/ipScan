@@ -1,14 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
     interface ISearchTask<T, TSub>
-    {        
+    {
+        object                              Locker { get; }
+
         bool                                isRunning { get; }        
         bool                                wasStopped { get; }
         int                                 taskId { get; }
-        
-        BufferedResult<T>                   buffer { get; }        
+        int                                 WorkingTaskCount { get; }
+        Dictionary<object, Task>            Tasks { get; }
+        int                                 MaxTaskCountLimit { get; set; }
+
+        BufferedResult<T>                   Buffer { get; }        
         Dictionary<TSub, bool>              SubTaskStates { get; }
         Dictionary<int, int>                Progress { get; }
         int                                 index { get; }

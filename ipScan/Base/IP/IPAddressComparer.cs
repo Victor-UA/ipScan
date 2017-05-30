@@ -15,8 +15,25 @@ namespace ipScan.Base.IP
         {
             try
             {
-                string[] X = x.ToString().Split('.');
-                string[] Y = y.ToString().Split('.');
+                string[] X;
+                string[] Y;
+                try
+                {
+                    X = x.ToString().Split('.');
+                }
+                catch (Exception)
+                {
+                    X = new string[] { "0","0","0","0" };
+                }
+                try
+                {
+                    Y = y.ToString().Split('.');
+                }
+                catch (Exception)
+                {
+                    Y = new string[] { "0", "0", "0", "0" };
+                }
+                
                 for (int i = 0; i < 4; i++)
                 {
                     int xInt;
