@@ -78,7 +78,12 @@ namespace ipScan.Classes.Main
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }
         private int pictureBox1MouseLastX { get; set; }
-        private List<KeyValuePair<string, IComparer>> gridHeaders { get ; set; }        
+        private List<KeyValuePair<string, IComparer>>   gridHeaders { get ; set; }  
+        private Bitmap                                  bmpTasksResult { get; set; }
+        private int bmpWidth = 5000;
+        private int bmpHeight = 19;
+
+
 
         public IPScanForm()
         {
@@ -194,10 +199,11 @@ namespace ipScan.Classes.Main
 
         private void DrawMultiProgress()
         {
-            if (pictureBox1.ClientSize.Width > 0)
-            {
-                Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
-                Graphics graphics = Graphics.FromImage(bmp);
+            //if (pictureBox1.ClientSize.Width > 0)
+            
+                //Bitmap bmp = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
+                Bitmap bmpTasksProgress = new Bitmap(bmpWidth, bmpHeight);
+                Graphics graphics = Graphics.FromImage(bmpTasksProgress);
 
                 Pen pen = new Pen(Color.Green);
                 Brush brush = Brushes.Green;
@@ -209,40 +215,47 @@ namespace ipScan.Classes.Main
                         Dictionary<int, int> progress = mySearchTasks[i].Progress;
                         foreach (int index in progress.Keys)
                         {
-                            int x0 = (int)((double)index * bmp.Width / ipList.Count);
-                            int x1 = (int)((double)progress[index] * bmp.Width / ipList.Count);
+                            int x0 = (int)((double)index * bmpTasksProgress.Width / ipList.Count);
+                            int x1 = (int)((double)progress[index] * bmpTasksProgress.Width / ipList.Count);
                             int width = x1 - x0;
 
-                            Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmp.Height);
+                            Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmpTasksProgress.Height);
+                            graphics.DrawRectangle(pen, rectangle);
+                            graphics.FillRectangle(brush, rectangle);
+                        }
+                    }
+
+                    //Додати інший bmp як маску знайдених
+                    graphics = Graphics.FromImage(bmpTasksResult);
+                    pen = new Pen(Color.Lime);
+                    brush = Brushes.Lime;
+                    int rectWidth = bmpTasksResult.Width / ipList.Count;
+                    List<IPInfo> buffer = bufferedResult.getBuffer();
+                    //foreach (IPInfo item in bufferedResult.Buffer)
+                    foreach (IPInfo item in buffer)
+                    {
+                        int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
+                        int x = (int)((double)index * bmpTasksResult.Width / ipList.Count);
+                        if (rectWidth < 2)
+                        {
+                            graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmpTasksResult.Height));
+                        }
+                        else
+                        {
+                            Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmpTasksResult.Height);
                             graphics.DrawRectangle(pen, rectangle);
                             graphics.FillRectangle(brush, rectangle);
                         }
                     }
                     
-                    /*
-                    //Додати інший bmp як маску знайдених
-                    pen = new Pen(Color.Lime);
-                    brush = Brushes.Lime;
-                    int rectWidth = bmp.Width / ipList.Count;
-                    foreach (IPInfo item in bufferedResult.Buffer)
-                    {
-                        int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
-                        int x = (int)((double)index * bmp.Width / ipList.Count);
-                        if (rectWidth < 2)
-                        {
-                            graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmp.Height));
-                        }
-                        else
-                        {
-                            Rectangle rectangle = new Rectangle(x, 0, rectWidth, bmp.Height);
-                            graphics.DrawRectangle(pen, rectangle);
-                            graphics.FillRectangle(brush, rectangle);
-                        }
-                    }
-                    */
-                }
+               
 
+                Bitmap bmp = new Bitmap(bmpWidth, bmpHeight);
+                graphics = Graphics.FromImage(bmp);
+                graphics.DrawImageUnscaled(bmpTasksProgress, 0, 0);
+                graphics.DrawImageUnscaled(bmpTasksResult, 0, 0);
                 pictureBox1.Image = bmp;
+                //pictureBox1.Image = bmpTasksProgress;
                 pictureBox1.Refresh();
             }
         }
@@ -305,6 +318,9 @@ namespace ipScan.Classes.Main
                 #endregion
 
                 ipList = IPAddressesRange(firstIpAddress, lastIpAddress);
+
+                bmpTasksResult = new Bitmap(bmpWidth, bmpHeight);
+
                 try
                 {
                     SetProgressMaxValue(ipList.Count);
@@ -368,7 +384,7 @@ namespace ipScan.Classes.Main
                         .Cast<ManagementObject>()
                         .First();
 
-                    taskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 1;
+                    taskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2;
 
                 }
                 catch (Exception)

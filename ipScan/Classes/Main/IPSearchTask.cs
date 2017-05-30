@@ -33,7 +33,7 @@ namespace ipScan.Classes.Main
             {
                 Tasks = new Dictionary<object, Task>();
                 WorkingTaskCount = 0;
-                int maxTaskCountLimit = 600;
+                int maxTaskCountLimit = 300;
                 int minTaskCountLimit = 100;
 
                 while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
