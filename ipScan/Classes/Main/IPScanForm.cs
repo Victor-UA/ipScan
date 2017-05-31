@@ -210,11 +210,11 @@ namespace ipScan.Classes.Main
             {
                 for (int i = 0; i < mySearchTasks.Count; i++)
                 {
-                    Dictionary<uint, uint> progress = mySearchTasks[i].Progress;
+                    Dictionary<uint, uint> progress = mySearchTasks[i].Progress;                    
                     foreach (uint index in progress.Keys)
                     {
-                        int x0 = (int)((double)index * bmpTasksProgress.Width / ipListCount);
-                        int x1 = (int)((double)progress[index] * bmpTasksProgress.Width / ipListCount);
+                        int x0 = (int)((index - firstIpAddress) * (uint)bmpTasksProgress.Width / ipListCount);
+                        int x1 = (int)((progress[index] - firstIpAddress) * (uint)bmpTasksProgress.Width / ipListCount);
                         int width = x1 - x0;
 
                         Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmpTasksProgress.Height);
