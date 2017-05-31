@@ -82,7 +82,14 @@ namespace ipScan.Base
         {
             try
             {
-                SubTaskStates.Add((TSub)sender, true);
+                if (SubTaskStates.ContainsKey((TSub)sender))
+                {
+                    SubTaskStates[(TSub)sender] = true;
+                }
+                else
+                {
+                    SubTaskStates.Add((TSub)sender, true);
+                }
             }
             catch (Exception ex)
             {
