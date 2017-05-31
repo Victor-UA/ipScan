@@ -45,7 +45,7 @@ namespace ipScan.Base.IP.Grid
             {
                 IPInfo ipInfo = item as IPInfo;
                 SourceGrid.Cells.Controllers.IController CellController = newCellController(item, Color.LightBlue);
-                grid[index, 0] = newCell(ipInfo, ipInfo.IPAddressStr, CellController);
+                grid[index, 0] = newCell(ipInfo, ipInfo.IPAddress, CellController);
                 grid[index, 1] = newCell(ipInfo, ipInfo.RoundtripTime, CellController);
                 grid[index, 2] = newCell(ipInfo, ipInfo.HostName, CellController);
                 grid[index, 3] = newCell(ipInfo, ipInfo.HostMac, CellController);
