@@ -14,7 +14,7 @@ namespace ipScan.Base.IP.Grid
             if (itemType == typeof(IPInfo))
             {
                 IPInfo ipInfo = item as IPInfo;
-                grid[Index, 0].Value = ipInfo.IPAddress;
+                grid[Index, 0].Value = ipInfo.IPAddressStr;
                 grid[Index, 0].Tag = ipInfo;
                 grid[Index, 1].Value = ipInfo.RoundtripTime;
                 grid[Index, 1].Tag = ipInfo;

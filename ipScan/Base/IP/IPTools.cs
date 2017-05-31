@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -17,6 +18,31 @@ namespace ipScan.Base.IP
             Int32 destIpAddress, Int32 srcIpAddress,
             byte[] macAddress, ref Int32 macAddressLength
         );
+
+        public static uint IPAddress2UInt32(string ipAddress)
+        {
+            return IPAddress2UInt32(IPAddress.Parse(ipAddress));
+        }
+        //https://stackoverflow.com/questions/36831/how-do-you-parse-an-ip-address-string-to-a-uint-value-in-c
+        public static uint IPAddress2UInt32(IPAddress ipAddress)
+        {
+            byte[] ipBytes = ipAddress.GetAddressBytes();
+            uint result =   (uint)ipBytes[3] << 24;
+            result +=       (uint)ipBytes[2] << 16;
+            result +=       (uint)ipBytes[1] << 8;
+            result +=       (uint)ipBytes[0];
+            return result;
+        }
+        public static IPAddress UInt322IPAddress(uint ipAddress)
+        {            
+            return IPAddress.Parse(UInt322IPAddressStr(ipAddress));
+        }
+        //https://stackoverflow.com/questions/22058697/c-sharp-winrt-convert-ipv4-address-from-uint-to-string
+        public static string UInt322IPAddressStr(uint ipAddress)
+        {            
+            byte[] bytes = BitConverter.GetBytes(ipAddress);
+            return string.Join(".", bytes);            
+        }
 
         public static PingBySocketReply PingHostBySocket(IPAddress Address)
         {
