@@ -96,7 +96,7 @@ namespace ipScan.Base.IP
             }
             else
             {
-                HostForm.Text = IPAddress.ToString() + " " + HostName;
+                HostForm.Text = IPAddressStr + " " + HostName;
             }
         }
         public void                             ShowHostForm(System.Windows.Forms.IWin32Window owner = null)
