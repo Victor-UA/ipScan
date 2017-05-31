@@ -599,8 +599,8 @@ namespace ipScan.Classes.Main
                     {
                     }
                 } 
+                e.Handled = true;
             }
-            e.Handled = true;
         }
     }
 
