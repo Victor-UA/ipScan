@@ -608,6 +608,7 @@ namespace ipScan.Classes.Main
                     }
                 } 
             }
+            e.Handled = true;
         }
     }
 
