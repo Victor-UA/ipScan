@@ -30,12 +30,12 @@ namespace ipScan.Base.Grid
             SourceGrid.Grid grid,
             List<T> List,
             Func<T, Color, GridCellController> newCellController = null,
-            List<KeyValuePair<String, IComparer>> Fields = null)
+            List<KeyValuePair<string, IComparer>> Fields = null)
         {
             grid.Columns.Clear();
             grid.Rows.Clear();
 
-            List<KeyValuePair<String, IComparer>> fields = Fields ?? new List<KeyValuePair<String, IComparer>>() { new KeyValuePair<string, IComparer>("Undefined", null) };
+            List<KeyValuePair<string, IComparer>> fields = Fields ?? new List<KeyValuePair<String, IComparer>>() { new KeyValuePair<string, IComparer>("Undefined", null) };
 
             //Columns filling
             grid.ColumnsCount = fields.Count;

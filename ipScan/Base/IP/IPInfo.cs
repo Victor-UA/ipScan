@@ -11,7 +11,20 @@ namespace ipScan.Base.IP
 {
     public class IPInfo : object
     {
-        public IPAddress                        IPAddress { get; set; }
+        private uint                            _IPAddress;
+        public uint                             IPAddress
+        {
+            get
+            {
+                return _IPAddress;
+            }
+            set
+            {
+                _IPAddress = value;
+                IPAddressStr = IPTools.UInt322IPAddressStr(value);
+            }
+        }
+        public string                           IPAddressStr { get; private set; }
         public long                             RoundtripTime { get; set; }
 
         public HostForm                         HostForm { get; private set; }
@@ -56,18 +69,18 @@ namespace ipScan.Base.IP
             }
         }
 
-        public IPInfo(IPAddress ipAddress, string hostName, long roundtripTime)
+        public IPInfo(uint ipAddress, string hostName, long roundtripTime)
         {
             IPAddress = ipAddress;
             HostName = hostName;
             RoundtripTime = roundtripTime;
             HostForm = null;            
         }
-        public IPInfo(IPAddress ipAddress) : this(ipAddress, string.Empty, 0)
+        public IPInfo(uint ipAddress) : this(ipAddress, string.Empty, 0)
         {
             
         }
-        public IPInfo(IPAddress ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
+        public IPInfo(uint ipAddress, long roundtripTime) : this(ipAddress, string.Empty, roundtripTime)
         {
             
         }
@@ -209,7 +222,7 @@ namespace ipScan.Base.IP
                 HostDetailsBeforeChanged(IPAddress, new EventArgs());
                 try
                 {
-                    HostName = Dns.GetHostEntry(IPAddress).HostName;
+                    HostName = Dns.GetHostEntry(IPTools.UInt322IPAddress(IPAddress)).HostName;
                 }
                 catch (Exception)
                 {
@@ -219,7 +232,7 @@ namespace ipScan.Base.IP
 
                 try
                 {
-                    HostMac = IPTools.GetMACFromNetworkComputer(IPAddress);
+                    HostMac = IPTools.GetMACFromNetworkComputer(IPTools.UInt322IPAddress(IPAddress));
                 }
                 catch (Exception)
                 {

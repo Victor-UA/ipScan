@@ -12,7 +12,7 @@ namespace ipScan.Base
         private bool isRunning { get; set; }
         private bool wasStopped { get; set; }
         private static readonly object          lockObject = new object();
-        private int                             OkRemaind { get; } = 4;
+        private uint                             OkRemaind { get; } = 4;
 
         private List<Task>                      myTasks { get; set; }
         private List<ISearchTask<T, TSub>>      mySearchTasks { get; set; }
@@ -24,9 +24,9 @@ namespace ipScan.Base
         private BufferedResult<T>               bufferResult { get; set; }        
         private Action<object>                  disposeTasks { get; set; }
 
-        private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
+        private Action<uint, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
 
-        private int                             TListCount { get; set; }
+        private uint                            IPListCount { get; set; }
         private DateTime                        timeStart { get; set; }
         public DateTime                         LastTime { get; private set; }
         public TimeSpan                         loopTime { get; protected set; }
@@ -44,8 +44,8 @@ namespace ipScan.Base
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
-            int TListCount,
+            Action<uint, int, int, TimeSpan, TimeSpan, int> SetProgress,
+            uint ipListCount,
             BufferedResult<T> BufferResult)
         {
             myTasks = MyTasks;
@@ -54,7 +54,7 @@ namespace ipScan.Base
             stopButtonEnable = StopButtonEnable;
             resultAppendBuffer = ResultAppendBuffer;
             setProgress = SetProgress;
-            this.TListCount = TListCount;
+            this.IPListCount = ipListCount;
             timeStart = DateTime.Now;
             LastTime = DateTime.Now;
             loopTime = TimeSpan.FromMilliseconds(0);
@@ -75,7 +75,7 @@ namespace ipScan.Base
                 bool TasksAreCompleted = false;
                 int mySearchTasksCountLimit = 50000;
                 bool mySearchTasksOutOfCountLimit_Paused = false;
-                int maxRemaind = OkRemaind;
+                uint maxRemaind = OkRemaind;
                 LastTime = DateTime.Now;
                 do
                 {                    
@@ -95,7 +95,7 @@ namespace ipScan.Base
                                                
                         bool mySearchTasksStartedAll = true;
                         TasksAreRunning = false;
-                        int progress = 0;
+                        uint progress = 0;
                         int TasksCount = 0;
                         int subTasksCount = 0;
                                                 
@@ -152,7 +152,7 @@ namespace ipScan.Base
                                             var mySearchTaskSeekRemaind = mySearchTasks[j];
                                             if (mySearchTaskSeekRemaind.isRunning)
                                             {
-                                                int taskRemaind = mySearchTaskSeekRemaind.remaind;
+                                                uint taskRemaind = mySearchTaskSeekRemaind.Remaind;
                                                 if (taskRemaind > maxRemaind)
                                                 {
                                                     maxRemaind = taskRemaind;
@@ -168,13 +168,13 @@ namespace ipScan.Base
                                             {
                                                 Thread.Sleep(1);
                                             }
-                                            int remaind = mySearchTaskMaxRemind.remaind;
-                                            int count = mySearchTaskMaxRemind.count;
-                                            int index = mySearchTaskMaxRemind.index;
-                                            int newRemaind = remaind / 2;
-                                            int newCount = count - newRemaind;
+                                            uint remaind = mySearchTaskMaxRemind.Remaind;
+                                            uint count = mySearchTaskMaxRemind.Count;
+                                            uint index = mySearchTaskMaxRemind.FirstIPAddress;
+                                            uint newRemaind = remaind / 2;
+                                            uint newCount = count - newRemaind;
 
-                                            mySearchTaskMaxRemind.count = newCount;
+                                            mySearchTaskMaxRemind.Count = newCount;
                                             mySearchTaskMaxRemind.Pause(false);
 
                                             mySearchTask.Init(index + newCount, newRemaind);
@@ -240,7 +240,7 @@ namespace ipScan.Base
                             }
                             else
                             {
-                                timeLeft = TimeSpan.FromMilliseconds((TListCount - progress) * (timePassed.TotalMilliseconds / progress));
+                                timeLeft = TimeSpan.FromMilliseconds((IPListCount - progress) * (timePassed.TotalMilliseconds / progress));
                             }
                         }
                         catch (Exception ex)

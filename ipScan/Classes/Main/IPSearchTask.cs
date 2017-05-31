@@ -12,11 +12,11 @@ using System.Runtime.InteropServices;
 
 namespace ipScan.Classes.Main
 {
-    class IPSearchTask : SearchTask<IPInfo, IPAddress>
+    class IPSearchTask : SearchTask<IPInfo, uint>
     {        
 
-        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
-            : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
+        public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+            : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
         {            
@@ -24,7 +24,7 @@ namespace ipScan.Classes.Main
             bool waiting4CheckTasks = false;
             int checkTasksLoopTimeMax = 1000; //мілісекунди
             int sleepTime = 100;
-            Progress.Add(index, currentPosition);
+            Progress.Add(FirstIPAddress, CurrentPosition);
 
             byte[] buffer = { 1 };
             PingOptions options = new PingOptions(50, true);            
@@ -35,7 +35,7 @@ namespace ipScan.Classes.Main
                 WorkingTaskCount = 0;
                 
 
-                while (isRunning && currentPosition < index + count && currentPosition < mainList.Count)
+                while (isRunning && CurrentPosition < FirstIPAddress + Count)
                 {
 
                     /*
@@ -108,13 +108,12 @@ namespace ipScan.Classes.Main
                         }
                         else
                         {
-                            IPAddress address = mainList[currentPosition];
                             lock(Locker)
                             {
-                                Tasks.Add(address, PingHostAsync(address, timeOut, buffer, options));
+                                Tasks.Add(CurrentPosition, PingHostAsync(CurrentPosition, timeOut, buffer, options));
                             }
-                            currentPosition++;
-                            Progress[index] = currentPosition;
+                            CurrentPosition++;
+                            Progress[FirstIPAddress] = CurrentPosition;
                         }
 
                     }
@@ -138,29 +137,21 @@ namespace ipScan.Classes.Main
         }
 
         //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
-        private async Task PingHostAsync(IPAddress ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        private async Task PingHostAsync(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
         {
             Interlocked.Increment(ref _WorkingTaskCount);
             try
             {
                 Ping ping = new Ping();
 
-                PingReply reply = await ping.SendPingAsync(ipAddress, TimeOut, buffer, options);
+                PingReply reply = await ping.SendPingAsync(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
 
                 if (!wasStopped) {
                     try
                     {
                         if (reply.Status == IPStatus.Success)
                         {
-                            IPAddress address = reply.Address;
-                            foreach (IPAddress item in mainList)
-                            {
-                                if (item.ToString() == reply.Address.ToString())
-                                {
-                                    address = item;
-                                    break;
-                                }
-                            }
+                            uint address = IPTools.IPAddress2UInt32(reply.Address);                            
                             IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
                             ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
                             ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
@@ -173,8 +164,12 @@ namespace ipScan.Classes.Main
                         Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
                     }
                 }
-                Interlocked.Decrement(ref _WorkingTaskCount);
-                Interlocked.Increment(ref _progress);
+                //Interlocked.Decrement(ref _WorkingTaskCount);
+                lock (Locker)
+                {
+                    _WorkingTaskCount--;
+                    _progress++;
+                }
             }
             catch (Exception ex)
             {

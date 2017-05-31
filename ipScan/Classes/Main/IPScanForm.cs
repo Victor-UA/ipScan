@@ -21,9 +21,9 @@ namespace ipScan.Classes.Main
     {
         private Base.IP.Grid.Fill fill;
         private List<Task<PingReply>> myTasks { get; set; }
-        private List<ISearchTask<IPInfo, IPAddress>> mySearchTasks { get; set; }
+        private List<ISearchTask<IPInfo, uint>> mySearchTasks { get; set; }
         private CancellationTokenSource mySearchTasksCancel { get; set; }
-        private CheckSearchTask<IPInfo, IPAddress> checkTasks { get; set; }
+        private CheckSearchTask<IPInfo, uint> checkTasks { get; set; }
         private bool _resultIsUpdatable = true;
         private bool resultIsUpdatable
         {
@@ -71,9 +71,10 @@ namespace ipScan.Classes.Main
                 }
             }
         }
-        private List<IPAddress> ipList { get; set; }
-        private IPAddress firstIpAddress;
-        private IPAddress lastIpAddress;
+        //private List<uint> ipList { get; set; }
+        private uint ipListCount { get; set; }
+        private uint firstIpAddress;
+        private uint lastIpAddress;
         private BufferedResult<IPInfo> bufferedResult { get; set; }
         private int TimeOut { get; set; }
         private ListIPInfo oldLines { get; set; }
@@ -157,16 +158,16 @@ namespace ipScan.Classes.Main
             GC.Collect();
         }        
 
-        private void SetProgress(int Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
+        private void SetProgress(uint Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<int, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
+                this.Invoke(new Action<uint, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
                 return;
             }
             try
             {
-                toolStripProgressBar1.Value = Progress;
+                toolStripProgressBar1.Value = (int)(Progress / ipListCount * 100);
                 label_Progress.Text = Progress.ToString() + @"\" + toolStripProgressBar1.Maximum.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
                 tSSL_Found.Text = bufferedResult == null ? "0" : bufferedResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
@@ -209,11 +210,11 @@ namespace ipScan.Classes.Main
             {
                 for (int i = 0; i < mySearchTasks.Count; i++)
                 {
-                    Dictionary<int, int> progress = mySearchTasks[i].Progress;
-                    foreach (int index in progress.Keys)
+                    Dictionary<uint, uint> progress = mySearchTasks[i].Progress;
+                    foreach (uint index in progress.Keys)
                     {
-                        int x0 = (int)((double)index * bmpTasksProgress.Width / ipList.Count);
-                        int x1 = (int)((double)progress[index] * bmpTasksProgress.Width / ipList.Count);
+                        int x0 = (int)((double)index * bmpTasksProgress.Width / ipListCount);
+                        int x1 = (int)((double)progress[index] * bmpTasksProgress.Width / ipListCount);
                         int width = x1 - x0;
 
                         Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmpTasksProgress.Height);
@@ -225,12 +226,12 @@ namespace ipScan.Classes.Main
                 graphics = Graphics.FromImage(bmpTasksResult);
                 pen = new Pen(Color.Lime);
                 brush = Brushes.Lime;
-                int rectWidth = bmpTasksResult.Width / ipList.Count;
+                int rectWidth = (int)(bmpTasksResult.Width / ipListCount);
                 List<IPInfo> buffer = bufferedResult.getBuffer();
                 foreach (IPInfo item in buffer)
                 {
-                    int index = ipList.FindIndex(IPAddress => IPAddress.ToString() == item.IPAddress.ToString());
-                    int x = (int)((double)index * bmpTasksResult.Width / ipList.Count);
+                    uint index = item.IPAddress - firstIpAddress;
+                    int x = (int)((double)index * bmpTasksResult.Width / ipListCount);
                     if (rectWidth < 2)
                     {
                         graphics.DrawLine(pen, new Point(x, 0), new Point(x, bmpTasksResult.Height));
@@ -279,7 +280,7 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    firstIpAddress = IPAddress.Parse(textBox_IPFirst.Text);
+                    firstIpAddress = IPTools.IPAddress2UInt32(textBox_IPFirst.Text);
                 }
                 catch (FormatException)
                 {
@@ -289,7 +290,7 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    lastIpAddress = IPAddress.Parse(textBox_IPLast.Text);
+                    lastIpAddress = IPTools.IPAddress2UInt32(textBox_IPLast.Text);
                 }
                 catch (FormatException)
                 {
@@ -309,13 +310,13 @@ namespace ipScan.Classes.Main
 
                 #endregion
 
-                ipList = IPAddressesRange(firstIpAddress, lastIpAddress);
+                ipListCount = (lastIpAddress - firstIpAddress) + 1;
 
                 bmpTasksResult = new Bitmap(bmpWidth, bmpHeight);
 
                 try
                 {
-                    SetProgressMaxValue(ipList.Count);
+                    SetProgressMaxValue(0);
                     SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
                 }
                 catch (Exception ex)
@@ -324,7 +325,7 @@ namespace ipScan.Classes.Main
                     return;
                 }
 
-                if (ipList == null || ipList.Count == 0)
+                if (ipListCount == 0)
                 {
                     MessageBox.Show("Помилка у кінцевій адресі", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -352,9 +353,9 @@ namespace ipScan.Classes.Main
                 
 
                 List<Task> myTasks = new List<Task>();//[taskCount];
-                mySearchTasks = new List<ISearchTask<IPInfo, IPAddress>>();//[taskCount];
+                mySearchTasks = new List<ISearchTask<IPInfo, uint>>();//[taskCount];
 
-                checkTasks = new CheckSearchTask<IPInfo, IPAddress>(
+                checkTasks = new CheckSearchTask<IPInfo, uint>(
                     myTasks,
                     mySearchTasks,
                     StartButtonEnable,
@@ -362,7 +363,7 @@ namespace ipScan.Classes.Main
                     ResultFillFromBuffer,
                     DisposeTasks,
                     SetProgress,
-                    ipList.Count,
+                    ipListCount,
                     bufferedResult);
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
@@ -382,13 +383,18 @@ namespace ipScan.Classes.Main
                 catch (Exception)
                 {
                 }
-                int range = (int)Math.Truncate((double)ipList.Count / maxTaskCount);
+                uint range = (uint)Math.Truncate((double)ipListCount / maxTaskCount);
                 for (int i = 0; i < maxTaskCount; i++)
                 {
-                    int count = i == maxTaskCount - 1 ? ipList.Count - range * i : range;
-                    IPSearchTask ipSearchTask = new IPSearchTask(i, ipList, i * range, count, maxTaskCountLimit, BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks);
+                    uint count = ((i == maxTaskCount - 1) ? ipListCount - range * (uint)i : range);
+                    IPSearchTask ipSearchTask = new IPSearchTask(
+                        i, firstIpAddress + (uint)i * range, count, maxTaskCountLimit, 
+                        BufferResultAddLine, TimeOut, mySearchTasksCancel.Token, checkTasks
+                    );
                     mySearchTasks.Add(ipSearchTask);
-                    Console.WriteLine(i + ": " + i * range + ", " + (i == maxTaskCount - 1 ? ipList.Count - range * i : range));
+                    Console.WriteLine(i + ": " + i * range + ", " + 
+                        (i == maxTaskCount - 1 ? ipListCount - range * i : range)
+                    );
                     myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start));
                 }                
             }
@@ -441,20 +447,12 @@ namespace ipScan.Classes.Main
         }
         #endregion
 
-        private static List<IPAddress> IPAddressesRange(IPAddress firstIPAddress, IPAddress lastIPAddress)
-        {
-            var firstIPAddressAsBytesArray = firstIPAddress.GetAddressBytes();
-            var lastIPAddressAsBytesArray = lastIPAddress.GetAddressBytes();
-            Array.Reverse(firstIPAddressAsBytesArray);
-            Array.Reverse(lastIPAddressAsBytesArray);
-            var firstIPAddressAsInt = BitConverter.ToInt32(firstIPAddressAsBytesArray, 0);
-            var lastIPAddressAsInt = BitConverter.ToInt32(lastIPAddressAsBytesArray, 0);
-            var ipAddressesInTheRange = new List<IPAddress>();
-            for (var i = firstIPAddressAsInt; i <= lastIPAddressAsInt; i++)
-            {
-                var bytes = BitConverter.GetBytes(i);
-                var newIp = new IPAddress(new[] { bytes[3], bytes[2], bytes[1], bytes[0] });
-                ipAddressesInTheRange.Add(newIp);
+        private static List<uint> IPAddressesRange(uint firstIPAddress, uint lastIPAddress)
+        {            
+            var ipAddressesInTheRange = new List<uint>();
+            for (var i = firstIPAddress; i <= lastIPAddress; i++)
+            {                
+                ipAddressesInTheRange.Add(i);
             }
             return ipAddressesInTheRange;
         }
@@ -511,19 +509,12 @@ namespace ipScan.Classes.Main
             }            
         }
 
-        private int pictureBox12ipListIndex(int X)
+        private uint pictureBox12ipListIndex(int X)
         {
             try
             {
-                if (ipList != null)
-                {
-                    double k = ipList.Count / (double)pictureBox1.Image.Width;
-                    return (int)(k * X);
-                }
-                else
-                {
-                    return 0;
-                }
+                double k = ipListCount / (double)pictureBox1.Image.Width;
+                return (uint)(k * X);
             }
             catch (Exception)
             {
@@ -535,22 +526,23 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                if (ipList != null && pictureBox1MouseLastX != e.X) 
+                if (pictureBox1MouseLastX != e.X) 
                 {
                     pictureBox1MouseLastX = e.X;
-                    int index = pictureBox12ipListIndex(e.X);
+                    uint index = pictureBox12ipListIndex(e.X);
+                    string ipAddress = IPTools.UInt322IPAddressStr(firstIpAddress + index);
                     foreach (var Row in SG_Result.Rows)
                     {
                         int rowIndex = Row.Index;
                         SourceGrid.Cells.ICellVirtual[] cellsAtRow = Row.Grid.GetCellsAtRow(rowIndex);
-                        if (cellsAtRow[0].ToString() == ipList[index].ToString())
+                        if (cellsAtRow[0].ToString() == ipAddress) 
                         {
                             SG_Result.ShowCell(new SourceGrid.Position(rowIndex, 0), true);
-                            toolTip1.Show("\t" + (cellsAtRow[1].ToString() ?? "") + "\r" + (cellsAtRow[2].ToString() ?? "") + "\r" + ipList[index].ToString(), pictureBox1 as IWin32Window);
+                            toolTip1.Show("\t" + (cellsAtRow[1].ToString() ?? "") + "\r" + (cellsAtRow[2].ToString() ?? "") + "\r" + ipAddress, pictureBox1 as IWin32Window);
                             return;
                         }
                     }
-                    toolTip1.Show("\r\r" + ipList[index].ToString(), pictureBox1 as IWin32Window);
+                    toolTip1.Show("\r\r" + ipAddress, pictureBox1 as IWin32Window);
                 }
             }
             catch (Exception)
@@ -571,7 +563,7 @@ namespace ipScan.Classes.Main
                 List<IPInfo> ipInfoList = bufferedResult.Buffer;
                 for (int i = 0; i < ipInfoList.Count; i++)
                 {
-                    if (ipInfoList[i].IPAddress.ToString() == ipList[pictureBox12ipListIndex(pictureBox1MouseLastX)].ToString())
+                    if (ipInfoList[i].IPAddressStr == IPTools.UInt322IPAddressStr(firstIpAddress + pictureBox12ipListIndex(pictureBox1MouseLastX)))
                     {
                         ipInfoList[i].ShowHostForm();
                         return;
@@ -607,8 +599,8 @@ namespace ipScan.Classes.Main
                     {
                     }
                 } 
+                e.Handled = true;
             }
-            e.Handled = true;
         }
     }
 
