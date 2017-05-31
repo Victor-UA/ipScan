@@ -152,17 +152,7 @@ namespace ipScan.Classes.Main
                     {
                         if (reply.Status == IPStatus.Success)
                         {
-                            uint address = IPTools.IPAddress2UInt32(reply.Address);
-                            /*
-                            foreach (IPAddress item in mainList)
-                            {
-                                if (item.ToString() == reply.Address.ToString())
-                                {
-                                    address = item;
-                                    break;
-                                }
-                            }
-                            */
+                            uint address = IPTools.IPAddress2UInt32(reply.Address);                            
                             IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
                             ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
                             ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
