@@ -12,10 +12,10 @@ using System.Runtime.InteropServices;
 
 namespace ipScan.Classes.Main
 {
-    class IPSearchTask : SearchTask<IPInfo, IPAddress>
+    class IPSearchTask : SearchTask<IPInfo, uint>
     {        
 
-        public IPSearchTask(int TaskId, List<IPAddress> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public IPSearchTask(int TaskId, List<uint> IPList, int Index, int Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
             : base(TaskId, IPList, Index, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
@@ -108,7 +108,7 @@ namespace ipScan.Classes.Main
                         }
                         else
                         {
-                            IPAddress address = mainList[currentPosition];
+                            uint address = mainList[currentPosition];
                             lock(Locker)
                             {
                                 Tasks.Add(address, PingHostAsync(address, timeOut, buffer, options));
@@ -138,14 +138,14 @@ namespace ipScan.Classes.Main
         }
 
         //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
-        private async Task PingHostAsync(IPAddress ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        private async Task PingHostAsync(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
         {
             Interlocked.Increment(ref _WorkingTaskCount);
             try
             {
                 Ping ping = new Ping();
 
-                PingReply reply = await ping.SendPingAsync(ipAddress, TimeOut, buffer, options);
+                PingReply reply = await ping.SendPingAsync(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
 
                 if (!wasStopped) {
                     try
