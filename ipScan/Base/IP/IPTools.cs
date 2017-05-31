@@ -21,21 +21,28 @@ namespace ipScan.Base.IP
 
         public static uint IPAddress2UInt32(string ipAddress)
         {
-            string[] ipBytes = ipAddress.Split('.');                  //20463882
-            uint result =   (uint)byte.Parse(ipBytes[0]) << 24;       //20464138
-            result +=       (uint)byte.Parse(ipBytes[1]) << 16;
-            result +=       (uint)byte.Parse(ipBytes[2]) << 8;
-            result +=       (uint)byte.Parse(ipBytes[3]);
+            /*
+            byte[] ipBytes = IPAddress.Parse(ipAddress).GetAddressBytes();
+            Array.Reverse(ipBytes);
+            uint result = BitConverter.ToUInt32(ipBytes, 0);
+            */
+            string[] ipBytesStr = ipAddress.Split('.');                  
+                                                                      
+            uint result =   (uint)byte.Parse(ipBytesStr[0]) << 24;       
+            result +=       (uint)byte.Parse(ipBytesStr[1]) << 16;
+            result +=       (uint)byte.Parse(ipBytesStr[2]) << 8;
+            result +=       (uint)byte.Parse(ipBytesStr[3]);
+    
             return result;
         }
         //https://stackoverflow.com/questions/36831/how-do-you-parse-an-ip-address-string-to-a-uint-value-in-c
         public static uint IPAddress2UInt32(IPAddress ipAddress)
-        {
-            byte[] ipBytes = ipAddress.GetAddressBytes(); //20463882
-            uint result =   (uint)ipBytes[3] << 24;       //20464138
-            result +=       (uint)ipBytes[2] << 16;
-            result +=       (uint)ipBytes[1] << 8;
-            result +=       (uint)ipBytes[0];
+        {            
+            byte[] ipBytes = ipAddress.GetAddressBytes();
+            uint result =   (uint)ipBytes[0] << 24;
+            result +=       (uint)ipBytes[1] << 16;
+            result +=       (uint)ipBytes[2] << 8;
+            result +=       (uint)ipBytes[3];
             return result;
         }
         public static IPAddress UInt322IPAddress(uint ipAddress)
@@ -46,7 +53,7 @@ namespace ipScan.Base.IP
         public static string UInt322IPAddressStr(uint ipAddress)
         {            
             byte[] bytes = BitConverter.GetBytes(ipAddress);
-            string result = string.Join(".", bytes);
+            string result = string.Join(".", bytes.Reverse());
             return result;
         }
 
