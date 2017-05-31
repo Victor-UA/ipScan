@@ -29,25 +29,24 @@ namespace ipScan.Base
         protected ICheckSearchTask          checkTasks { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
         public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
-        public Dictionary<int, int>         Progress { get; private set; }
-        protected List<TSub>                mainList { get; set; }
-        public int                          index { get; private set; }
-        protected int                       _currentPosition;
-        public int                          currentPosition
+        public Dictionary<uint, uint>       Progress { get; private set; }
+        public uint                         FirstIPAddress { get; private set; }
+        protected uint                      _currentPosition;
+        public uint                         CurrentPosition
         {
             get { return _currentPosition; }
             protected set { _currentPosition = value; }
         }
-        public int                          count { get; set; }
-        public int                          remaind
+        public uint                         Count { get; set; }
+        public uint                         Remaind
         {
             get
             {
-                return (index + count - 1 - currentPosition);
+                return (FirstIPAddress + Count - 1 - CurrentPosition);
             }
         }
-        protected int                       _progress;
-        public int                          progress
+        protected uint                      _progress;
+        public uint                         progress
         {
             get { return _progress; }
             protected set { _progress = value; }
@@ -57,17 +56,16 @@ namespace ipScan.Base
         private Action<T>                   bufferResultAddLine { get; set; }    
         protected ComputerInfo              ComputerInfo { get; set; }
 
-        public SearchTask(int TaskId, List<TSub> TList, int Index, int Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
         {
             Buffer = new BufferedResult<T>();
             SubTaskStates = new Dictionary<TSub, bool>();
-            Progress = new Dictionary<int, int>();
+            Progress = new Dictionary<uint, uint>();
             taskId = TaskId;            
             checkTasks = CheckTasks;
-            this.mainList = TList;
-            index = Index;
-            count = Count;
-            currentPosition = index;
+            FirstIPAddress = firstIpAddress;
+            this.Count = Count;
+            CurrentPosition = FirstIPAddress;
             timeOut = TimeOut;
             bufferResultAddLine = BufferResultAddLine;
             isPaused = false;
@@ -109,12 +107,12 @@ namespace ipScan.Base
             }
         }
 
-        public void Init(int Index, int Count)
+        public void Init(uint firstIPAddress, uint count)
         {
-            index = currentPosition = Index;
-            count = Count;
+            FirstIPAddress = CurrentPosition = firstIPAddress;
+            Count = count;
         }
-
+        
         protected abstract void Search();
 
         public void Start()
