@@ -513,7 +513,7 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                double k = ipListCount / (double)pictureBox1.Image.Width;
+                double k = ipListCount / (double)pictureBox1.Width;
                 return (uint)(k * X);
             }
             catch (Exception)
