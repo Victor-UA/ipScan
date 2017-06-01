@@ -168,7 +168,7 @@ namespace ipScan.Classes.Main
             try
             {
                 toolStripProgressBar1.Value = (int)(Progress / ipListCount * 100);
-                label_Progress.Text = Progress.ToString() + @"\" + toolStripProgressBar1.Maximum.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
+                label_Progress.Text = Progress.ToString() + @"\" + ipListCount.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
                 tSSL_Found.Text = bufferedResult == null ? "0" : bufferedResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
