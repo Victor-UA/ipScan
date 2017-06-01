@@ -54,7 +54,7 @@ namespace ipScan.Base.IP
         public bool                             isLooking4HostDetails { get; private set; }
         private CancellationTokenSource         CancelScanHostPorts { get; set; }
         private int                             waitingForResponses;
-        private int                             currentHostPort;
+        private int                             CurrentHostPort { get; set; }
         private int                             maxWaitingForResponses { get; set; } = 200; 
                
         public EventedList<PortInfo>            Ports { get; private set; }
@@ -128,14 +128,15 @@ namespace ipScan.Base.IP
                 while (!ScanTCPPortsIsRunning)
                 {
                     Thread.Sleep(1000);
-                    HostForm.setScanPortsProgress(currentHostPort, waitingForResponses, maxWaitingForResponses);
+                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, maxWaitingForResponses);
                 }
                 while (ScanTCPPortsIsRunning)
                 {
                     Thread.Sleep(1000);
-                    HostForm.setScanPortsProgress(currentHostPort, waitingForResponses, maxWaitingForResponses);
+                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, maxWaitingForResponses);
                 }
             });
+
             //https://www.codeproject.com/Articles/199016/Simple-TCP-Port-Scanner
             Task ScanHostTCPPorts = Task.Run(() =>
             {
@@ -147,7 +148,7 @@ namespace ipScan.Base.IP
                 };
                 waitingForResponses = 0;
                     
-                for (currentHostPort = 0; currentHostPort < 65535 && !CancelScanHostPorts.Token.IsCancellationRequested; currentHostPort++)
+                for (CurrentHostPort = 1; CurrentHostPort <= 65535 && !CancelScanHostPorts.Token.IsCancellationRequested; CurrentHostPort++)
                 {
                     while (waitingForResponses >= maxWaitingForResponses)
                     {
@@ -155,45 +156,11 @@ namespace ipScan.Base.IP
                     }
                     try
                     {
-                        Socket socket;
-
-                        socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        socket.ReceiveTimeout = 100;                      
-                        socket.BeginConnect(new IPEndPoint(IPAddress, currentHostPort), (IAsyncResult asyncResult) =>
-                        {
-                            try
-                            {
-                                Interlocked.Decrement(ref waitingForResponses);
-                                Socket socketResult = asyncResult.AsyncState as Socket;
-                                socketResult.EndConnect(asyncResult);
-                                if (socketResult.Connected)
-                                {
-                                    try
-                                    {
-                                        Ports.Add(new PortInfo
-                                            (
-                                                int.Parse(socketResult.RemoteEndPoint.ToString().Split(':')[1]),
-                                                socketResult.ProtocolType,
-                                                true
-                                            )
-                                        );
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Debug.WriteLine(ex.StackTrace);
-                                    }
-                                }                                
-                            }
-                            catch
-                            {
-                            }
-                        },
-                            socket
-                        );
-                        Interlocked.Increment(ref waitingForResponses);
+                        ScanPortTCP(CurrentHostPort);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Debug.WriteLine(ex.Message + "r" + ex.StackTrace);
                     }
                     
                 }
@@ -204,6 +171,61 @@ namespace ipScan.Base.IP
                 ScanTCPPortsIsRunning = false;
             });            
         }
+        private void ScanPortTCP(int currentHostPort)
+        {
+            try
+            {
+                Socket socket;
+
+                socket = new Socket(
+                    AddressFamily.InterNetwork,
+                    SocketType.Stream,
+                    ProtocolType.Tcp
+                );
+                socket.ReceiveTimeout = (int)(RoundtripTime * 1.1 + 1);
+                socket.BeginConnect(new IPEndPoint(IPTools.UInt322IPAddress(IPAddress), currentHostPort),
+                    (IAsyncResult asyncResult) =>
+                    {
+                        try
+                        {                            
+                            Socket socketResult = asyncResult.AsyncState as Socket;
+                            socketResult.EndConnect(asyncResult);
+                            if (socketResult.Connected)
+                            {
+                                try
+                                {
+                                    Ports.Add(new PortInfo
+                                        (
+                                            int.Parse(socketResult.RemoteEndPoint.ToString().Split(':')[1]),
+                                            socketResult.ProtocolType,
+                                            true
+                                        )
+                                    );
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(ex.StackTrace);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref waitingForResponses);
+                        }
+                    },
+                    socket
+                );
+                Interlocked.Increment(ref waitingForResponses);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }            
+        }
+    
         public void                             StopScanHostPorts()
         {
             try
