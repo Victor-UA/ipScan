@@ -526,7 +526,7 @@ namespace ipScan.Classes.Main
         {
             try
             {
-                if (pictureBox1MouseLastX != e.X) 
+                if (ipListCount > 0 && pictureBox1MouseLastX != e.X) 
                 {
                     pictureBox1MouseLastX = e.X;
                     uint index = pictureBox12ipListIndex(e.X);
