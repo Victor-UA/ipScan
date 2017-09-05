@@ -225,7 +225,62 @@ namespace ipScan.Base.IP
                 throw;
             }            
         }
-    
+        private void ScanPortUDP(int currentHostPort)
+        {
+            try
+            {
+
+                UdpClient udpClient = new UdpClient(11000);
+                Socket socket = udpClient.Client;
+                socket.ExclusiveAddressUse = true;
+                socket.ReceiveTimeout = (int)(RoundtripTime * 1.1 + 1);
+
+                socket.ReceiveTimeout = (int)(RoundtripTime * 1.1 + 1);
+                socket.BeginConnect(new IPEndPoint(IPTools.UInt322IPAddress(IPAddress), currentHostPort),
+                    (IAsyncResult asyncResult) =>
+                    {
+                        try
+                        {
+                            /*
+                            Socket socketResult = asyncResult.AsyncState as Socket;
+                            socketResult.EndConnect(asyncResult);
+                            if (socketResult.Connected)
+                            {
+                                try
+                                {
+                                    Ports.Add(new PortInfo
+                                        (
+                                            int.Parse(socketResult.RemoteEndPoint.ToString().Split(':')[1]),
+                                            socketResult.ProtocolType,
+                                            true
+                                        )
+                                    );
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(ex.StackTrace);
+                                }
+                            }
+                            */
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref waitingForResponses);
+                        }
+                    },
+                    socket
+                );
+                Interlocked.Increment(ref waitingForResponses);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public void                             StopScanHostPorts()
         {
             try

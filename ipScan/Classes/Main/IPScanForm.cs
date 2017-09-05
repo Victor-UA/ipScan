@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ using ipScan.Base.IP;
 using System.Collections;
 using System.Net.NetworkInformation;
 using System.Management;
+using ipScan.Properties;
 
 namespace ipScan.Classes.Main
 {
@@ -100,6 +100,49 @@ namespace ipScan.Classes.Main
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
             fill.GridFill(SG_Result, null as ListIPInfo, null, gridHeaders);
         }
+        private void IPScanForm_Load(object sender, EventArgs e)
+        {
+            if (Settings.Default.MainWindowLocation != null)
+            {
+                Location = Settings.Default.MainWindowLocation;
+            }
+            if (Settings.Default.MainWindowSize != null)
+            {
+                Size = Settings.Default.MainWindowSize;
+            }
+            if (Settings.Default.MainWindowState != FormWindowState.Minimized)
+            {
+                WindowState = Settings.Default.MainWindowState;
+            }
+        }
+        private void IPScanForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Settings.Default.MainWindowLocation = Location;
+            if (this.WindowState == FormWindowState.Normal)
+            {
+                Settings.Default.MainWindowSize = Size;
+            }
+            else
+            {
+                Settings.Default.MainWindowSize = RestoreBounds.Size;
+            }
+            Settings.Default.MainWindowState = WindowState;
+            Settings.Default.Save();
+
+            try
+            {
+                button_Stop_Click(sender, null);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                e.Cancel = false;
+            }
+        }
+
+
 
         private void StartButtonEnable(bool Enable)
         {
@@ -492,22 +535,7 @@ namespace ipScan.Classes.Main
             {
                 button_Pause.Text = "Pause";
             }
-        }        
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            try
-            {
-                button_Stop_Click(sender, null);
-            }
-            catch (Exception)
-            {
-            }
-            finally
-            {
-                e.Cancel = false;
-            }            
-        }
+        }                
 
         private uint pictureBox12ipListIndex(int X)
         {
@@ -601,8 +629,6 @@ namespace ipScan.Classes.Main
                 } 
                 e.Handled = true;
             }
-        }
-    }
-
-    
+        }        
+    }    
 }

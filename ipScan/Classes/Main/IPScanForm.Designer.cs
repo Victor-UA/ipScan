@@ -317,7 +317,8 @@
             this.MinimumSize = new System.Drawing.Size(600, 450);
             this.Name = "IPScanForm";
             this.Text = "ipScan";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.IPScanForm_FormClosing);
+            this.Load += new System.EventHandler(this.IPScanForm_Load);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
