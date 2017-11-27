@@ -210,12 +210,12 @@ namespace ipScan.Classes.Main
             }
             try
             {
-                toolStripProgressBar1.Value = (int)(Progress / ipListCount * 100);
                 label_Progress.Text = Progress.ToString() + @"\" + ipListCount.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
                 tSSL_Found.Text = bufferedResult == null ? "0" : bufferedResult.Buffer.Count().ToString();
                 tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
                 tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
                 tSSL_pauseTime.Text = pauseTime.ToString();
+                toolStripProgressBar1.Value = (int)(Progress * 100 / ipListCount);
                 
                 DrawMultiProgress();
             }
@@ -359,7 +359,7 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    SetProgressMaxValue(0);
+                    SetProgressMaxValue(100);
                     SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
                 }
                 catch (Exception ex)

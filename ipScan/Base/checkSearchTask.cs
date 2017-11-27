@@ -105,6 +105,8 @@ namespace ipScan.Base
                             {
                                 var mySearchTask = mySearchTasks[i];
                                 bool SubTasksAreRunning = false;
+
+                                #region Get Statistics
                                 try
                                 {
                                     if (mySearchTask != null && mySearchTask.SubTaskStates != null)
@@ -132,6 +134,8 @@ namespace ipScan.Base
                                     Debug.WriteLine(ex.StackTrace);
                                 }
 
+                                #endregion
+
                                 if (mySearchTask != null)
                                 {
                                     if (mySearchTask.isRunning)
@@ -143,7 +147,8 @@ namespace ipScan.Base
                                 }
                                 else
                                 {
-                                    if (myTasks[i].IsCompleted && maxRemaind >= OkRemaind)                                    
+                                    #region Change Task Range if IsComleted
+                                    if (myTasks[i].IsCompleted && maxRemaind >= OkRemaind)
                                     {
                                         maxRemaind = 0;
                                         int taskIndex = -1;
@@ -182,8 +187,9 @@ namespace ipScan.Base
                                             Console.WriteLine(i.ToString() + " is joined to " + taskIndex.ToString());
                                         }
                                     }
+                                    #endregion
                                 }
-                                
+
                                 TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
                                 TasksAreCompleted = TasksAreCompleted || myTasks[i].IsCompleted;
                                 bufferResult.AddLines(mySearchTask.Buffer.getBuffer());
@@ -201,7 +207,8 @@ namespace ipScan.Base
                         if (TasksAreRunning || TasksAreCompleted)
                         {
                             isStarting = false;
-                        }
+                        }                                                
+
 
                         if (!isResultOutputBlocked)
                         {

@@ -27,7 +27,7 @@ namespace ipScan.Classes.Main
             Progress.Add(FirstIPAddress, CurrentPosition);
 
             byte[] buffer = { 1 };
-            PingOptions options = new PingOptions(50, true);            
+            PingOptions options = new PingOptions(254, true);                        
 
             if (!wasStopped)
             {
@@ -37,7 +37,7 @@ namespace ipScan.Classes.Main
 
                 while (isRunning && CurrentPosition < FirstIPAddress + Count)
                 {
-
+                    #region Is Task have be paused
                     /*
                     ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
                     ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
@@ -80,7 +80,7 @@ namespace ipScan.Classes.Main
                         }
                         sleepTime = 100;
                     }
-                    
+                    #endregion
 
                     if (isPaused || waiting4CheckTasks)
                     {
@@ -143,12 +143,10 @@ namespace ipScan.Classes.Main
             try
             {
                 Ping ping = new Ping();
-
                 PingReply reply = await ping.SendPingAsync(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
-
                 if (!wasStopped) {
                     try
-                    {
+                    {                        
                         if (reply.Status == IPStatus.Success)
                         {
                             uint address = IPTools.IPAddress2UInt32(reply.Address);                            
@@ -157,7 +155,7 @@ namespace ipScan.Classes.Main
                             ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
                             ipInfo.setHostDetailsAsync();
                             Buffer.AddLine(ipInfo);
-                        }
+                        }                        
                     }
                     catch (Exception ex)
                     {
