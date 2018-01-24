@@ -438,7 +438,7 @@ namespace ipScan.Classes.Main
                     Console.WriteLine(i + ": " + i * range + ", " + 
                         (i == maxTaskCount - 1 ? ipListCount - range * i : range)
                     );
-                    myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start));
+                    myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start, TaskCreationOptions.LongRunning));
                 }                
             }
         }
