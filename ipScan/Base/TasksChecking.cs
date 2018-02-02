@@ -9,7 +9,6 @@ namespace ipScan.Base
 {
     class TasksChecking<T, TSub> : ITasksChecking
     {
-        private bool isRunning { get; set; }
         private bool wasStopped { get; set; }
         private static readonly object          lockObject = new object();
         private uint                             OkRemaind { get; } = 4;
@@ -74,23 +73,11 @@ namespace ipScan.Base
                 bool TasksAreCompleted = false;                
                 uint maxRemaind = OkRemaind;
                 LastTime = DateTime.Now;
-                int CorrectedSleepTime = SleepTime;
                 do
                 {                    
-                    if (isPaused)
+                    Thread.Sleep(SleepTime);
+                    if (!isPaused)                    
                     {
-                        Thread.Sleep(SleepTime);
-                    }
-                    else
-                    {
-                        Thread.Sleep(CorrectedSleepTime);   
-                        
-                        CorrectedSleepTime += (int)(SleepTime - loopTime.TotalMilliseconds);
-                        if (CorrectedSleepTime < 0)
-                        {
-                            CorrectedSleepTime = 0;
-                        }
-                                               
                         bool mySearchTasksStartedAll = true;
                         TasksAreRunning = false;
                         int progress = 0;

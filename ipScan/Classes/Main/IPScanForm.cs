@@ -383,10 +383,10 @@ namespace ipScan.Classes.Main
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
                                
-                int maxTaskCount = 1;
+                int tasksCount = 1;
                 try
                 {
-                    maxTaskCount = int.Parse(textBox_ThreadCount.Text);
+                    tasksCount = int.Parse(textBox_ThreadCount.Text);
                 }
                 catch (Exception ex)
                 {
@@ -433,19 +433,25 @@ namespace ipScan.Classes.Main
 
                 #region Create&Run IPSearchTasks
                 //Get Each IPSearchTask IPAddresses range
-                uint range = (uint)Math.Truncate((double)_ipListCount / maxTaskCount);
+                uint range = (uint)Math.Truncate((double)_ipListCount / tasksCount);
+
+                if (range == 0)
+                {
+                    range = 1;
+                    tasksCount = (int)_ipListCount;
+                }
 
                 //Create & Run IPSearchTasks
-                for (int i = 0; i < maxTaskCount; i++)
+                for (int i = 0; i < tasksCount; i++)
                 {
-                    uint count = ((i == maxTaskCount - 1) ? _ipListCount - range * (uint)i : range);
+                    uint count = ((i == tasksCount - 1) ? _ipListCount - range * (uint)i : range);
                     IPSearchTask ipSearchTask = new IPSearchTask(
                         i, _firstIpAddress + (uint)i * range, count, BufferResultAddLine, 
                         _timeOut, _mySearchTasksCancel.Token, _tasksChecking
                     );
                     _mySearchTasks.Add(ipSearchTask);
                     Console.WriteLine(i + ": " + i * range + ", " +
-                        (i == maxTaskCount - 1 ? _ipListCount - range * i : range)
+                        (i == tasksCount - 1 ? _ipListCount - range * i : range)
                     );
                     myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start, TaskCreationOptions.LongRunning));
                 } 
