@@ -70,10 +70,9 @@ namespace ipScan.Base
             isStarting = true;
             try
             {
-                GC.Collect();
                 bool TasksAreRunning = false;
                 bool TasksAreCompleted = false;
-                int mySearchTasksCountLimit = 50000;
+                int mySearchTasksCountLimit = 50;               
                 bool mySearchTasksOutOfCountLimit_Paused = false;
                 uint maxRemaind = OkRemaind;
                 LastTime = DateTime.Now;
@@ -183,7 +182,7 @@ namespace ipScan.Base
                                             mySearchTaskMaxRemind.Pause(false);
 
                                             mySearchTask.Init(index + newCount, newRemaind);
-                                            myTasks[i] = Task.Factory.StartNew(mySearchTask.Start);
+                                            myTasks[i] = Task.Factory.StartNew(mySearchTask.Start, TaskCreationOptions.LongRunning);
                                             Console.WriteLine(i.ToString() + " is joined to " + taskIndex.ToString());
                                         }
                                     }

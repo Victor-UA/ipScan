@@ -411,21 +411,22 @@ namespace ipScan.Classes.Main
                 newTask(checkTasks.Check);
                 mySearchTasksCancel = new CancellationTokenSource();
 
-                int maxTaskCount = 1;
-                try
-                {
-                    var cpu =
-                        new ManagementObjectSearcher("select * from Win32_Processor")
-                        .Get()
-                        .Cast<ManagementObject>()
-                        .First();
+                int maxTaskCount = maxTaskCountLimit;
+                //try
+                //{
+                //    var cpu =
+                //        new ManagementObjectSearcher("select * from Win32_Processor")
+                //        .Get()
+                //        .Cast<ManagementObject>()
+                //        .First();
 
-                    maxTaskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2;
+                //    maxTaskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2 * 100;
 
-                }
-                catch (Exception)
-                {
-                }
+                //}
+                //catch (Exception)
+                //{
+                //}
+
                 uint range = (uint)Math.Truncate((double)ipListCount / maxTaskCount);
                 for (int i = 0; i < maxTaskCount; i++)
                 {

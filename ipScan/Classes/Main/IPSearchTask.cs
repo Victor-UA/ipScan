@@ -88,33 +88,34 @@ namespace ipScan.Classes.Main
                     }
                     else
                     {
-                        if (WorkingTaskCount >= maxTaskCount)
-                        {
-                            
-                            //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
-                            if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
-                                && 
-                                checkTasks.loopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1)
-                                {
-                                //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
-                                //int newMaxTaskCount = (int)(maxTaskCount * 1.1);
-                                //maxTaskCount = newMaxTaskCount > maxTaskCount ? 
-                                //    newMaxTaskCount <= maxTaskCountLimit ? 
-                                //    newMaxTaskCount : maxTaskCountLimit : ++maxTaskCount;
-                                maxTaskCount = MaxTaskCountLimit;
-                            }                         
-                                                           
-                            Thread.Sleep(100);
-                        }
-                        else
-                        {
-                            lock(Locker)
-                            {
-                                Tasks.Add(CurrentPosition, PingHostAsync(CurrentPosition, timeOut, buffer, options));
-                            }
+                        //if (WorkingTaskCount >= maxTaskCount)
+                        //{
+
+                        //    //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
+                        //    if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
+                        //        &&
+                        //        checkTasks.loopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1)
+                        //    {
+                        //        //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
+                        //        //int newMaxTaskCount = (int)(maxTaskCount * 1.1);
+                        //        //maxTaskCount = newMaxTaskCount > maxTaskCount ? 
+                        //        //    newMaxTaskCount <= maxTaskCountLimit ? 
+                        //        //    newMaxTaskCount : maxTaskCountLimit : ++maxTaskCount;
+                        //        maxTaskCount = MaxTaskCountLimit;
+                        //    }
+
+                        //    Thread.Sleep(100);
+                        //}
+                        //else
+                        //{
+                        //    lock (Locker)
+                        //    {
+                        //        Tasks.Add(CurrentPosition, PingHostAsync(CurrentPosition, timeOut, buffer, options));
+                        //    }
+                            PingHost(CurrentPosition, timeOut, buffer, options);
                             CurrentPosition++;
                             Progress[FirstIPAddress] = CurrentPosition;
-                        }
+                        //}
 
                     }
                     if (cancellationToken.IsCancellationRequested)
@@ -188,7 +189,60 @@ namespace ipScan.Classes.Main
                     Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
                 }
             }
-        }          
+        }
+        private void PingHost(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        {
+            Interlocked.Increment(ref _WorkingTaskCount);
+            try
+            {
+                Ping ping = new Ping();
+                PingReply reply = ping.Send(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
+                if (!wasStopped)
+                {
+                    try
+                    {
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            uint address = IPTools.IPAddress2UInt32(reply.Address);
+                            IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
+                            ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
+                            ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
+                            ipInfo.setHostDetailsAsync();
+                            Buffer.AddLine(ipInfo);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                    }
+                }
+                //Interlocked.Decrement(ref _WorkingTaskCount);
+                lock (Locker)
+                {
+                    _WorkingTaskCount--;
+                    _progress++;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+            }
+
+            if (!wasStopped)
+            {
+                try
+                {
+                    lock (Locker)
+                    {
+                        Tasks.Remove(ipAddress);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                }
+            }
+        }
 
         public override void Stop()
         {
