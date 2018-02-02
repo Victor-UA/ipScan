@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.Devices;
+using System.Collections.Concurrent;
 
 namespace ipScan.Base
 {
@@ -16,19 +17,12 @@ namespace ipScan.Base
         public bool                         isRunning { get; protected set; }        
         public bool                         wasStopped { get; protected set; }
         protected CancellationToken         cancellationToken { get; set; }
-        public int                          taskId { get; private set; }
-        public int                          _WorkingTaskCount;
-        public int                          WorkingTaskCount
-        {
-            get { return _WorkingTaskCount; }
-            protected set { _WorkingTaskCount = value; }
-        }
-        public Dictionary<object, Task>     Tasks { get; protected set; }
-        public int                          MaxTaskCountLimit { get; set; }
+        public int                          taskId { get; private set; }        
+        public Dictionary<object, Task>     Tasks { get; protected set; }        
 
-        protected ITasksChecking          TasksChecking { get; set; }
+        protected ITasksChecking            TasksChecking { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
-        public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
+        public ConcurrentDictionary<TSub, bool> SubTaskStates { get; private set; }
         public Dictionary<uint, uint>       Progress { get; private set; }
         public uint                         FirstIPAddress { get; private set; }
         protected uint                      _currentPosition;
@@ -45,8 +39,8 @@ namespace ipScan.Base
                 return (FirstIPAddress + Count - 1 - CurrentPosition);
             }
         }
-        protected uint                      _progress;
-        public uint                         progress
+        protected int                       _progress;
+        public int                          progress
         {
             get { return _progress; }
             protected set { _progress = value; }
@@ -56,10 +50,10 @@ namespace ipScan.Base
         private Action<T>                   bufferResultAddLine { get; set; }    
         protected ComputerInfo              ComputerInfo { get; set; }
 
-        public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ITasksChecking CheckTasks)
+        public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
         {
             Buffer = new BufferedResult<T>();
-            SubTaskStates = new Dictionary<TSub, bool>();
+            SubTaskStates = new ConcurrentDictionary<TSub, bool>();
             Progress = new Dictionary<uint, uint>();
             taskId = TaskId;            
             TasksChecking = CheckTasks;
@@ -73,7 +67,6 @@ namespace ipScan.Base
             wasStopped = false;
             cancellationToken = CancellationToken;
             progress = 0;
-            MaxTaskCountLimit = maxTaskCountLimit;
         }
 
         protected void TSub_BeforeChanged(object sender, EventArgs e)
@@ -86,7 +79,7 @@ namespace ipScan.Base
                 }
                 else
                 {
-                    SubTaskStates.Add((TSub)sender, true);
+                    SubTaskStates.TryAdd((TSub)sender, true);
                 }
             }
             catch (Exception ex)

@@ -199,11 +199,11 @@ namespace ipScan.Classes.Main
             GC.Collect();
         }        
 
-        private void SetProgress(uint Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
+        private void SetProgress(int Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<uint, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
+                this.Invoke(new Action<int, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
                 return;
             }
             try
@@ -383,10 +383,10 @@ namespace ipScan.Classes.Main
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
                                
-                int maxTaskCountLimit = 1;
+                int maxTaskCount = 1;
                 try
                 {
-                    maxTaskCountLimit = int.Parse(textBox_ThreadCount.Text);
+                    maxTaskCount = int.Parse(textBox_ThreadCount.Text);
                 }
                 catch (Exception ex)
                 {
@@ -412,10 +412,7 @@ namespace ipScan.Classes.Main
                     _ipListCount,
                     _bufferedResult);
                 Task.Factory.StartNew(_tasksChecking.Check, _mySearchTasksCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-                #endregion
-
-                //Отримано з інтерфейсу користувача
-                int maxTaskCount = maxTaskCountLimit;
+                #endregion                
 
                 #region (DISABLED) Get maxTaskCount from NumberOfCores
                 //try
@@ -443,8 +440,8 @@ namespace ipScan.Classes.Main
                 {
                     uint count = ((i == maxTaskCount - 1) ? _ipListCount - range * (uint)i : range);
                     IPSearchTask ipSearchTask = new IPSearchTask(
-                        i, _firstIpAddress + (uint)i * range, count, maxTaskCountLimit,
-                        BufferResultAddLine, _timeOut, _mySearchTasksCancel.Token, _tasksChecking
+                        i, _firstIpAddress + (uint)i * range, count, BufferResultAddLine, 
+                        _timeOut, _mySearchTasksCancel.Token, _tasksChecking
                     );
                     _mySearchTasks.Add(ipSearchTask);
                     Console.WriteLine(i + ": " + i * range + ", " +
@@ -500,17 +497,6 @@ namespace ipScan.Classes.Main
         }
         #endregion
 
-        private static List<uint> IPAddressesRange(uint firstIPAddress, uint lastIPAddress)
-        {            
-            var ipAddressesInTheRange = new List<uint>();
-            for (var i = firstIPAddress; i <= lastIPAddress; i++)
-            {                
-                ipAddressesInTheRange.Add(i);
-            }
-            return ipAddressesInTheRange;
-        }
-
-
         private void button_Stop_Click(object sender, EventArgs e)
         {            
             for (int i = 0; i < _mySearchTasks.Count(); i++)
@@ -529,13 +515,7 @@ namespace ipScan.Classes.Main
         }
 
         private void button_Pause_Click(object sender, EventArgs e)
-        {
-            /*
-            for (int i = 0; i < mySearchTasks.Count(); i++)
-            {
-                mySearchTasks[i].Pause();
-            }
-            */
+        {            
             button_Pause.Tag = _tasksChecking.Pause();
             if ((bool)button_Pause.Tag)
             {
@@ -625,18 +605,7 @@ namespace ipScan.Classes.Main
         private void textBox_ThreadCount_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == 13)
-            {
-                for (int i = 0; i < _mySearchTasks.Count; i++)
-                {
-                    try
-                    {
-                        int maxTaskCountLimit = int.Parse(textBox_ThreadCount.Text);
-                        _mySearchTasks[i].MaxTaskCountLimit = maxTaskCountLimit;
-                    }
-                    catch (Exception ex)
-                    {
-                    }
-                } 
+            {                
                 e.Handled = true;
             }
         }        

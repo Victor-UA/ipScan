@@ -13,15 +13,14 @@ using System.Runtime.InteropServices;
 namespace ipScan.Classes.Main
 {
     class IPSearchTask : SearchTask<IPInfo, uint>
-    {        
+    {
+        public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
+            : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }
 
-        public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
-            : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
-        
         protected override void Search()
         {            
             Debug.WriteLine(taskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
-            bool waiting4CheckTasks = false;            
+            bool waiting4TasksChecking = false;            
             int sleepTime = 100;
             Progress.Add(FirstIPAddress, CurrentPosition);
 
@@ -31,167 +30,126 @@ namespace ipScan.Classes.Main
             if (!wasStopped)
             {
                 Tasks = new Dictionary<object, Task>();
-                WorkingTaskCount = 0;
-                
 
                 while (isRunning && CurrentPosition < FirstIPAddress + Count)
                 {
-                    #region Is Task have be paused
+                    #region Is Task has to be paused
+
+                    #region (DISABLED) Check memory
                     /*
-                    ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
-                    ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
-                    int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
-                    int newMaxTaskCount = maxTaskCount + deltaCount;
-                    maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
-                    */
+                                ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
+                                ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
+                                int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
+                                int newMaxTaskCount = maxTaskCount + deltaCount;
+                                maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
+                                */
+                    #endregion                    
 
-                    int maxTaskCount = MaxTaskCountLimit;
-
-                    TimeSpan checkTasksLoopTime = DateTime.Now - TasksChecking.LastTime;                    
-                    
-                    if (checkTasksLoopTime.TotalMilliseconds > TasksChecking.SleepTime * 10)
+                    TimeSpan tasksCheckingLoopTime = DateTime.Now - TasksChecking.LastTime;                    
+                    if (tasksCheckingLoopTime.TotalMilliseconds > TasksChecking.SleepTime * 10)
                     {
-                        if (!waiting4CheckTasks)
+                        #region Calculate sleepTime
+                        if (!waiting4TasksChecking)
                         {
-                            Debug.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + checkTasksLoopTime.TotalSeconds.ToString());
-                            waiting4CheckTasks = true;
+                            Debug.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + tasksCheckingLoopTime.TotalSeconds.ToString());
+                            waiting4TasksChecking = true;
                         }
-                        
-                        sleepTime += (int)(checkTasksLoopTime.TotalSeconds - TasksChecking.SleepTime);
+
+                        sleepTime += (int)(tasksCheckingLoopTime.TotalSeconds - TasksChecking.SleepTime);
                         if (sleepTime > 1000 || sleepTime < 0)
                         {
                             sleepTime = 1000;
-                        }
-
-                        //Debug.WriteLine("------------------------" + (int)(maxTaskCount * 0.95));
-                        //int newMaxTaskCount = (int)(maxTaskCount * 0.9);
-                        //maxTaskCount = newMaxTaskCount < 1 ? 1 : newMaxTaskCount;
-                        maxTaskCount = MaxTaskCountLimit / 2;
-
-
+                        }                        
+                        #endregion
                     }
                     else
                     {
-                        if (waiting4CheckTasks)
+                        if (waiting4TasksChecking)
                         {
-                            waiting4CheckTasks = false;
+                            waiting4TasksChecking = false;
                             Debug.WriteLine(taskId.ToString() + " resumed its work");
                         }
                         sleepTime = 100;
                     }
                     #endregion
 
-                    if (isPaused || waiting4CheckTasks)
+                    if (isPaused || waiting4TasksChecking)
                     {
                         Thread.Sleep(sleepTime);
                     }
                     else
                     {
-                        //if (WorkingTaskCount >= maxTaskCount)
-                        //{
-
-                        //    //if (checkTasksLoopTime.TotalMilliseconds <= checkTasksLoopTimeMax && checkTasks.MySearchTasksStartedAll)
-                        //    if (checkTasksLoopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1
-                        //        &&
-                        //        checkTasks.loopTime.TotalMilliseconds < checkTasksLoopTimeMax * 1.1)
-                        //    {
-                        //        //Debug.WriteLine("++++++++++++++++++++++++" + (int)(maxTaskCount * 1.2));
-                        //        //int newMaxTaskCount = (int)(maxTaskCount * 1.1);
-                        //        //maxTaskCount = newMaxTaskCount > maxTaskCount ? 
-                        //        //    newMaxTaskCount <= maxTaskCountLimit ? 
-                        //        //    newMaxTaskCount : maxTaskCountLimit : ++maxTaskCount;
-                        //        maxTaskCount = MaxTaskCountLimit;
-                        //    }
-
-                        //    Thread.Sleep(100);
-                        //}
-                        //else
-                        //{
-                        //    lock (Locker)
-                        //    {
-                        //        Tasks.Add(CurrentPosition, PingHostAsync(CurrentPosition, timeOut, buffer, options));
-                        //    }
-                            PingHost(CurrentPosition, timeOut, buffer, options);
-                            CurrentPosition++;
-                            Progress[FirstIPAddress] = CurrentPosition;
-                        //}
-
+                        PingHost(CurrentPosition, timeOut, buffer, options);                        
+                        CurrentPosition++;
+                        Progress[FirstIPAddress] = CurrentPosition;
                     }
                     if (cancellationToken.IsCancellationRequested)
                     {
                         Stop();
                     }                    
                 }
-            }
-            
-            while (isRunning && WorkingTaskCount > 0)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    Stop();
-                }
-                Thread.Sleep(1000);
-            }
+            }                      
             isRunning = false;
             Debug.WriteLine(taskId + " is stopped");
         }
 
-        //https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
-        private async Task PingHostAsync(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
-        {
-            Interlocked.Increment(ref _WorkingTaskCount);
-            try
-            {
-                Ping ping = new Ping();
-                PingReply reply = await ping.SendPingAsync(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
-                if (!wasStopped) {
-                    try
-                    {                        
-                        if (reply.Status == IPStatus.Success)
-                        {
-                            uint address = IPTools.IPAddress2UInt32(reply.Address);                            
-                            IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
-                            ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
-                            ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
-                            ipInfo.setHostDetailsAsync();
-                            Buffer.AddLine(ipInfo);
-                        }                        
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-                    }
-                }
-                //Interlocked.Decrement(ref _WorkingTaskCount);
-                lock (Locker)
-                {
-                    _WorkingTaskCount--;
-                    _progress++;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-            }
+        #region (DISABLED) PingHostAsync
+        ////https://stackoverflow.com/questions/24158814/ping-sendasync-always-successful-even-if-client-is-not-pingable-in-cmd
+        //private async Task PingHostAsync(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
+        //{
+        //    Interlocked.Increment(ref _WorkingTaskCount);
+        //    try
+        //    {
+        //        Ping ping = new Ping();
+        //        PingReply reply = await ping.SendPingAsync(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
+        //        if (!wasStopped) {
+        //            try
+        //            {                        
+        //                if (reply.Status == IPStatus.Success)
+        //                {
+        //                    uint address = IPTools.IPAddress2UInt32(reply.Address);                            
+        //                    IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
+        //                    ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
+        //                    ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
+        //                    ipInfo.setHostDetailsAsync();
+        //                    Buffer.AddLine(ipInfo);
+        //                }                        
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+        //            }
+        //        }
+        //        //Interlocked.Decrement(ref _WorkingTaskCount);
+        //        lock (Locker)
+        //        {
+        //            _WorkingTaskCount--;
+        //            _progress++;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+        //    }
 
-            if (!wasStopped)
-            {
-                try
-                {
-                    lock (Locker)
-                    {
-                        Tasks.Remove(ipAddress);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-                }
-            }
-        }
+        //    if (!wasStopped)
+        //    {
+        //        try
+        //        {
+        //            lock (Locker)
+        //            {
+        //                Tasks.Remove(ipAddress);
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+        //        }
+        //    }
+        //} 
+        #endregion
         private void PingHost(uint ipAddress, int TimeOut, byte[] buffer, PingOptions options)
-        {
-            Interlocked.Increment(ref _WorkingTaskCount);
+        {            
             try
             {
                 Ping ping = new Ping();
@@ -215,12 +173,7 @@ namespace ipScan.Classes.Main
                         Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
                     }
                 }
-                //Interlocked.Decrement(ref _WorkingTaskCount);
-                lock (Locker)
-                {
-                    _WorkingTaskCount--;
-                    _progress++;
-                }
+                Interlocked.Increment(ref _progress);                
             }
             catch (Exception ex)
             {

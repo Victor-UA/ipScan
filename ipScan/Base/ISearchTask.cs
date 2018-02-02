@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -11,19 +12,17 @@ namespace ipScan.Base
         bool                                isRunning { get; }        
         bool                                wasStopped { get; }
         int                                 taskId { get; }
-        int                                 WorkingTaskCount { get; }
         Dictionary<object, Task>            Tasks { get; }
-        int                                 MaxTaskCountLimit { get; set; }
 
         BufferedResult<T>                   Buffer { get; }        
-        Dictionary<TSub, bool>              SubTaskStates { get; }
+        ConcurrentDictionary<TSub, bool>    SubTaskStates { get; }
         Dictionary<uint, uint>              Progress { get; }
         uint                                FirstIPAddress { get; }
         uint                                CurrentPosition { get; }
         uint                                Count { get; set; }
         uint                                Remaind { get; }
                 
-        uint                                progress { get; }
+        int                                 progress { get; }
         bool                                isPaused { get; }
 
         void                                Init(uint firstIPAddress, uint count);
