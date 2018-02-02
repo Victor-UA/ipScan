@@ -26,7 +26,7 @@ namespace ipScan.Base
         public Dictionary<object, Task>     Tasks { get; protected set; }
         public int                          MaxTaskCountLimit { get; set; }
 
-        protected ICheckSearchTask          checkTasks { get; set; }
+        protected ITasksChecking          TasksChecking { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
         public Dictionary<TSub, bool>       SubTaskStates { get; private set; }
         public Dictionary<uint, uint>       Progress { get; private set; }
@@ -56,13 +56,13 @@ namespace ipScan.Base
         private Action<T>                   bufferResultAddLine { get; set; }    
         protected ComputerInfo              ComputerInfo { get; set; }
 
-        public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, int maxTaskCountLimit, CancellationToken CancellationToken, ITasksChecking CheckTasks)
         {
             Buffer = new BufferedResult<T>();
             SubTaskStates = new Dictionary<TSub, bool>();
             Progress = new Dictionary<uint, uint>();
             taskId = TaskId;            
-            checkTasks = CheckTasks;
+            TasksChecking = CheckTasks;
             FirstIPAddress = firstIpAddress;
             this.Count = Count;
             CurrentPosition = FirstIPAddress;

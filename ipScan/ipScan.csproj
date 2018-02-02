@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -24,7 +25,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.0</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -91,8 +91,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\Grid\GridCellController.cs" />
-    <Compile Include="Base\ICheckSearchTask.cs" />
-    <Compile Include="Base\CheckSearchTask.cs" />
+    <Compile Include="Base\ITasksChecking.cs" />
+    <Compile Include="Base\TasksChecking.cs" />
     <Compile Include="Base\EventedList.cs" />
     <Compile Include="Base\Grid\Fill.cs" />
     <Compile Include="Base\IP\Host\Grid\Fill.cs" />

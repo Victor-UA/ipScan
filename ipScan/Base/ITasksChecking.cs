@@ -2,7 +2,7 @@
 
 namespace ipScan.Base
 {
-    interface ICheckSearchTask
+    interface ITasksChecking
     {
         DateTime LastTime { get; }
         TimeSpan loopTime { get; }

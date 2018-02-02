@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
-    class CheckSearchTask<T, TSub> : ICheckSearchTask
+    class TasksChecking<T, TSub> : ITasksChecking
     {
         private bool isRunning { get; set; }
         private bool wasStopped { get; set; }
@@ -37,7 +37,7 @@ namespace ipScan.Base
         private bool                            isResultOutputBlocked { get; set; }
 
 
-        public CheckSearchTask(
+        public TasksChecking(
             List<Task> MyTasks,
             List<ISearchTask<T, TSub>> MySearchTasks,
             Action<bool> StartButtonEnable,

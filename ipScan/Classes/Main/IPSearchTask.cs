@@ -15,14 +15,13 @@ namespace ipScan.Classes.Main
     class IPSearchTask : SearchTask<IPInfo, uint>
     {        
 
-        public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ICheckSearchTask CheckTasks)
+        public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, int maxTaskCountLimit, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
             : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, maxTaskCountLimit, CancellationToken, CheckTasks) { }        
         
         protected override void Search()
         {            
             Debug.WriteLine(taskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
-            bool waiting4CheckTasks = false;
-            int checkTasksLoopTimeMax = 1000; //мілісекунди
+            bool waiting4CheckTasks = false;            
             int sleepTime = 100;
             Progress.Add(FirstIPAddress, CurrentPosition);
 
@@ -48,9 +47,9 @@ namespace ipScan.Classes.Main
 
                     int maxTaskCount = MaxTaskCountLimit;
 
-                    TimeSpan checkTasksLoopTime = DateTime.Now - checkTasks.LastTime;                    
+                    TimeSpan checkTasksLoopTime = DateTime.Now - TasksChecking.LastTime;                    
                     
-                    if (checkTasksLoopTime.TotalMilliseconds > checkTasksLoopTimeMax * 10)
+                    if (checkTasksLoopTime.TotalMilliseconds > TasksChecking.SleepTime * 10)
                     {
                         if (!waiting4CheckTasks)
                         {
@@ -58,7 +57,7 @@ namespace ipScan.Classes.Main
                             waiting4CheckTasks = true;
                         }
                         
-                        sleepTime += (int)(checkTasksLoopTime.TotalSeconds - checkTasksLoopTimeMax);
+                        sleepTime += (int)(checkTasksLoopTime.TotalSeconds - TasksChecking.SleepTime);
                         if (sleepTime > 1000 || sleepTime < 0)
                         {
                             sleepTime = 1000;
