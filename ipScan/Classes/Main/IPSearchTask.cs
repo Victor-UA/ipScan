@@ -29,8 +29,6 @@ namespace ipScan.Classes.Main
 
             if (!wasStopped)
             {
-                Tasks = new Dictionary<object, Task>();
-
                 while (isRunning && CurrentPosition < FirstIPAddress + Count)
                 {
                     #region Is Task has to be paused
@@ -153,7 +151,7 @@ namespace ipScan.Classes.Main
             try
             {
                 Ping ping = new Ping();
-                PingReply reply = ping.Send(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);
+                PingReply reply = ping.Send(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);                
                 if (!wasStopped)
                 {
                     try
@@ -179,53 +177,24 @@ namespace ipScan.Classes.Main
             {
                 Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
             }
-
-            if (!wasStopped)
-            {
-                try
-                {
-                    lock (Locker)
-                    {
-                        Tasks.Remove(ipAddress);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
-                }
-            }
         }
 
         public override void Stop()
         {
             lock (Locker)
             {
-                while (true)
+                try
                 {
-                    try
+                    foreach (IPInfo item in Buffer.Buffer)
                     {
-                        foreach (IPInfo item in Buffer.Buffer)
+                        if (item != null)
                         {
-                            if (item != null)
-                            {
-                                item.StopLooking4HostDetails(null);
-                            }
+                            item.StopLooking4HostDetails(null);
                         }
+                    }
 
-                    }
-                    catch (Exception) { }
-                    try
-                    {
-                        Tasks.Clear();
-                        Tasks = null;
-                    }
-                    catch (Exception)
-                    {
-
-                        throw;
-                    }
-                    break;
                 }
+                catch (Exception) { }
                 wasStopped = true;
                 isRunning = false;
             }

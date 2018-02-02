@@ -12,7 +12,6 @@ namespace ipScan.Base
         bool                                isRunning { get; }        
         bool                                wasStopped { get; }
         int                                 taskId { get; }
-        Dictionary<object, Task>            Tasks { get; }
 
         BufferedResult<T>                   Buffer { get; }        
         ConcurrentDictionary<TSub, bool>    SubTaskStates { get; }

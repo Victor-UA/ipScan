@@ -16,7 +16,6 @@ namespace ipScan.Base
         public bool                         wasStopped { get; protected set; }
         protected CancellationToken         cancellationToken { get; set; }
         public int                          taskId { get; private set; }        
-        public Dictionary<object, Task>     Tasks { get; protected set; }        
 
         protected ITasksChecking            TasksChecking { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
