@@ -123,11 +123,11 @@ namespace ipScan.Base
 
                                 if (mySearchTask != null)
                                 {
-                                    if (mySearchTask.isRunning)
+                                    if (mySearchTask.IsRunning)
                                     {
                                         TasksCount++;
                                     }
-                                    mySearchTasksStartedAll = mySearchTasksStartedAll && (mySearchTask.isRunning || mySearchTask.wasStopped || mySearchTask.progress > 0);
+                                    mySearchTasksStartedAll = mySearchTasksStartedAll && (mySearchTask.IsRunning || mySearchTask.WasStopped || mySearchTask.Progress > 0);
                                 }
 
                                 #region Change Task Range if IsComleted
@@ -138,7 +138,7 @@ namespace ipScan.Base
                                     for (int j = 0; j < mySearchTasks.Count(); j++)
                                     {
                                         var mySearchTaskSeekRemaind = mySearchTasks[j];
-                                        if (mySearchTaskSeekRemaind.isRunning)
+                                        if (mySearchTaskSeekRemaind.IsRunning)
                                         {
                                             uint taskRemaind = mySearchTaskSeekRemaind.Remaind;
                                             if (taskRemaind > maxRemaind)
@@ -152,7 +152,7 @@ namespace ipScan.Base
                                     {
                                         var mySearchTaskMaxRemind = mySearchTasks[taskIndex];
                                         mySearchTaskMaxRemind.Pause(true);
-                                        while (!mySearchTaskMaxRemind.isPaused)
+                                        while (!mySearchTaskMaxRemind.IsPaused)
                                         {
                                             Thread.Sleep(1);
                                         }
@@ -176,7 +176,7 @@ namespace ipScan.Base
                                 TasksAreCompleted = TasksAreCompleted || myTasks[i].IsCompleted;
                                 bufferResult.AddLines(mySearchTask.Buffer.getBuffer());
 
-                                progress += mySearchTask.progress;
+                                progress += mySearchTask.Progress;
                             }
                             catch (Exception ex)
                             {

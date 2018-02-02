@@ -40,7 +40,7 @@ namespace ipScan.Base.IP
                 {
                     if (HostForm != null)
                     {
-                        setHostFormCaption();
+                        SetHostFormCaption();
                     }
                 }
                 catch
@@ -50,12 +50,12 @@ namespace ipScan.Base.IP
         }
         public PhysicalAddress                  HostMac { get; set; }
 
-        public Thread                           look4HostDetails { get; private set; }
-        public bool                             isLooking4HostDetails { get; private set; }
+        public Thread                           _look4HostDetails { get; private set; }
+        public bool                             _isLooking4HostDetails { get; private set; }
         private CancellationTokenSource         CancelScanHostPorts { get; set; }
         private int                             waitingForResponses;
         private int                             CurrentHostPort { get; set; }
-        private int                             maxWaitingForResponses { get; set; } = 200; 
+        private int                             _maxWaitingForResponses { get; set; } = 200; 
                
         public EventedList<PortInfo>            Ports { get; private set; }
         private bool                            _ScanPortsIsRunning;
@@ -88,11 +88,11 @@ namespace ipScan.Base.IP
         public event EventHandler HostDetailsBeforeChanged;
         public event EventHandler HostDetailsAfterChanged;        
 
-        private void                            setHostFormCaption()
+        private void                            SetHostFormCaption()
         {
             if (HostForm.InvokeRequired)
             {
-                HostForm.Invoke(new Action(setHostFormCaption));
+                HostForm.Invoke(new Action(SetHostFormCaption));
             }
             else
             {
@@ -104,7 +104,7 @@ namespace ipScan.Base.IP
             if (HostForm == null || HostForm.IsDisposed)
             {
                 HostForm = new HostForm(this);
-                setHostFormCaption();                
+                SetHostFormCaption();                
             }
             if (HostForm.Visible)
             {
@@ -128,12 +128,12 @@ namespace ipScan.Base.IP
                 while (!ScanTCPPortsIsRunning)
                 {
                     Thread.Sleep(1000);
-                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, maxWaitingForResponses);
+                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, _maxWaitingForResponses);
                 }
                 while (ScanTCPPortsIsRunning)
                 {
                     Thread.Sleep(1000);
-                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, maxWaitingForResponses);
+                    HostForm.setScanPortsProgress(CurrentHostPort, waitingForResponses, _maxWaitingForResponses);
                 }
             });
 
@@ -150,7 +150,7 @@ namespace ipScan.Base.IP
                     
                 for (CurrentHostPort = 1; CurrentHostPort <= 65535 && !CancelScanHostPorts.Token.IsCancellationRequested; CurrentHostPort++)
                 {
-                    while (waitingForResponses >= maxWaitingForResponses)
+                    while (waitingForResponses >= _maxWaitingForResponses)
                     {
                         Thread.Sleep(0);
                     }
@@ -222,14 +222,13 @@ namespace ipScan.Base.IP
             }
             catch (Exception ex)
             {
-                throw;
+                Debug.WriteLine(ex.Message);
             }            
         }
         private void ScanPortUDP(int currentHostPort)
         {
             try
             {
-
                 UdpClient udpClient = new UdpClient(11000);
                 Socket socket = udpClient.Client;
                 socket.ExclusiveAddressUse = true;
@@ -263,8 +262,8 @@ namespace ipScan.Base.IP
                             }
                             */
                         }
-                        catch (Exception ex)
-                        {
+                        catch (Exception)
+                        {                            
                         }
                         finally
                         {
@@ -277,7 +276,7 @@ namespace ipScan.Base.IP
             }
             catch (Exception ex)
             {
-                throw;
+                Debug.WriteLine(ex.Message);
             }
         }
 
@@ -292,10 +291,10 @@ namespace ipScan.Base.IP
             }
         }
 
-        public void                             setHostDetailsAsync()
+        public void                             SetHostDetailsAsync()
         {
-            look4HostDetails = new Thread(() => {
-                isLooking4HostDetails = true;
+            _look4HostDetails = new Thread(() => {
+                _isLooking4HostDetails = true;
                 HostDetailsBeforeChanged(IPAddress, new EventArgs());
                 try
                 {
@@ -317,19 +316,19 @@ namespace ipScan.Base.IP
                     HostMac = null;
                 }
 
-                isLooking4HostDetails = false;
+                _isLooking4HostDetails = false;
                 HostDetailsAfterChanged(IPAddress, new EventArgs());
             });
-            look4HostDetails.Start();            
+            _look4HostDetails.Start();            
         }
 
-        public void                                 StopLooking4HostDetails(object obj)
+        public void                             StopLooking4HostDetails(object obj)
         {                      
-            if (look4HostDetails != null)
+            if (_look4HostDetails != null)
             {
                 try
                 {
-                    look4HostDetails.Abort();
+                    _look4HostDetails.Abort();
                     //look4HostDetails.Join();
                 }
                 catch (Exception)
@@ -359,7 +358,7 @@ namespace ipScan.Base.IP
             OnHostDetailsAferChanged(new PropertyChangedEventArgs(propertyName));
         }
 */      
-        public string                               toString()
+        public string                           toString()
         {
             string[] ip = IPAddress.ToString().Split('.');
             string result = string.Empty;
@@ -369,7 +368,7 @@ namespace ipScan.Base.IP
             }
             return result + "\t" + RoundtripTime.ToString().PadLeft(4, ' ') + "\t" + HostName;
         }
-        public override string                      ToString()
+        public override string                  ToString()
         {
             return IPAddress.ToString();
         }

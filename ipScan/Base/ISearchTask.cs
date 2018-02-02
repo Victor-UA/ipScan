@@ -1,7 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
@@ -9,20 +6,20 @@ namespace ipScan.Base
     {
         object                              Locker { get; }
 
-        bool                                isRunning { get; }        
-        bool                                wasStopped { get; }
-        int                                 taskId { get; }
+        bool                                IsRunning { get; }        
+        bool                                WasStopped { get; }
+        int                                 TaskId { get; }
 
         BufferedResult<T>                   Buffer { get; }        
         ConcurrentDictionary<TSub, bool>    SubTaskStates { get; }
-        Dictionary<uint, uint>              Progress { get; }
+        ConcurrentDictionary<uint, uint>    ProgressDict { get; }
         uint                                FirstIPAddress { get; }
         uint                                CurrentPosition { get; }
         uint                                Count { get; set; }
         uint                                Remaind { get; }
                 
-        int                                 progress { get; }
-        bool                                isPaused { get; }
+        int                                 Progress { get; }
+        bool                                IsPaused { get; }
 
         void                                Init(uint firstIPAddress, uint count);
 

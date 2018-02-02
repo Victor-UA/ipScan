@@ -13,6 +13,7 @@ using ipScan.Base.IP;
 using System.Collections;
 using System.Net.NetworkInformation;
 using ipScan.Properties;
+using System.Collections.Concurrent;
 
 namespace ipScan.Classes.Main
 {
@@ -55,7 +56,7 @@ namespace ipScan.Classes.Main
                     {
                         for (int i = 0; i < _mySearchTasks.Count(); i++)
                         {
-                            isRunning = isRunning || _mySearchTasks[i].isRunning;
+                            isRunning = isRunning || _mySearchTasks[i].IsRunning;
                             if (isRunning)
                             {
                                 return true;
@@ -249,20 +250,19 @@ namespace ipScan.Classes.Main
 
             if (_mySearchTasks != null)
             {
-                for (int i = 0; i < _mySearchTasks.Count; i++)
-                {
-                    Dictionary<uint, uint> progress = _mySearchTasks[i].Progress;                    
-                    foreach (uint index in progress.Keys)
+                foreach (var mySearchTask in _mySearchTasks)
+                {                    
+                    foreach (uint index in mySearchTask.ProgressDict.Keys)
                     {
                         int x0 = (int)((index - _firstIpAddress) * (uint)bmpTasksProgress.Width / _ipListCount);
-                        int x1 = (int)((progress[index] - _firstIpAddress) * (uint)bmpTasksProgress.Width / _ipListCount);
+                        int x1 = (int)((mySearchTask.ProgressDict[index] - _firstIpAddress) * (uint)bmpTasksProgress.Width / _ipListCount);
                         int width = x1 - x0;
 
                         Rectangle rectangle = new Rectangle(x0, 0, width == 0 ? 1 : width, bmpTasksProgress.Height);
                         graphics.DrawRectangle(pen, rectangle);
                         graphics.FillRectangle(brush, rectangle);
                     }
-                }
+                }                
 
                 graphics = Graphics.FromImage(_bmpTasksResult);
                 pen = new Pen(Color.Lime);

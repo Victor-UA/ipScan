@@ -19,17 +19,17 @@ namespace ipScan.Classes.Main
 
         protected override void Search()
         {            
-            Debug.WriteLine(taskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
+            Debug.WriteLine(TaskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
             bool waiting4TasksChecking = false;            
             int sleepTime = 100;
-            Progress.Add(FirstIPAddress, CurrentPosition);
+            ProgressDict.TryAdd(FirstIPAddress, CurrentPosition);
 
             byte[] buffer = { 1 };
             PingOptions options = new PingOptions(254, true);                        
 
-            if (!wasStopped)
+            if (!WasStopped)
             {
-                while (isRunning && CurrentPosition < FirstIPAddress + Count)
+                while (IsRunning && CurrentPosition < FirstIPAddress + Count)
                 {
                     #region Is Task has to be paused
 
@@ -49,7 +49,7 @@ namespace ipScan.Classes.Main
                         #region Calculate sleepTime
                         if (!waiting4TasksChecking)
                         {
-                            Debug.WriteLine(taskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + tasksCheckingLoopTime.TotalSeconds.ToString());
+                            Debug.WriteLine(TaskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + tasksCheckingLoopTime.TotalSeconds.ToString());
                             waiting4TasksChecking = true;
                         }
 
@@ -65,21 +65,21 @@ namespace ipScan.Classes.Main
                         if (waiting4TasksChecking)
                         {
                             waiting4TasksChecking = false;
-                            Debug.WriteLine(taskId.ToString() + " resumed its work");
+                            Debug.WriteLine(TaskId.ToString() + " resumed its work");
                         }
                         sleepTime = 100;
                     }
                     #endregion
 
-                    if (isPaused || waiting4TasksChecking)
+                    if (IsPaused || waiting4TasksChecking)
                     {
                         Thread.Sleep(sleepTime);
                     }
                     else
                     {
-                        PingHost(CurrentPosition, timeOut, buffer, options);                        
+                        PingHost(CurrentPosition, _timeOut, buffer, options);                        
                         CurrentPosition++;
-                        Progress[FirstIPAddress] = CurrentPosition;
+                        ProgressDict[FirstIPAddress] = CurrentPosition;
                     }
                     if (cancellationToken.IsCancellationRequested)
                     {
@@ -87,8 +87,8 @@ namespace ipScan.Classes.Main
                     }                    
                 }
             }                      
-            isRunning = false;
-            Debug.WriteLine(taskId + " is stopped");
+            IsRunning = false;
+            Debug.WriteLine(TaskId + " is stopped");
         }
 
         #region (DISABLED) PingHostAsync
@@ -152,7 +152,7 @@ namespace ipScan.Classes.Main
             {
                 Ping ping = new Ping();
                 PingReply reply = ping.Send(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);                
-                if (!wasStopped)
+                if (!WasStopped)
                 {
                     try
                     {
@@ -162,7 +162,7 @@ namespace ipScan.Classes.Main
                             IPInfo ipInfo = new IPInfo(address, reply.RoundtripTime);
                             ipInfo.HostDetailsBeforeChanged += TSub_BeforeChanged;
                             ipInfo.HostDetailsAfterChanged += TSub_AfterChanged;
-                            ipInfo.setHostDetailsAsync();
+                            ipInfo.SetHostDetailsAsync();
                             Buffer.AddLine(ipInfo);
                         }
                     }
@@ -195,8 +195,8 @@ namespace ipScan.Classes.Main
 
                 }
                 catch (Exception) { }
-                wasStopped = true;
-                isRunning = false;
+                WasStopped = true;
+                IsRunning = false;
             }
         }        
     }
