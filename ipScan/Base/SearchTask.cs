@@ -5,12 +5,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic.Devices;
 using System.Collections.Concurrent;
+using NLog;
 
 namespace ipScan.Base
 {
     abstract class SearchTask<T, TSub> : ISearchTask<T, TSub>
     {
-        public object                       Locker { get; } = new object();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        protected const int PAUSE_SLEEP_TIME = 100;
+
+        protected object                    _locker { get; } = new object();
 
         public bool                         IsRunning { get; protected set; }        
         public bool                         WasStopped { get; protected set; }
@@ -42,28 +47,47 @@ namespace ipScan.Base
             get { return _progress; }
             protected set { _progress = value; }
         }
-        protected int                       _timeOut { get; set; }
-        public bool                         IsPaused { get; private set; }
-        private Action<T>                   _bufferResultAddLine { get; set; }    
-        protected ComputerInfo              ComputerInfo { get; set; }
+        protected int                       _timeOut;
+        private bool                        _isPaused;
+        public bool                         IsPaused
+        {
+            get
+            {
+                return _isPaused;
+            }
+            private set
+            {
+                _isPaused = value;
+                if (value)
+                {
+                    _logger.Trace(string.Format("Task [{0}] was paused", TaskId));
+                }
+                else
+                {
+                    _logger.Trace(string.Format("Task [{0}] was unpaused", TaskId));
+                }
+            }
+        }
+        private Action<T>                   _bufferResultAddLine;
+        protected ComputerInfo              _computerInfo;
 
         public SearchTask(int TaskId, uint firstIpAddress, uint Count, Action<T> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
         {
-            Buffer = new BufferedResult<T>();
-            SubTaskStates = new ConcurrentDictionary<TSub, bool>();
-            ProgressDict = new ConcurrentDictionary<uint, uint>();
+            this.Buffer = new BufferedResult<T>();
+            this.SubTaskStates = new ConcurrentDictionary<TSub, bool>();
+            this.ProgressDict = new ConcurrentDictionary<uint, uint>();
             this.TaskId = TaskId;            
-            TasksChecking = CheckTasks;
-            FirstIPAddress = firstIpAddress;
+            this.TasksChecking = CheckTasks;
+            this.FirstIPAddress = firstIpAddress;
             this.Count = Count;
-            CurrentPosition = FirstIPAddress;
-            _timeOut = TimeOut;
-            _bufferResultAddLine = BufferResultAddLine;
-            IsPaused = false;
-            IsRunning = false;            
-            WasStopped = false;
-            cancellationToken = CancellationToken;
-            Progress = 0;
+            this.CurrentPosition = FirstIPAddress;
+            this._timeOut = TimeOut;
+            this._bufferResultAddLine = BufferResultAddLine;
+            this.IsPaused = false;
+            this.IsRunning = false;            
+            this.WasStopped = false;
+            this.cancellationToken = CancellationToken;
+            this.Progress = 0;
         }
 
         protected void TSub_BeforeChanged(object sender, EventArgs e)
@@ -81,7 +105,7 @@ namespace ipScan.Base
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.StackTrace);
+                _logger.Error(ex);
             }
         }
         protected void TSub_AfterChanged(object sender, EventArgs e)
@@ -91,9 +115,9 @@ namespace ipScan.Base
                 if (SubTaskStates.ContainsKey((TSub)sender))
                     SubTaskStates[(TSub)sender] = false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
+                _logger.Error(ex);
             }
         }
 

@@ -13,7 +13,7 @@ namespace ipScan.Base
         void Check();
         void Stop();
         bool Pause();
-        bool Pause(bool IsPaused);
+        void Pause(bool IsPaused);
         
     }
 }

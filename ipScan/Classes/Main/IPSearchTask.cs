@@ -9,17 +9,20 @@ using System.Net.Sockets;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using NLog;
 
 namespace ipScan.Classes.Main
 {
     class IPSearchTask : SearchTask<IPInfo, uint>
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
             : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }
 
         protected override void Search()
-        {            
-            Debug.WriteLine(TaskId + " is started " + DateTime.Now + "." + DateTime.Now.Millisecond);            
+        {
+            _logger.Trace(string.Format("Task [{0}] started", TaskId));            
             bool waiting4TasksChecking = false;            
             int sleepTime = 100;
             ProgressDict.TryAdd(FirstIPAddress, CurrentPosition);
@@ -49,7 +52,8 @@ namespace ipScan.Classes.Main
                         #region Calculate sleepTime
                         if (!waiting4TasksChecking)
                         {
-                            Debug.WriteLine(TaskId.ToString() + " is waiting for checkTasks iterration. CheckTasks loop time: " + tasksCheckingLoopTime.TotalSeconds.ToString());
+                            _logger.Trace(string.Format("Task [{0}] is waiting for checkTasks iterration. CheckTasks loop time: {1}",
+                                TaskId, tasksCheckingLoopTime.TotalSeconds));
                             waiting4TasksChecking = true;
                         }
 
@@ -65,30 +69,36 @@ namespace ipScan.Classes.Main
                         if (waiting4TasksChecking)
                         {
                             waiting4TasksChecking = false;
-                            Debug.WriteLine(TaskId.ToString() + " resumed its work");
+                            _logger.Trace(string.Format("Task [{0}] resumed its work", TaskId));
                         }
                         sleepTime = 100;
                     }
                     #endregion
 
-                    if (IsPaused || waiting4TasksChecking)
+                    if (waiting4TasksChecking)
                     {
                         Thread.Sleep(sleepTime);
                     }
+                    else if (IsPaused)
+                    {
+                        Thread.Sleep(PAUSE_SLEEP_TIME);
+                    }
                     else
                     {
-                        PingHost(CurrentPosition, _timeOut, buffer, options);                        
+                        PingHost(CurrentPosition, _timeOut, buffer, options);
                         CurrentPosition++;
                         ProgressDict[FirstIPAddress] = CurrentPosition;
                     }
+
                     if (cancellationToken.IsCancellationRequested)
                     {
                         Stop();
+                        _logger.Trace(string.Format("Task [{0}] cancelled", TaskId));
                     }                    
                 }
             }                      
             IsRunning = false;
-            Debug.WriteLine(TaskId + " is stopped");
+            _logger.Trace(string.Format("Task [{0}] stopped", TaskId));            
         }
 
         #region (DISABLED) PingHostAsync
@@ -168,20 +178,20 @@ namespace ipScan.Classes.Main
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                        _logger.Error(ex);
                     }
                 }
                 Interlocked.Increment(ref _progress);                
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message + "\r" + ex.StackTrace);
+                _logger.Error(ex);
             }
         }
 
         public override void Stop()
         {
-            lock (Locker)
+            lock (_locker)
             {
                 try
                 {
@@ -192,9 +202,11 @@ namespace ipScan.Classes.Main
                             item.StopLooking4HostDetails(null);
                         }
                     }
-
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex);
+                }
                 WasStopped = true;
                 IsRunning = false;
             }

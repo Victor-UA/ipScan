@@ -31,7 +31,23 @@ namespace ipScan.Base
         public TimeSpan                         loopTime { get; protected set; }
         public int                              SleepTime { get; set; }
         private bool                            isStarting { get; set; }
-        private bool                            isPaused { get; set; }
+        private bool _isPaused;
+        protected bool IsPaused
+        {
+            get
+            {
+                return _isPaused;
+            }
+
+            set
+            {
+                _isPaused = value;
+                foreach (var item in mySearchTasks)
+                {
+                    item.Pause(value);
+                }
+            }
+        }
         private bool                            isStopped { get; set; }
         private bool                            isResultOutputBlocked { get; set; }
 
@@ -76,7 +92,7 @@ namespace ipScan.Base
                 do
                 {                    
                     Thread.Sleep(SleepTime);
-                    if (!isPaused)                    
+                    if (!IsPaused)                    
                     {
                         bool mySearchTasksStartedAll = true;
                         TasksAreRunning = false;
@@ -239,13 +255,16 @@ namespace ipScan.Base
         {
             isStopped = true;
         }
+
         public bool Pause()
         {
-            return isPaused = !isPaused;
-        }        
-        public bool Pause(bool IsPaused)
+            IsPaused = !IsPaused;
+            return IsPaused;
+        }
+
+        public void Pause(bool IsPaused)
         {
-            return isPaused = IsPaused;
+            this.IsPaused = IsPaused;            
         }
     }
 }

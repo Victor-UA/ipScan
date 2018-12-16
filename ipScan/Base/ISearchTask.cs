@@ -4,8 +4,6 @@ namespace ipScan.Base
 {
     interface ISearchTask<T, TSub>
     {
-        object                              Locker { get; }
-
         bool                                IsRunning { get; }        
         bool                                WasStopped { get; }
         int                                 TaskId { get; }
