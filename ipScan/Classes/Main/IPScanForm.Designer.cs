@@ -30,8 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IPScanForm));
-            this.textBox_IPFirst = new System.Windows.Forms.TextBox();
-            this.textBox_IPLast = new System.Windows.Forms.TextBox();
             this.textBox_ThreadCount = new System.Windows.Forms.TextBox();
             this.button_Start = new System.Windows.Forms.Button();
             this.button_Stop = new System.Windows.Forms.Button();
@@ -53,23 +51,11 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.comboBox_IPFirst = new System.Windows.Forms.ComboBox();
+            this.comboBox_IPLast = new System.Windows.Forms.ComboBox();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // textBox_IPFirst
-            // 
-            this.textBox_IPFirst.Location = new System.Drawing.Point(12, 12);
-            this.textBox_IPFirst.Name = "textBox_IPFirst";
-            this.textBox_IPFirst.Size = new System.Drawing.Size(165, 20);
-            this.textBox_IPFirst.TabIndex = 0;
-            // 
-            // textBox_IPLast
-            // 
-            this.textBox_IPLast.Location = new System.Drawing.Point(183, 12);
-            this.textBox_IPLast.Name = "textBox_IPLast";
-            this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
-            this.textBox_IPLast.TabIndex = 1;
             // 
             // textBox_ThreadCount
             // 
@@ -293,11 +279,29 @@
             this.label2.TabIndex = 11;
             this.label2.Text = "Ping Timeout";
             // 
+            // comboBox_IPFirst
+            // 
+            this.comboBox_IPFirst.FormattingEnabled = true;
+            this.comboBox_IPFirst.Location = new System.Drawing.Point(15, 12);
+            this.comboBox_IPFirst.Name = "comboBox_IPFirst";
+            this.comboBox_IPFirst.Size = new System.Drawing.Size(165, 21);
+            this.comboBox_IPFirst.TabIndex = 12;
+            // 
+            // comboBox_IPLast
+            // 
+            this.comboBox_IPLast.FormattingEnabled = true;
+            this.comboBox_IPLast.Location = new System.Drawing.Point(186, 12);
+            this.comboBox_IPLast.Name = "comboBox_IPLast";
+            this.comboBox_IPLast.Size = new System.Drawing.Size(165, 21);
+            this.comboBox_IPLast.TabIndex = 13;
+            // 
             // IPScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 571);
+            this.Controls.Add(this.comboBox_IPLast);
+            this.Controls.Add(this.comboBox_IPFirst);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.SG_Result);
@@ -309,8 +313,6 @@
             this.Controls.Add(this.button_Stop);
             this.Controls.Add(this.button_Start);
             this.Controls.Add(this.textBox_ThreadCount);
-            this.Controls.Add(this.textBox_IPLast);
-            this.Controls.Add(this.textBox_IPFirst);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(600, 450);
             this.Name = "IPScanForm";
@@ -326,9 +328,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBox_IPFirst;
-        private System.Windows.Forms.TextBox textBox_IPLast;
         private System.Windows.Forms.TextBox textBox_ThreadCount;
         private System.Windows.Forms.Button button_Start;
         private System.Windows.Forms.Button button_Stop;
@@ -350,6 +349,8 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBox_IPFirst;
+        private System.Windows.Forms.ComboBox comboBox_IPLast;
     }
 }
 

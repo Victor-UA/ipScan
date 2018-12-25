@@ -82,12 +82,13 @@ namespace ipScan.Classes.Main
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
             _fill.GridFill(SG_Result, null as ListIPInfo, null, _gridHeaders);
 
-            var localIP = IPTools.GetLocalIPAddress();
-            if (localIP != null)
+            var localIPs = IPTools.GetLocalIPAddress();
+            if (localIPs != null)
             {
-                textBox_IPFirst.Text = textBox_IPLast.Text = localIP.ToString();
+                comboBox_IPFirst.Items.AddRange(localIPs.ToArray());
+                comboBox_IPLast.Items.AddRange(localIPs.ToArray());
+                comboBox_IPFirst.Text = comboBox_IPLast.Text = localIPs.First().ToString();                
             }
-
             _logger.Trace("Started");
         }
         private void IPScanForm_Load(object sender, EventArgs e)
@@ -306,13 +307,13 @@ namespace ipScan.Classes.Main
                 button_Pause.Text = "Pause";                
 
                 //https://toster.ru/q/140605
-                if (String.IsNullOrWhiteSpace(textBox_IPFirst.Text))
+                if (String.IsNullOrWhiteSpace(comboBox_IPFirst.Text))
                 {
                     MessageBox.Show("Помилка у початковій адресі", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                if (String.IsNullOrWhiteSpace(textBox_IPLast.Text))
+                if (String.IsNullOrWhiteSpace(comboBox_IPLast.Text))
                 {
                     MessageBox.Show("Помилка у кінцевій адресі", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -320,7 +321,7 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    _firstIpAddress = IPTools.IPAddress2UInt32(textBox_IPFirst.Text);
+                    _firstIpAddress = IPTools.IPAddress2UInt32(comboBox_IPFirst.Text);
                 }
                 catch (FormatException ex)
                 {
@@ -331,7 +332,7 @@ namespace ipScan.Classes.Main
 
                 try
                 {
-                    _lastIpAddress = IPTools.IPAddress2UInt32(textBox_IPLast.Text);
+                    _lastIpAddress = IPTools.IPAddress2UInt32(comboBox_IPLast.Text);
                 }
                 catch (FormatException ex)
                 {

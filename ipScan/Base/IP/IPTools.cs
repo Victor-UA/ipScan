@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -195,22 +196,28 @@ namespace ipScan.Base.IP
         }
 
         //https://stackoverflow.com/questions/6803073/get-local-ip-address
-        public static IPAddress GetLocalIPAddress()
+        public static IEnumerable<IPAddress> GetLocalIPAddress()
         {
+            IList<IPAddress> result = null;
             if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
             {
+                result = new List<IPAddress>();
                 var host = Dns.GetHostEntry(Dns.GetHostName());
+
                 foreach (var ip in host.AddressList)
                 {
                     if (ip.AddressFamily == AddressFamily.InterNetwork)
                     {
                         _logger.Info(string.Concat("Current host ip: [", ip, "]"));
-                        return ip;
+                        result.Add(ip);
                     }
                 }
             }
-            _logger.Error("No network adapters with an IPv4 address in the system!");
-            return null;            
+            else
+            {
+                _logger.Error("No network adapters with an IPv4 address in the system!");
+            }
+            return result;            
         }
     }
 }
