@@ -81,6 +81,13 @@ namespace ipScan.Classes.Main
             button_Pause.Tag = false;
             //SG_Result.Controller.AddController(new GridController(Color.LightBlue));
             _fill.GridFill(SG_Result, null as ListIPInfo, null, _gridHeaders);
+
+            var localIP = IPTools.GetLocalIPAddress();
+            if (localIP != null)
+            {
+                textBox_IPFirst.Text = textBox_IPLast.Text = localIP.ToString();
+            }
+
             _logger.Trace("Started");
         }
         private void IPScanForm_Load(object sender, EventArgs e)

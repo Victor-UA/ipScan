@@ -59,7 +59,6 @@ namespace ipScan.Base
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            //!Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
             Action<IProgressData> SetProgress,
             uint ipListCount,
             BufferedResult<T> BufferResult)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace ipScan.Base.IP
 {
     class IPTools
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         [DllImport("Iphlpapi.dll", EntryPoint = "SendARP")]
         internal extern static Int32 SendArp(
             Int32 destIpAddress, Int32 srcIpAddress,
@@ -189,6 +192,25 @@ namespace ipScan.Base.IP
                 // Discard PingExceptions and return false;
             }
             return reply;
+        }
+
+        //https://stackoverflow.com/questions/6803073/get-local-ip-address
+        public static IPAddress GetLocalIPAddress()
+        {
+            if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
+            {
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        _logger.Info(string.Concat("Current host ip: [", ip, "]"));
+                        return ip;
+                    }
+                }
+            }
+            _logger.Error("No network adapters with an IPv4 address in the system!");
+            return null;            
         }
     }
 }

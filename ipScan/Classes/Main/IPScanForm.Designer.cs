@@ -63,7 +63,6 @@
             this.textBox_IPFirst.Name = "textBox_IPFirst";
             this.textBox_IPFirst.Size = new System.Drawing.Size(165, 20);
             this.textBox_IPFirst.TabIndex = 0;
-            this.textBox_IPFirst.Text = "10.65.56.1";
             // 
             // textBox_IPLast
             // 
@@ -71,7 +70,6 @@
             this.textBox_IPLast.Name = "textBox_IPLast";
             this.textBox_IPLast.Size = new System.Drawing.Size(171, 20);
             this.textBox_IPLast.TabIndex = 1;
-            this.textBox_IPLast.Text = "10.66.56.1";
             // 
             // textBox_ThreadCount
             // 
