@@ -23,7 +23,7 @@ namespace ipScan.Base
         private BufferedResult<T>               bufferResult { get; set; }        
         private Action<object>                  disposeTasks { get; set; }
 
-        private Action<int, int, int, TimeSpan, TimeSpan, int> setProgress { get; set; }
+        private Action<IProgressData> setProgress { get; set; }
 
         private uint                            IPListCount { get; set; }
         private DateTime                        timeStart { get; set; }
@@ -59,7 +59,8 @@ namespace ipScan.Base
             Action<bool> StopButtonEnable,
             Action<object> ResultAppendBuffer,
             Action<object> DisposeTasks,
-            Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
+            //!Action<int, int, int, TimeSpan, TimeSpan, int> SetProgress,
+            Action<IProgressData> SetProgress,
             uint ipListCount,
             BufferedResult<T> BufferResult)
         {
@@ -234,8 +235,15 @@ namespace ipScan.Base
                             timeLeft = TimeSpan.MinValue;
                             Debug.WriteLine(ex.StackTrace);
                         }
-                        setProgress(progress, TasksCount, subTasksCount, timePassed, timeLeft, (int)loopTime.TotalMilliseconds);
-                        
+                        setProgress(new ProgressData()
+                        {
+                            Progress = progress,
+                            TasksCount = TasksCount,
+                            SubTasksCount = subTasksCount,
+                            TimePassed = timePassed,
+                            TimeLeft = timeLeft,
+                            PauseTime = (int)loopTime.TotalMilliseconds
+                        } );
                     }
                     loopTime = DateTime.Now - LastTime;
                     LastTime = DateTime.Now;

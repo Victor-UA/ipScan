@@ -98,7 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\Grid\GridCellController.cs" />
+    <Compile Include="Base\IProgressData.cs" />
     <Compile Include="Base\ITasksChecking.cs" />
+    <Compile Include="Base\ProgressData.cs" />
     <Compile Include="Base\TasksChecking.cs" />
     <Compile Include="Base\EventedList.cs" />
     <Compile Include="Base\Grid\Fill.cs" />

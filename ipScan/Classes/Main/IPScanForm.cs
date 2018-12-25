@@ -185,21 +185,28 @@ namespace ipScan.Classes.Main
             GC.Collect();
         }        
 
-        private void SetProgress(int Progress, int Thread4IpCount, int Thread4HostNameCount, TimeSpan timePassed, TimeSpan timeLeft, int pauseTime)
+        private void SetProgress(IProgressData progressData)
         {
             if (InvokeRequired)
             {
-                this.Invoke(new Action<int, int, int, TimeSpan, TimeSpan, int>(SetProgress), Progress, Thread4IpCount, Thread4HostNameCount, timePassed, timeLeft, pauseTime);
+                this.Invoke(new Action<IProgressData>(SetProgress), progressData);
                 return;
             }
             try
             {
-                label_Progress.Text = Progress.ToString() + @"\" + _ipListCount.ToString() + "  [ " + string.Format("{0:hh\\:mm\\:ss}", timePassed) + @" \ " + string.Format("{0:hh\\:mm\\:ss}", timeLeft) + " ]";
+                label_Progress.Text = string.Concat(
+                    progressData.Progress.ToString(), @"\", _ipListCount.ToString(), 
+                    "  [ ", 
+                    string.Format("{0:hh\\:mm\\:ss}", progressData.TimePassed), 
+                    @" \ ", 
+                    string.Format("{0:hh\\:mm\\:ss}", progressData.TimeLeft), 
+                    " ]"
+                    );
                 tSSL_Found.Text = _bufferedResult == null ? "0" : _bufferedResult.Buffer.Count().ToString();
-                tSSL_ThreadIPWorks.Text = Thread4IpCount.ToString();
-                tSSL_ThreadsDNS.Text = Thread4HostNameCount.ToString();
-                tSSL_pauseTime.Text = pauseTime.ToString();
-                toolStripProgressBar1.Value = (int)(Progress * 100 / _ipListCount);
+                tSSL_ThreadIPWorks.Text = progressData.TasksCount.ToString();
+                tSSL_ThreadsDNS.Text = progressData.SubTasksCount.ToString();
+                tSSL_pauseTime.Text = progressData.PauseTime.ToString();
+                toolStripProgressBar1.Value = (int)(progressData.Progress * 100 / _ipListCount);
                 
                 DrawMultiProgress();
             }
@@ -343,7 +350,7 @@ namespace ipScan.Classes.Main
                 try
                 {
                     SetProgressMaxValue(100);
-                    SetProgress(0, 0, 0, TimeSpan.MinValue, TimeSpan.MinValue, 0);
+                    SetProgress(new ProgressData());
                 }
                 catch (Exception ex)
                 {
