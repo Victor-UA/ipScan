@@ -153,14 +153,17 @@ namespace ipScan.Base.IP
 
                 //check the reply, zero (0) is an error
                 if (arpReply != 0)
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                {
+                    _logger.Trace(new Win32Exception(Marshal.GetLastWin32Error()));
+                    return null;
+                }
 
                 //return the MAC address in a PhysicalAddress format
                 return new PhysicalAddress(macByteArray);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.StackTrace);
+                _logger.Error(ex);
                 return null;
             }
         }

@@ -9,6 +9,6 @@ namespace ipScan.Base
         int SubTasksCount { get; set; }
         int TasksCount { get; set; }
         TimeSpan TimeLeft { get; set; }
-        TimeSpan TimePassed { get; set; }
+        TimeSpan TimePassed { get; set; }        
     }
 }

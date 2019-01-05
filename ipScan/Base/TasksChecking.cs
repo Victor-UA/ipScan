@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ipScan.Base.IP;
+using Newtonsoft.Json;
+using NLog;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,12 +12,15 @@ namespace ipScan.Base
 {
     class TasksChecking<T, TSub> : ITasksChecking
     {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        private object _locker = new object();
+
         private bool wasStopped { get; set; }
         private static readonly object          lockObject = new object();
-        private uint                             OkRemaind { get; } = 4;
+        private const uint                      MIN_REMAIND  = 4;
 
-        private List<Task>                      myTasks { get; set; }
-        private List<ISearchTask<T, TSub>>      mySearchTasks { get; set; }
+        private List<ISearchTask<T, TSub>>      _mySearchTasks { get; set; }
         public bool                             MySearchTasksStartedAll { get; protected set; }
 
         private Action<bool>                    startButtonEnable { get; set; }
@@ -30,9 +36,9 @@ namespace ipScan.Base
         public DateTime                         LastTime { get; private set; }
         public TimeSpan                         loopTime { get; protected set; }
         public int                              SleepTime { get; set; }
-        private bool                            isStarting { get; set; }
+        public bool                             IsStarting { get; set; }
         private bool _isPaused;
-        protected bool IsPaused
+        protected bool                          IsPaused
         {
             get
             {
@@ -42,7 +48,7 @@ namespace ipScan.Base
             set
             {
                 _isPaused = value;
-                foreach (var item in mySearchTasks)
+                foreach (var item in _mySearchTasks)
                 {
                     item.Pause(value);
                 }
@@ -51,9 +57,10 @@ namespace ipScan.Base
         private bool                            isStopped { get; set; }
         private bool                            isResultOutputBlocked { get; set; }
 
+        private int                             _tasksCount;
+        private long                            _progressRemaind;
 
         public TasksChecking(
-            List<Task> MyTasks,
             List<ISearchTask<T, TSub>> MySearchTasks,
             Action<bool> StartButtonEnable,
             Action<bool> StopButtonEnable,
@@ -63,8 +70,7 @@ namespace ipScan.Base
             uint ipListCount,
             BufferedResult<T> BufferResult)
         {
-            myTasks = MyTasks;
-            mySearchTasks = MySearchTasks;
+            this._mySearchTasks = MySearchTasks;
             startButtonEnable = StartButtonEnable;
             stopButtonEnable = StopButtonEnable;
             resultAppendBuffer = ResultAppendBuffer;
@@ -78,34 +84,36 @@ namespace ipScan.Base
             isStopped = false;
             SleepTime = 1000;
             MySearchTasksStartedAll = false;
+            IsStarting = true;
         }
         
         public void Check()
-        {
-            isStarting = true;
+        {            
+            TimeSpan timePassed = TimeSpan.MinValue;
             try
             {
                 bool TasksAreRunning = false;
                 bool TasksAreCompleted = false;                
-                uint maxRemaind = OkRemaind;
                 LastTime = DateTime.Now;
                 do
-                {                    
+                {
                     Thread.Sleep(SleepTime);
                     if (!IsPaused)                    
                     {
                         bool mySearchTasksStartedAll = true;
                         TasksAreRunning = false;
                         int progress = 0;
-                        int TasksCount = 0;
+                        int tasksCount = 0;
                         int subTasksCount = 0;
-                                                
-                        for (int i = 0; i < mySearchTasks.Count(); i++)
+
+                        #region mySearchTasks Handling
+
+                        for (int i = 0; i < _mySearchTasks.Count; i++)
                         {
                             try
                             {
-                                var mySearchTask = mySearchTasks[i];
                                 bool SubTasksAreRunning = false;
+                                var mySearchTask = _mySearchTasks[i];
 
                                 #region Get Statistics
                                 try
@@ -129,10 +137,9 @@ namespace ipScan.Base
                                         }
                                     }
                                 }
-
                                 catch (Exception ex)
                                 {
-                                    Debug.WriteLine(ex.StackTrace);
+                                    _logger.Error(ex);
                                 }
 
                                 #endregion
@@ -141,72 +148,28 @@ namespace ipScan.Base
                                 {
                                     if (mySearchTask.IsRunning)
                                     {
-                                        TasksCount++;
+                                        tasksCount++;
                                     }
                                     mySearchTasksStartedAll = mySearchTasksStartedAll && (mySearchTask.IsRunning || mySearchTask.WasStopped || mySearchTask.Progress > 0);
                                 }
 
-                                #region Change Task Range if IsComleted
-                                if (myTasks[i].IsCompleted && maxRemaind >= OkRemaind)
-                                {
-                                    maxRemaind = 0;
-                                    int taskIndex = -1;
-                                    for (int j = 0; j < mySearchTasks.Count(); j++)
-                                    {
-                                        var mySearchTaskSeekRemaind = mySearchTasks[j];
-                                        if (mySearchTaskSeekRemaind.IsRunning)
-                                        {
-                                            uint taskRemaind = mySearchTaskSeekRemaind.Remaind;
-                                            if (taskRemaind > maxRemaind)
-                                            {
-                                                maxRemaind = taskRemaind;
-                                                taskIndex = j;
-                                            }
-                                        }
-                                    }
-                                    if (taskIndex >= 0 && maxRemaind >= OkRemaind)
-                                    {
-                                        var mySearchTaskMaxRemind = mySearchTasks[taskIndex];
-                                        mySearchTaskMaxRemind.Pause(true);
-                                        while (!mySearchTaskMaxRemind.IsPaused)
-                                        {
-                                            Thread.Sleep(1);
-                                        }
-                                        uint remaind = mySearchTaskMaxRemind.Remaind;
-                                        uint count = mySearchTaskMaxRemind.Count;
-                                        uint index = mySearchTaskMaxRemind.FirstIPAddress;
-                                        uint newRemaind = remaind / 2;
-                                        uint newCount = count - newRemaind;
-
-                                        mySearchTaskMaxRemind.Count = newCount;
-                                        mySearchTaskMaxRemind.Pause(false);
-
-                                        mySearchTask.Init(index + newCount, newRemaind);
-                                        myTasks[i] = Task.Factory.StartNew(mySearchTask.Start, TaskCreationOptions.LongRunning);
-                                        Console.WriteLine(i.ToString() + " is joined to " + taskIndex.ToString());
-                                    }
-                                }
-                                #endregion
-
-                                TasksAreRunning = TasksAreRunning || !myTasks[i].IsCompleted || SubTasksAreRunning;
-                                TasksAreCompleted = TasksAreCompleted || myTasks[i].IsCompleted;
+                                TasksAreRunning = TasksAreRunning || mySearchTask.MyTask != null && !mySearchTask.MyTask.IsCompleted || SubTasksAreRunning;
+                                TasksAreCompleted = TasksAreCompleted || mySearchTask.MyTask != null && mySearchTask.MyTask.IsCompleted;
                                 bufferResult.AddLines(mySearchTask.Buffer.getBuffer());
 
                                 progress += mySearchTask.Progress;
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.StackTrace);
+                                _logger.Error(ex);
                             }
                         }
 
+                        #endregion
+
                         MySearchTasksStartedAll = mySearchTasksStartedAll;
 
-                        if (TasksAreRunning || TasksAreCompleted)
-                        {
-                            isStarting = false;
-                        }                                                
-
+                        #region Calculate Time
 
                         if (!isResultOutputBlocked)
                         {
@@ -214,7 +177,7 @@ namespace ipScan.Base
                         }                                               
                         
                         DateTime Now = DateTime.Now;
-                        TimeSpan timePassed;
+                        
                         TimeSpan timeLeft;
                         try
                         {
@@ -232,12 +195,18 @@ namespace ipScan.Base
                         {
                             timePassed = TimeSpan.MinValue;
                             timeLeft = TimeSpan.MinValue;
-                            Debug.WriteLine(ex.StackTrace);
+                            _logger.Error(ex);
                         }
+
+                        #endregion
+
+                        this._tasksCount = tasksCount;
+                        this._progressRemaind = IPListCount - progress;
+
                         setProgress(new ProgressData()
                         {
                             Progress = progress,
-                            TasksCount = TasksCount,
+                            TasksCount = tasksCount,
                             SubTasksCount = subTasksCount,
                             TimePassed = timePassed,
                             TimeLeft = timeLeft,
@@ -246,16 +215,80 @@ namespace ipScan.Base
                     }
                     loopTime = DateTime.Now - LastTime;
                     LastTime = DateTime.Now;
-                } while ((TasksAreRunning || isStarting) && !isStopped);
+                } while ((TasksAreRunning || IsStarting) && !isStopped);
                 disposeTasks(null);                
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.StackTrace);
+                _logger.Error(ex);
             }
-            Console.WriteLine("Усі задачі зупинено");
+            _logger.Info(string.Concat("All done, time: [", (timePassed == TimeSpan.MinValue ? "" : timePassed.ToString()), "]"));
             startButtonEnable(true);
             stopButtonEnable(false);
+        }
+
+        private int GetMaxRemaindTaskIndex()
+        {
+            var maxRemaind = MIN_REMAIND;
+            int result = -1;
+            for (int i = 0; i < _mySearchTasks.Count; i++)
+            {
+                var searchTask = _mySearchTasks[i];
+                if (searchTask.IsRunning && !searchTask.IsBlocked && searchTask.Remaind > maxRemaind)
+                {
+                    maxRemaind = searchTask.Remaind;
+                    result = searchTask.TaskId;
+                }
+            }            
+            return result;
+        }
+
+        public bool ChangeSearchTaskRange(int Index)
+        {
+            bool result = false;
+
+            if (_tasksCount <= _progressRemaind)
+            {
+                var mySearchTask = _mySearchTasks[Index];
+                var taskIndex = GetMaxRemaindTaskIndex();
+                if (taskIndex >= 0)
+                {
+                    var mySearchTaskMaxRemind = _mySearchTasks[taskIndex];                
+                    if (mySearchTaskMaxRemind.BlockWith(Index))
+                    {
+                        mySearchTaskMaxRemind.Pause(true);                    
+                        uint remaind = mySearchTaskMaxRemind.Remaind;
+                        if (remaind >= MIN_REMAIND)
+                        {
+                            uint oldCount = mySearchTaskMaxRemind.Count;
+                            uint index = mySearchTaskMaxRemind.FirstIPAddress;
+                            uint newRemaind = remaind / 2;
+                            uint newCount = oldCount - newRemaind;
+
+                            mySearchTaskMaxRemind.Count = newCount;
+
+                            mySearchTask.Init(index + newCount, newRemaind);
+                            _logger.Trace(string.Concat(
+                                "Task [", mySearchTaskMaxRemind.TaskId, "] ",
+                                "FirstIP: ", mySearchTaskMaxRemind.FirstIPAddress, ", ",
+                                "LastIP: ", mySearchTaskMaxRemind.FirstIPAddress + oldCount - 1, ", ",
+                                "Remind: ", remaind, ", ",
+                                "Count: ", oldCount, ", ",
+                                "New LastIP: ", mySearchTaskMaxRemind.FirstIPAddress + mySearchTaskMaxRemind.Count - 1, " >>> ",
+                                "[", mySearchTask.TaskId, "] ",
+                                "FirstIP: ", mySearchTask.FirstIPAddress, ", ",
+                                "LastIP: ", mySearchTask.FirstIPAddress + mySearchTask.Count - 1
+                            ));
+                            result = true;
+                        }
+                        mySearchTaskMaxRemind.Pause(false);
+                        mySearchTaskMaxRemind.UnBlock();
+                    }
+                }                        
+            }
+
+
+            return result;
         }
 
         public void Stop()

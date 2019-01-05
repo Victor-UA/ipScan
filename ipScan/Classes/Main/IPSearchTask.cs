@@ -17,6 +17,8 @@ namespace ipScan.Classes.Main
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+        const int MAX_SLEEP_TIME = 10000;
+
         public IPSearchTask(int TaskId, uint firstIPAddress, uint Count, Action<IPInfo> BufferResultAddLine, int TimeOut, CancellationToken CancellationToken, ITasksChecking CheckTasks)
             : base(TaskId, firstIPAddress, Count, BufferResultAddLine, TimeOut, CancellationToken, CheckTasks) { }
 
@@ -28,73 +30,75 @@ namespace ipScan.Classes.Main
             ProgressDict.TryAdd(FirstIPAddress, CurrentPosition);
 
             byte[] buffer = { 1 };
-            PingOptions options = new PingOptions(254, true);                        
+            PingOptions options = new PingOptions(254, true);            
 
             if (!WasStopped)
             {
-                while (IsRunning && CurrentPosition < FirstIPAddress + Count)
+                while (IsRunning)
                 {
-                    #region Is Task has to be paused
-
-                    #region (DISABLED) Check memory
-                    /*
-                                ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
-                                ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
-                                int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
-                                int newMaxTaskCount = maxTaskCount + deltaCount;
-                                maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
-                                */
-                    #endregion                    
-
-                    TimeSpan tasksCheckingLoopTime = DateTime.Now - TasksChecking.LastTime;                    
-                    if (tasksCheckingLoopTime.TotalMilliseconds > TasksChecking.SleepTime * 10)
+                    if (Remaind > 0)
                     {
-                        #region Calculate sleepTime
-                        if (!waiting4TasksChecking)
-                        {
-                            _logger.Trace(string.Format("Task [{0}] is waiting for checkTasks iterration. CheckTasks loop time: {1}",
-                                TaskId, tasksCheckingLoopTime.TotalSeconds));
-                            waiting4TasksChecking = true;
-                        }
+                        #region Is Task has to be paused
 
-                        sleepTime += (int)(tasksCheckingLoopTime.TotalSeconds - TasksChecking.SleepTime);
-                        if (sleepTime > 1000 || sleepTime < 0)
-                        {
-                            sleepTime = 1000;
-                        }                        
+                        #region (DISABLED) Check memory
+                        /*
+                                    ComputerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
+                                    ulong freeMemory = (ulong)(ComputerInfo.AvailablePhysicalMemory * 0.9);
+                                    int deltaCount = (int)(freeMemory / 500000) - (maxTaskCount - WorkingTaskCount);
+                                    int newMaxTaskCount = maxTaskCount + deltaCount;
+                                    maxTaskCount = (newMaxTaskCount > 0) ? (newMaxTaskCount < maxTaskCountLimit) ? newMaxTaskCount : maxTaskCountLimit : maxTaskCount;
+                                    */
                         #endregion
-                    }
-                    else
-                    {
-                        if (waiting4TasksChecking)
+
+                        TimeSpan tasksCheckingLoopTime = DateTime.Now - CheckTasks.LastTime;
+                        if (tasksCheckingLoopTime.TotalMilliseconds > CheckTasks.SleepTime * 2)
+                        {
+                            #region Calculate sleepTime
+                            sleepTime += (int)(tasksCheckingLoopTime.TotalMilliseconds - CheckTasks.SleepTime);
+                            if (sleepTime > MAX_SLEEP_TIME || sleepTime < 0)
+                            {
+                                sleepTime = MAX_SLEEP_TIME;
+                            }
+                            if (!waiting4TasksChecking)
+                            {
+                                _logger.Trace($"Task [{TaskId}] is waiting for checkTasks iterration {sleepTime} ms. CheckTasks loop time: {tasksCheckingLoopTime.TotalSeconds}");
+                                waiting4TasksChecking = true;
+                            }
+                            #endregion
+                        }
+                        else
                         {
                             waiting4TasksChecking = false;
-                            _logger.Trace(string.Format("Task [{0}] resumed its work", TaskId));
+                            sleepTime = PAUSE_SLEEP_TIME;
                         }
-                        sleepTime = 100;
-                    }
-                    #endregion
+                        #endregion
 
-                    if (waiting4TasksChecking)
-                    {
-                        Thread.Sleep(sleepTime);
-                    }
-                    else if (IsPaused)
-                    {
-                        Thread.Sleep(PAUSE_SLEEP_TIME);
+                        if (waiting4TasksChecking)
+                        {
+                            Thread.Sleep(sleepTime);
+                        }
+                        else if (IsPaused)
+                        {
+                            Thread.Sleep(PAUSE_SLEEP_TIME);
+                        }
+                        else
+                        {
+                            PingHost(CurrentPosition, _timeOut, buffer, options);
+                            CurrentPosition++;
+                            ProgressDict[FirstIPAddress] = CurrentPosition;
+                        }
+
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            Stop();
+                            _logger.Trace(string.Format("Task [{0}] cancelled", TaskId));
+                        }
+                        
                     }
                     else
                     {
-                        PingHost(CurrentPosition, _timeOut, buffer, options);
-                        CurrentPosition++;
-                        ProgressDict[FirstIPAddress] = CurrentPosition;
+                        IsRunning = CheckTasks.ChangeSearchTaskRange(TaskId);
                     }
-
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        Stop();
-                        _logger.Trace(string.Format("Task [{0}] cancelled", TaskId));
-                    }                    
                 }
             }                      
             IsRunning = false;
@@ -161,7 +165,8 @@ namespace ipScan.Classes.Main
             try
             {
                 Ping ping = new Ping();
-                PingReply reply = ping.Send(IPTools.UInt322IPAddressStr(ipAddress), TimeOut, buffer, options);                
+                string ip = IPTools.UInt322IPAddressStr(ipAddress);
+                PingReply reply = ping.Send(ip, TimeOut, buffer, options);                
                 if (!WasStopped)
                 {
                     try
@@ -182,6 +187,7 @@ namespace ipScan.Classes.Main
                     }
                 }
                 Interlocked.Increment(ref _progress);                
+                _logger.Trace(string.Concat(TaskId, ": ", ip, ": ", reply.Status));
             }
             catch (Exception ex)
             {

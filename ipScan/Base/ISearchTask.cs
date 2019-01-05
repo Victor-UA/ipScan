@@ -1,11 +1,17 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace ipScan.Base
 {
     interface ISearchTask<T, TSub>
     {
-        bool                                IsRunning { get; }        
+        bool                                IsRunning { get; }  
+        bool                                IsBlocked { get; }      
+        int                                 WhoBlocked { get; }
+        bool                                BlockWith(int TaskId);
+        bool                                UnBlock();
         bool                                WasStopped { get; }
+        Task                                MyTask { get; set; }
         int                                 TaskId { get; }
 
         BufferedResult<T>                   Buffer { get; }        

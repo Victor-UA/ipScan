@@ -64,6 +64,9 @@ namespace ipScan.Classes.Main
         private int _pictureBox1MouseLastX;
         private List<KeyValuePair<string, IComparer>> _gridHeaders;
         private Bitmap _bmpTasksResult;
+
+        int _timeOut = 100;
+        int _tasksCount = 1;
         #endregion
 
 
@@ -144,7 +147,11 @@ namespace ipScan.Classes.Main
         private void StopButtonEnable(bool Enable)
         {
             SetControlPropertyThreadSafe(button_Stop, "Enabled", Enable);
-            SetControlPropertyThreadSafe(button_Pause, "Enabled", Enable);            
+            SetControlPropertyThreadSafe(button_Pause, "Enabled", Enable);
+            if (!Enable)
+            {
+                _logger.Info(string.Concat("Found: ", tSSL_Found.Text));
+            }          
         }              
 
         private void ResultFillFromBuffer(object Buffer = null)
@@ -220,7 +227,7 @@ namespace ipScan.Classes.Main
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                _logger.Error(ex, "progressData: ", progressData.ToString());
             }
         }
         private void SetProgressMaxValue(int MaxValue)
@@ -250,8 +257,9 @@ namespace ipScan.Classes.Main
 
             if (_mySearchTasks != null)
             {
-                foreach (var mySearchTask in _mySearchTasks)
-                {                    
+                for (int i = 0; i < _mySearchTasks.Count; i++)
+                {
+                    var mySearchTask = _mySearchTasks[i];                    
                     foreach (uint index in mySearchTask.ProgressDict.Keys)
                     {
                         int x0 = (int)((index - _firstIpAddress) * (uint)bmpTasksProgress.Width / _ipListCount);
@@ -296,7 +304,7 @@ namespace ipScan.Classes.Main
 
 
         /*Start*/
-        private void button_Start_Click(object sender, EventArgs e)
+        private async void button_Start_Click(object sender, EventArgs e)
         {
             if (!IsRunning)
             {
@@ -341,7 +349,7 @@ namespace ipScan.Classes.Main
                     return;
                 }
 
-                int _timeOut = 100;
+                
                 if (!int.TryParse(textBox_Timeout.Text, out _timeOut))
                 {
                     _logger.Error("Timeout string [{0}] is incorrect", textBox_Timeout.Text);
@@ -376,88 +384,105 @@ namespace ipScan.Classes.Main
                 StopButtonEnable(true);
                 button_Stop.Focus();
 
+
+
                 _bufferedResult = new BufferedResult<IPInfo>();                
                 _fill.GridFill(SG_Result, null as ListIPInfo, null, _gridHeaders);
                 _oldLines = new ListIPInfo();
                 pictureBox1.Image = new Bitmap(pictureBox1.ClientSize.Width, pictureBox1.ClientSize.Height);
 
-
-                int tasksCount = 1;
-                if (!(int.TryParse(textBox_ThreadCount.Text, out tasksCount)))
+                
+                if (!(int.TryParse(textBox_ThreadCount.Text, out _tasksCount)))
                 {
                     _logger.Error("TasksCount string [{0}] is incorrect", textBox_ThreadCount.Text);
-                }                
+                }
                 #endregion
 
-                #region Create&Run Tasks
+                _logger.Info(string.Concat("Start searching from [", comboBox_IPFirst.Text, "] to [", comboBox_IPLast.Text, "]"));
 
-                #region Create&Run TasksChecking
-                List<Task> myTasks = new List<Task>();//[taskCount]; 
-                _mySearchTasks = new List<ISearchTask<IPInfo, uint>>();//[taskCount];
                 _mySearchTasksCancel = new CancellationTokenSource();
-
-                _tasksChecking = new TasksChecking<IPInfo, uint>(
-                    myTasks,
-                    _mySearchTasks,
-                    StartButtonEnable,
-                    StopButtonEnable,
-                    ResultFillFromBuffer,
-                    DisposeTasks,
-                    SetProgress,
-                    _ipListCount,
-                    _bufferedResult);
-                Task.Factory.StartNew(_tasksChecking.Check, _mySearchTasksCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-                #endregion                
-
-                #region (DISABLED) Get maxTaskCount from NumberOfCores
-                //try
-                //{
-                //    var cpu =
-                //        new ManagementObjectSearcher("select * from Win32_Processor")
-                //        .Get()
-                //        .Cast<ManagementObject>()
-                //        .First();
-
-                //    maxTaskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2 * 100;
-
-                //}
-                //catch (Exception)
-                //{
-                //} 
-                #endregion
-
-                #region Create&Run IPSearchTasks
-
-            
-                //Get Each IPSearchTask IPAddresses range
-                uint range = (uint)Math.Truncate((double)_ipListCount / tasksCount);
-
-                if (range == 0)
+                await Task.Factory.StartNew(Start, _mySearchTasksCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+                if (_tasksChecking != null)
                 {
-                    range = 1;
-                    tasksCount = (int)_ipListCount;
+                    _tasksChecking.IsStarting = false;                
                 }
-
-                //Create & Run IPSearchTasks
-                _logger.Trace(string.Format("Create {0} tasks", tasksCount));                
-                _logger.Trace(string.Format("{0,5} | {1,10} | {2,10} |", "No", "StartIndex", "Length"));
-                for (int i = 0; i < tasksCount; i++)
-                {
-                    uint count = ((i == tasksCount - 1) ? _ipListCount - range * (uint)i : range);
-                    IPSearchTask ipSearchTask = new IPSearchTask(
-                        i, _firstIpAddress + (uint)i * range, count, BufferResultAddLine, 
-                        _timeOut, _mySearchTasksCancel.Token, _tasksChecking
-                    );
-                    _mySearchTasks.Add(ipSearchTask);
-                    _logger.Trace(string.Format("{0,5} | {1,10} | {2,10} |",
-                        i, i * range, (i == tasksCount - 1 ? _ipListCount - range * i : range)));
-                    myTasks.Add(Task.Factory.StartNew(ipSearchTask.Start, TaskCreationOptions.LongRunning));
-                }
-                #endregion
-
-                #endregion
             }
-        }        
+        }       
+        
+        private void Start()
+        {
+            #region Create&Run Tasks
+
+            #region Create&Run TasksChecking
+            _mySearchTasks = new List<ISearchTask<IPInfo, uint>>();//[taskCount];
+            
+
+            _tasksChecking = new TasksChecking<IPInfo, uint>(
+                //!myTasks,
+                _mySearchTasks,
+                StartButtonEnable,
+                StopButtonEnable,
+                ResultFillFromBuffer,
+                DisposeTasks,
+                SetProgress,
+                _ipListCount,
+                _bufferedResult);
+            Task.Factory.StartNew(_tasksChecking.Check, _mySearchTasksCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+            #endregion
+
+            #region (DISABLED) Get maxTaskCount from NumberOfCores
+            //try
+            //{
+            //    var cpu =
+            //        new ManagementObjectSearcher("select * from Win32_Processor")
+            //        .Get()
+            //        .Cast<ManagementObject>()
+            //        .First();
+
+            //    maxTaskCount = int.Parse(cpu["NumberOfCores"].ToString()) * 2 * 100;
+
+            //}
+            //catch (Exception)
+            //{
+            //} 
+            #endregion
+
+            #region Create&Run IPSearchTasks
+
+
+            //Get Each IPSearchTask IPAddresses range
+            uint range = (uint)Math.Truncate((double)_ipListCount / _tasksCount);
+
+            if (range == 0)
+            {
+                range = 1;
+                _tasksCount = (int)_ipListCount;
+            }
+
+            //Create & Run IPSearchTasks
+            _logger.Info(string.Format("Create {0} tasks", _tasksCount));
+            _logger.Trace(string.Format("{0,5} | {1,10} | {2,10} |", "No", "StartIndex", "Length"));
+            for (int i = 0; i < _tasksCount; i++)
+            {
+                if (_mySearchTasksCancel.Token.IsCancellationRequested)
+                {
+                    _logger.Trace("Start was cancelled");
+                    return;
+                }
+                uint count = ((i == _tasksCount - 1) ? _ipListCount - range * (uint)i : range);
+                IPSearchTask ipSearchTask = new IPSearchTask(
+                    i, _firstIpAddress + (uint)i * range, count, BufferResultAddLine,
+                    _timeOut, _mySearchTasksCancel.Token, _tasksChecking
+                );
+                _mySearchTasks.Add(ipSearchTask);
+                _logger.Trace(string.Format("{0,5} | {1,10} | {2,10} |",
+                    i, i * range, (i == _tasksCount - 1 ? _ipListCount - range * i : range)));
+                ipSearchTask.MyTask = (Task.Factory.StartNew(ipSearchTask.Start, TaskCreationOptions.LongRunning));
+            }
+            #endregion
+
+            #endregion
+        }
 
         #region SetPropertyThreadSafeDelegate
         private delegate void SetPropertyThreadSafeDelegate<TResult>(

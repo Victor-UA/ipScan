@@ -17,12 +17,40 @@ namespace ipScan.Base
 
         protected object                    _locker { get; } = new object();
 
-        public bool                         IsRunning { get; protected set; }        
+        public bool                         IsRunning { get; protected set; }
+
+        public virtual bool                 IsBlocked { get; protected set; }
+        public int                          WhoBlocked { get; protected set; }
+        public virtual bool                 UnBlock()
+        {
+            bool result = true;
+            WhoBlocked = -1;
+            IsBlocked = false;
+            return result;
+        }
+
+        public virtual bool                 BlockWith(int TaskId)
+        {
+            lock (_locker)
+            {
+                if (!IsBlocked)
+                {
+                    WhoBlocked = TaskId;
+                    IsBlocked = true;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
         public bool                         WasStopped { get; protected set; }
         protected CancellationToken         cancellationToken { get; set; }
+        public Task                         MyTask { get; set; }
         public int                          TaskId { get; private set; }        
 
-        protected ITasksChecking            TasksChecking { get; set; }
+        protected ITasksChecking            CheckTasks { get; set; }
         public BufferedResult<T>            Buffer { get; private set; }        
         public ConcurrentDictionary<TSub, bool> SubTaskStates { get; private set; }
         public ConcurrentDictionary<uint, uint> ProgressDict { get; private set; }
@@ -38,7 +66,14 @@ namespace ipScan.Base
         {
             get
             {
-                return (FirstIPAddress + Count - 1 - CurrentPosition);
+                if (FirstIPAddress + Count > CurrentPosition)
+                {
+                    return (Count - (CurrentPosition - FirstIPAddress));
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
         protected int                       _progress;
@@ -76,15 +111,18 @@ namespace ipScan.Base
             this.Buffer = new BufferedResult<T>();
             this.SubTaskStates = new ConcurrentDictionary<TSub, bool>();
             this.ProgressDict = new ConcurrentDictionary<uint, uint>();
+            this.MyTask = null;
             this.TaskId = TaskId;            
-            this.TasksChecking = CheckTasks;
+            this.CheckTasks = CheckTasks;
             this.FirstIPAddress = firstIpAddress;
             this.Count = Count;
             this.CurrentPosition = FirstIPAddress;
             this._timeOut = TimeOut;
             this._bufferResultAddLine = BufferResultAddLine;
             this.IsPaused = false;
-            this.IsRunning = false;            
+            this.IsRunning = false;
+            this.IsBlocked = false;
+            this.WhoBlocked = -1;
             this.WasStopped = false;
             this.cancellationToken = CancellationToken;
             this.Progress = 0;
