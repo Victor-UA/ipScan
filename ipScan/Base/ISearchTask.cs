@@ -5,7 +5,8 @@ namespace ipScan.Base
 {
     interface ISearchTask<T, TSub>
     {
-        bool                                IsRunning { get; }  
+        bool                                IsRunning { get; }
+        bool Waiting4TasksChecking { get; }
         bool                                IsBlocked { get; }      
         int                                 WhoBlocked { get; }
         bool                                BlockWith(int TaskId);

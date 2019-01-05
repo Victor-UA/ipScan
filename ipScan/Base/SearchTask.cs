@@ -103,6 +103,7 @@ namespace ipScan.Base
                 }
             }
         }
+        public bool Waiting4TasksChecking { get; protected set; } = false;
         private Action<T>                   _bufferResultAddLine;
         protected ComputerInfo              _computerInfo;
 

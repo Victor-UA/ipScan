@@ -25,7 +25,7 @@ namespace ipScan.Classes.Main
         protected override void Search()
         {
             _logger.Trace(string.Format("Task [{0}] started", TaskId));            
-            bool waiting4TasksChecking = false;            
+            
             int sleepTime = 100;
             ProgressDict.TryAdd(FirstIPAddress, CurrentPosition);
 
@@ -38,7 +38,7 @@ namespace ipScan.Classes.Main
                 {
                     if (Remaind > 0)
                     {
-                        #region Is Task has to be paused
+                        #region (DISABLED) Is Task has to be paused
 
                         #region (DISABLED) Check memory
                         /*
@@ -50,30 +50,30 @@ namespace ipScan.Classes.Main
                                     */
                         #endregion
 
-                        TimeSpan tasksCheckingLoopTime = DateTime.Now - CheckTasks.LastTime;
-                        if (tasksCheckingLoopTime.TotalMilliseconds > CheckTasks.SleepTime * 2)
-                        {
-                            #region Calculate sleepTime
-                            sleepTime += (int)(tasksCheckingLoopTime.TotalMilliseconds - CheckTasks.SleepTime);
-                            if (sleepTime > MAX_SLEEP_TIME || sleepTime < 0)
-                            {
-                                sleepTime = MAX_SLEEP_TIME;
-                            }
-                            if (!waiting4TasksChecking)
-                            {
-                                _logger.Trace($"Task [{TaskId}] is waiting for checkTasks iterration {sleepTime} ms. CheckTasks loop time: {tasksCheckingLoopTime.TotalSeconds}");
-                                waiting4TasksChecking = true;
-                            }
-                            #endregion
-                        }
-                        else
-                        {
-                            waiting4TasksChecking = false;
-                            sleepTime = PAUSE_SLEEP_TIME;
-                        }
+                        //TimeSpan tasksCheckingLoopTime = DateTime.Now - CheckTasks.LastTime;
+                        //if (tasksCheckingLoopTime.TotalMilliseconds > CheckTasks.SleepTime * 2)
+                        //{
+                        //    #region Calculate sleepTime
+                        //    sleepTime += (int)(tasksCheckingLoopTime.TotalMilliseconds - CheckTasks.SleepTime);
+                        //    if (sleepTime > MAX_SLEEP_TIME || sleepTime < 0)
+                        //    {
+                        //        sleepTime = MAX_SLEEP_TIME;
+                        //    }
+                        //    if (!Waiting4TasksChecking)
+                        //    {
+                        //        _logger.Trace($"Task [{TaskId}] is waiting for checkTasks iterration {sleepTime} ms. CheckTasks loop time: {tasksCheckingLoopTime.TotalSeconds}");
+                        //        Waiting4TasksChecking = true;
+                        //    }
+                        //    #endregion
+                        //}
+                        //else
+                        //{
+                        //    Waiting4TasksChecking = false;
+                        //    sleepTime = PAUSE_SLEEP_TIME;
+                        //}
                         #endregion
 
-                        if (waiting4TasksChecking)
+                        if (Waiting4TasksChecking)
                         {
                             Thread.Sleep(sleepTime);
                         }

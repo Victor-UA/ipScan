@@ -21,5 +21,7 @@ namespace ipScan.Base
 
         bool IsStarting { get; set; }
 
+        int TasksCount { get; }
+
     }
 }

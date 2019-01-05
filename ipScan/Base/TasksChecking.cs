@@ -57,7 +57,7 @@ namespace ipScan.Base
         private bool                            isStopped { get; set; }
         private bool                            isResultOutputBlocked { get; set; }
 
-        private int                             _tasksCount;
+        public int                              TasksCount { get; private set; }
         private long                            _progressRemaind;
 
         public TasksChecking(
@@ -95,6 +95,7 @@ namespace ipScan.Base
                 bool TasksAreRunning = false;
                 bool TasksAreCompleted = false;                
                 LastTime = DateTime.Now;
+                Stopwatch stopwatch = new Stopwatch();
                 do
                 {
                     Thread.Sleep(SleepTime);
@@ -107,6 +108,7 @@ namespace ipScan.Base
                         int subTasksCount = 0;
 
                         #region mySearchTasks Handling
+
 
                         for (int i = 0; i < _mySearchTasks.Count; i++)
                         {
@@ -146,7 +148,7 @@ namespace ipScan.Base
 
                                 if (mySearchTask != null)
                                 {
-                                    if (mySearchTask.IsRunning)
+                                    if (mySearchTask.IsRunning && !mySearchTask.Waiting4TasksChecking)
                                     {
                                         tasksCount++;
                                     }
@@ -164,6 +166,7 @@ namespace ipScan.Base
                                 _logger.Error(ex);
                             }
                         }
+
 
                         #endregion
 
@@ -200,9 +203,9 @@ namespace ipScan.Base
 
                         #endregion
 
-                        this._tasksCount = tasksCount;
+                        this.TasksCount = tasksCount;
                         this._progressRemaind = IPListCount - progress;
-
+                        
                         setProgress(new ProgressData()
                         {
                             Progress = progress,
@@ -210,7 +213,7 @@ namespace ipScan.Base
                             SubTasksCount = subTasksCount,
                             TimePassed = timePassed,
                             TimeLeft = timeLeft,
-                            PauseTime = (int)loopTime.TotalMilliseconds
+                            PauseTime = (int)loopTime.TotalMilliseconds                            
                         } );
                     }
                     loopTime = DateTime.Now - LastTime;
@@ -247,7 +250,7 @@ namespace ipScan.Base
         {
             bool result = false;
 
-            if (_tasksCount <= _progressRemaind)
+            if (TasksCount <= _progressRemaind)
             {
                 var mySearchTask = _mySearchTasks[Index];
                 var taskIndex = GetMaxRemaindTaskIndex();

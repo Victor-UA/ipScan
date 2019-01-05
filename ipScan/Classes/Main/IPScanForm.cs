@@ -15,6 +15,7 @@ using System.Net.NetworkInformation;
 using ipScan.Properties;
 using System.Collections.Concurrent;
 using NLog;
+using System.Timers;
 
 namespace ipScan.Classes.Main
 {
@@ -54,7 +55,7 @@ namespace ipScan.Classes.Main
         }
         private Base.IP.Grid.Fill _fill;
         private List<ISearchTask<IPInfo, uint>> _mySearchTasks;
-        private CancellationTokenSource _mySearchTasksCancel;
+        private CancellationTokenSource _mySearchTasksCancel = new CancellationTokenSource();
         private ITasksChecking _tasksChecking;        
         private uint _ipListCount;
         private uint _firstIpAddress;
@@ -223,7 +224,7 @@ namespace ipScan.Classes.Main
                 tSSL_pauseTime.Text = progressData.PauseTime.ToString();
                 toolStripProgressBar1.Value = (int)(progressData.Progress * 100 / _ipListCount);
                 
-                DrawMultiProgress();
+                DrawMultiProgress(null, null);
             }
             catch (Exception ex)
             {
@@ -247,7 +248,7 @@ namespace ipScan.Classes.Main
             }
         }
 
-        private void DrawMultiProgress()
+        private void DrawMultiProgress(object source, ElapsedEventArgs e)
         {
             Bitmap bmpTasksProgress = new Bitmap(BMP_WIDTH, BMP_HEIGHT);
             Graphics graphics = Graphics.FromImage(bmpTasksProgress);
@@ -259,7 +260,7 @@ namespace ipScan.Classes.Main
             {
                 for (int i = 0; i < _mySearchTasks.Count; i++)
                 {
-                    var mySearchTask = _mySearchTasks[i];                    
+                    var mySearchTask = _mySearchTasks[i];
                     foreach (uint index in mySearchTask.ProgressDict.Keys)
                     {
                         int x0 = (int)((index - _firstIpAddress) * (uint)bmpTasksProgress.Width / _ipListCount);
@@ -270,7 +271,7 @@ namespace ipScan.Classes.Main
                         graphics.DrawRectangle(pen, rectangle);
                         graphics.FillRectangle(brush, rectangle);
                     }
-                }                
+                }
 
                 graphics = Graphics.FromImage(_bmpTasksResult);
                 pen = new Pen(Color.Lime);
@@ -279,18 +280,26 @@ namespace ipScan.Classes.Main
                 List<IPInfo> buffer = _bufferedResult.getBuffer();
                 foreach (IPInfo item in buffer)
                 {
-                    uint index = item.IPAddress - _firstIpAddress;
-                    int x = (int)((double)index * _bmpTasksResult.Width / _ipListCount);
-                    if (rectWidth < 2)
+                    try
                     {
-                        graphics.DrawLine(pen, new Point(x, 0), new Point(x, _bmpTasksResult.Height));
+                        uint index = item.IPAddress - _firstIpAddress;
+                        int x = (int)((double)index * _bmpTasksResult.Width / _ipListCount);
+                        if (rectWidth < 2)
+                        {
+                            graphics.DrawLine(pen, new Point(x, 0), new Point(x, _bmpTasksResult.Height));
+                        }
+                        else
+                        {
+                            Rectangle rectangle = new Rectangle(x, 0, rectWidth, _bmpTasksResult.Height);
+                            graphics.DrawRectangle(pen, rectangle);
+                            graphics.FillRectangle(brush, rectangle);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Rectangle rectangle = new Rectangle(x, 0, rectWidth, _bmpTasksResult.Height);
-                        graphics.DrawRectangle(pen, rectangle);
-                        graphics.FillRectangle(brush, rectangle);
+                        _logger.Error(ex);
                     }
+                    
                 }
 
                 Bitmap bmp = new Bitmap(BMP_WIDTH, BMP_HEIGHT);
@@ -299,6 +308,7 @@ namespace ipScan.Classes.Main
                 graphics.DrawImageUnscaled(_bmpTasksResult, 0, 0);
                 pictureBox1.Image = bmp;
                 pictureBox1.Refresh();
+                //this.Invoke(new Action(() => { pictureBox1.Refresh(); }));
             }
         }
 
@@ -633,7 +643,7 @@ namespace ipScan.Classes.Main
         {
             if (!IsRunning)
             {
-                DrawMultiProgress();
+                DrawMultiProgress(null, null);
             }
         }
 
