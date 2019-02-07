@@ -60,12 +60,12 @@
             // textBox_ThreadCount
             // 
             this.textBox_ThreadCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_ThreadCount.Location = new System.Drawing.Point(125, 431);
+            this.textBox_ThreadCount.Location = new System.Drawing.Point(64, 431);
             this.textBox_ThreadCount.Name = "textBox_ThreadCount";
             this.textBox_ThreadCount.Size = new System.Drawing.Size(50, 20);
             this.textBox_ThreadCount.TabIndex = 2;
             this.textBox_ThreadCount.TabStop = false;
-            this.textBox_ThreadCount.Text = "10";
+            this.textBox_ThreadCount.Text = "500";
             this.textBox_ThreadCount.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_ThreadCount_KeyPress);
             // 
             // button_Start
@@ -94,7 +94,7 @@
             // textBox_Timeout
             // 
             this.textBox_Timeout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox_Timeout.Location = new System.Drawing.Point(256, 431);
+            this.textBox_Timeout.Location = new System.Drawing.Point(195, 431);
             this.textBox_Timeout.Name = "textBox_Timeout";
             this.textBox_Timeout.Size = new System.Drawing.Size(50, 20);
             this.textBox_Timeout.TabIndex = 3;
@@ -265,15 +265,15 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 434);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(109, 13);
+            this.label1.Size = new System.Drawing.Size(46, 13);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Threads per Segment";
+            this.label1.Text = "Threads";
             // 
             // label2
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(181, 434);
+            this.label2.Location = new System.Drawing.Point(120, 434);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(69, 13);
             this.label2.TabIndex = 11;
